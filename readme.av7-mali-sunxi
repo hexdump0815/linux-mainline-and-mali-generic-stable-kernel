@@ -1,0 +1,45 @@
+# all below is based on ubuntu 18.04 and might differ for other dists
+# other things required:
+- user in video group
+usermod -a -G video <username>
+- mali udev rules
+root@odroid:~# cat /etc/udev/rules.d/50-mali.rules
+KERNEL=="mali", MODE="0660", GROUP="video"
+KERNEL=="mali0", MODE="0660", GROUP="video"
+- xorg.conf
+01-armsoc.conf
+
+# mali kernel module
+cd /compile/source
+git clone https://github.com/mripard/sunxi-mali.git
+apt-get install quilt
+cd /compile/source/sunxi-mali
+export CROSS_COMPILE=""
+export KDIR=/compile/source/linux-stable
+export INSTALL_MOD_PATH=/
+./build.sh -r r6p2 -b
+#./build.sh -r r6p2 -i
+# for recompile: run ./build.sh -r r6p2 -c before to unapply patches
+# for debug build replace release in build.sh with debug
+export kver=5.4.3-stb-av7+
+mkdir /lib/modules/${kver}/extra
+cp mali.ko /lib/modules/${kver}/extra
+tar czf /compile/result/stable/${kver}-mali-sunxi.tar.gz /lib/modules/${kver}/extra/mali.ko
+
+# xorg server
+apt-get install xserver-xorg-dev libtool automake xutils-dev libudev-dev
+git clone https://github.com/paolosabatino/xf86-video-armsoc.git
+mv xf86-video-armsoc rockchip-xf86-video-armsoc
+cd rockchip-xf86-video-armsoc
+./autogen.sh
+make
+result: src/.libs/armsoc_drv.so
+
+# gl4es
+git clone https://github.com/ptitSeb/gl4es.git
+cd gl4es
+apt-get install cmake
+cd gl4es
+cmake . -DODROID=1
+make
+result: lib/libGl.so.1

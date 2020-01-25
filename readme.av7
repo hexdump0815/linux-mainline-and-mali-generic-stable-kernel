@@ -1,0 +1,133 @@
+#
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+#
+# patches:
+# set mac addr on kernel cmdline - otherwise a random one is generated
+patch -p1 < /compile/doc/stable/misc.av7/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
+# clock the bpi at 1.2ghz
+patch -p1 < /compile/doc/stable/misc.av7/bpi-enable-more-overclock.patch
+# set bpi otg usb to host mode
+patch -p1 < /compile/doc/stable/misc.av7/bpi-usb-otg-host-mode.patch
+# more clock speeds for r89, enable emmc, gpu node, hdmi fix
+patch -p1 < /compile/doc/stable/misc.av7/r89-dtb-more-and-higher-cpu-clocks-emmc-gpu-hdmi.patch
+# raise the temp limits where thermal throttling starts
+patch -p1 < /compile/doc/stable/misc.av7/rk3288-higher-alert-temp.patch
+# add higher cpu clocks for h3
+patch -p1 < /compile/doc/stable/misc.av7/sun8i-h3-higher-cpu-clocks.patch
+# prepare for sunxi mali support for the bpi - from https://github.com/mripard/sunxi-mali/issues/63
+patch -p1 < /compile/doc/stable/misc.av7/sunxi-drm-gem-cma-Export-with-handle-allocator.patch
+patch -p1 < /compile/doc/stable/misc.av7/sunxi-drm-sun4i-Add-GEM-allocator.patch
+# add rk3288 mali support for the r89
+# TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
+patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-complete.patch
+cp -r /compile/doc/stable/misc.av7/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
+# v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
+patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-v5.0.patch
+# v5.4 - fix mali compile
+patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.4.patch
+# v5.1 - add more meson8m2 dtbs
+patch -p1 < /compile/doc/stable/misc.av7/meson8m2-dtb.patch
+cp /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
+# v5.4 - fix v3d power setup for rpi3
+patch -p1 < /compile/doc/stable/misc.av7/rpi3-v3d-power-fix-armv7l.patch
+
+cp /compile/doc/stable/config.av7 /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+export ARCH=arm
+# make multi_v7_defconfig + fix options - see misc.av7/options
+make oldconfig
+make -j 4 zImage dtbs modules
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+# find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+# move away the rk3288 mali module and tar it separately beforehand
+mkdir -p /lib/modules/${kver}/extra
+mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
+tar cvzf /compile/source/linux-stable/${kver}-mali-rk3288.tar.gz /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/extra
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+# for all except amlogic 32bit socs
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+# for amlogic 32bit socs (legacy u-boot)
+mkimage -A arm -O linux -T kernel -C none -a 0x00208000 -e 0x00208000 -n linux-${kver} -d arch/arm/boot/zImage /boot/uImage-${kver}
+mkdir /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/meson8b-mxq.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/meson8m2*.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/sun7i-a20-bananapi.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/sun8i-h3-libretech-all-h3-cc.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-r89.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-tinker.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-tinker-s.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-veyron-jaq.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-veyron-speedy.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/tegra124-nyan-big.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/bcm2836-rpi-2-b.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/bcm2837-rpi-3-b.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.av7 /compile/doc/stable/config.av7.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av7
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av7-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+cd /compile/source/linux-stable
+make distclean
+rm ${kver}.tar.gz
+
+# s805 tv box mxq - /boot/s805_autoscript.txt:
+setenv kver 5.4.3-stb-av7+
+# rootfs on mmc - not sure if the disableuhs is still required
+#setenv bootargs "console=ttyAML0,115200 root=/dev/mmcblk0p3 rootwait ro loglevel=8 disableuhs fsck.repair=yes net.ifnames=0 ipv6.disable=1 stmmac.macaddr=11:22:33:44:55:66 threadirqs noresume"
+# rootfs on usb
+setenv bootargs "console=ttyAML0,115200 root=/dev/sda3 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1 stmmac.macaddr=11:22:33:44:55:66 threadirqs noresume"
+# this is to startup the mmc
+#mmcinfo
+# kernel etc. on mmc
+#fatload mmc 0 0x14000000 uImage-${kver}
+#fatload mmc 0 0x15000000 uInitrd-${kver}
+#fatload mmc 0 0x11800000 dtb-${kver}/meson8b-mxq.dtb
+# kernel etc. on usb
+fatload usb 0 0x14000000 uImage-${kver}
+fatload usb 0 0x15000000 uInitrd-${kver}
+fatload usb 0 0x11800000 dtb-${kver}/meson8b-mxq.dtb
+bootm 0x14000000 0x15000000 0x11800000
+# use: mkimage -A arm -T script -O linux -d s805_autoscript.txt s805_autoscript
+
+# bananpi m1 (bpi mq) - /boot/boot.txt:
+setenv kver 5.4.3-stb-av7+
+# framebuffer
+setenv bootargs "console=ttyS0,115200 console=tty0 root=/dev/mmcblk0p2 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1"
+# no framebuffer
+#setenv bootargs "console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1"
+# setenv bootdelay "3"
+fatload mmc 0:1 ${kernel_addr_r} zImage-${kver}
+fatload mmc 0:1 ${ramdisk_addr_r} uInitrd-${kver}
+fatload mmc 0:1 ${fdt_addr_r} dtb-${kver}/sun7i-a20-bananapi.dtb
+bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+# use: mkimage -A arm -T script -O linux -d boot.txt boot.scr
+
+# h3 tv-box (tx1 and r39) - /boot/boot.txt:
+setenv kver "5.4.3-stb-av7+"
+# framebuffer
+setenv bootargs "console=ttyS0,115200 console=tty1 root=/dev/mmcblk0p3 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_fb_mem_reserve=16"
+# no framebuffer
+setenv bootargs "console=ttyS0,115200 root=/dev/mmcblk0p3 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_fb_mem_reserve=16"
+# setenv bootdelay "3"
+ext4load mmc 0:1 ${kernel_addr_r} zImage-${kver}
+ext4load mmc 0:1 ${ramdisk_addr_r} uInitrd-${kver}
+ext4load mmc 0:1 ${fdt_addr_r} dtb-${kver}/sun8i-h3-orangepi-plus.dtb
+bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+# use: mkimage -A arm -T script -O linux -d boot.txt boot.scr
+
+# r89 - boot creation script

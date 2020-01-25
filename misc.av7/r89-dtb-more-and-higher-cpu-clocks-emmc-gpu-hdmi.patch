@@ -1,0 +1,508 @@
+diff --git a/arch/arm/boot/dts/rk3288-r89.dts b/arch/arm/boot/dts/rk3288-r89.dts
+index a6ffc381abaa..868d3a92de1b 100644
+--- a/arch/arm/boot/dts/rk3288-r89.dts
++++ b/arch/arm/boot/dts/rk3288-r89.dts
+@@ -47,6 +47,18 @@
+ 		pinctrl-0 = <&ir_int>;
+ 	};
+ 
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable>,<&bt_enable>;
++		reset-gpios = <&gpio4 RK_PD4 GPIO_ACTIVE_LOW>, /* wifi poweron gpio */
++				<&gpio4 RK_PD5 GPIO_ACTIVE_LOW>; /* bt reset gpio */
++		/* taken from armbian xt-q8l-v10 device tree */
++		post-power-on-delay-ms = <100>;
++	};
++
+ 	vcc_host: vcc-host-regulator {
+ 		compatible = "regulator-fixed";
+ 		enable-active-high;
+@@ -79,7 +91,7 @@
+ 		vin-supply = <&vcc_io>;
+ 	};
+ 
+-	vcc_sys: sys-regulator {
++	vbat_wl: vcc_sys: sys-regulator {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "sys-supply";
+ 		regulator-min-microvolt = <5000000>;
+@@ -87,12 +99,130 @@
+ 		regulator-always-on;
+ 		regulator-boot-on;
+ 	};
++
++	vcc_flash: flash-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_flash";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		vin-supply = <&vcc_io>;
++	};
++
++	/*
++	 * Sound taken from tinkerboard device tree, adapted to r89
++	 * Inspired by the armbian xt-q8l-v10 device tree by Paolo Sabatino
++	 */
++	soundcard-hdmi {
++		compatible = "simple-audio-card";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,name = "DW-I2S-HDMI";
++		simple-audio-card,mclk-fs = <512>;
++
++		simple-audio-card,codec {
++			sound-dai = <&hdmi>;
++		};
++
++		simple-audio-card,cpu {
++			sound-dai = <&i2s>;
++		};
++	};
++
++	soundcard-spdif {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "SPDIF";
++		simple-audio-card,dai-link@1 {
++			cpu {
++				sound-dai = <&spdif>;
++			};
++			codec {
++				sound-dai = <&spdif_out>;
++			};
++		};
++	};
++
++	spdif_out: spdif-out {
++		compatible = "linux,spdif-dit";
++		#sound-dai-cells = <0>;
++	};
+ };
+ 
+ &cpu0 {
+ 	cpu0-supply = <&vdd_cpu>;
+ };
+ 
++/* add some more cpu frequencies at the top end */
++&cpu_opp_table {
++	opp-1704000000 {
++		opp-hz = /bits/ 64 <1704000000>;
++		opp-microvolt = <1350000>;
++	};
++	opp-1800000000 {
++		opp-hz = /bits/ 64 <1800000000>;
++		opp-microvolt = <1400000>;
++	};
++	/* turbo-mode only frequencies below */
++	opp-1896000000 {
++		opp-hz = /bits/ 64 <1896000000>;
++		opp-microvolt = <1425000>;
++		turbo-mode;
++	};
++	opp-1920000000 {
++		opp-hz = /bits/ 64 <1920000000>;
++		opp-microvolt = <1425000>;
++		turbo-mode;
++	};
++	opp-1992000000 {
++		opp-hz = /bits/ 64 <1992000000>;
++		opp-microvolt = <1450000>;
++		turbo-mode;
++	};
++	opp-2016000000 {
++		opp-hz = /bits/ 64 <2016000000>;
++		opp-microvolt = <1475000>;
++		turbo-mode;
++	};
++	opp-2040000000 {
++		opp-hz = /bits/ 64 <2040000000>;
++		opp-microvolt = <1475000>;
++		turbo-mode;
++	};
++	opp-2064000000 {
++		opp-hz = /bits/ 64 <2064000000>;
++		opp-microvolt = <1475000>;
++		turbo-mode;
++	};
++	opp-2088000000 {
++		opp-hz = /bits/ 64 <2088000000>;
++		opp-microvolt = <1500000>;
++		turbo-mode;
++	};
++	opp-2112000000 {
++		opp-hz = /bits/ 64 <2112000000>;
++		opp-microvolt = <1500000>;
++		turbo-mode;
++	};
++	opp-2136000000 {
++		opp-hz = /bits/ 64 <2136000000>;
++		opp-microvolt = <1500000>;
++		turbo-mode;
++	};
++	opp-2160000000 {
++		opp-hz = /bits/ 64 <2160000000>;
++		opp-microvolt = <1500000>;
++		turbo-mode;
++	};
++	opp-2184000000 {
++		opp-hz = /bits/ 64 <2184000000>;
++		opp-microvolt = <1500000>;
++		turbo-mode;
++	};
++	opp-2208000000 {
++		opp-hz = /bits/ 64 <2208000000>;
++		opp-microvolt = <1500000>;
++		turbo-mode;
++	};
++};
++
+ &gmac {
+ 	phy-supply = <&vcc_lan>;
+ 	phy-mode = "rgmii";
+@@ -109,21 +239,39 @@
+ 	status = "ok";
+ };
+ 
++&gpu {
++	mali-supply = <&vdd_gpu>;
++	status = "okay";
++};
++
+ &hdmi {
++	ddc-i2c-bus = <&i2c5>;
+ 	status = "okay";
+ };
+ 
+ &i2c0 {
+ 	status = "okay";
+ 
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		interrupt-parent = <&gpio7>;
++		interrupts = <RK_PA4 IRQ_TYPE_EDGE_FALLING>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
+ 	vdd_cpu: pmic@40 {
+ 		compatible = "silergy,syr827";
+ 		reg = <0x40>;
+ 		fcs,suspend-voltage-selector = <1>;
+ 		regulator-name = "VDD_CPU";
+ 		regulator-enable-ramp-delay = <300>;
+-		regulator-min-microvolt = <850000>;
+-		regulator-max-microvolt = <1350000>;
++		regulator-min-microvolt = <712500>;
++		regulator-max-microvolt = <1500000>;
+ 		regulator-ramp-delay = <8000>;
+ 		regulator-always-on;
+ 		regulator-boot-on;
+@@ -136,8 +284,8 @@
+ 		fcs,suspend-voltage-selector = <1>;
+ 		regulator-name = "VDD_GPU";
+ 		regulator-enable-ramp-delay = <300>;
+-		regulator-min-microvolt = <850000>;
+-		regulator-max-microvolt = <1350000>;
++		regulator-min-microvolt = <712500>;
++		regulator-max-microvolt = <1500000>;
+ 		regulator-ramp-delay = <8000>;
+ 		regulator-always-on;
+ 		regulator-boot-on;
+@@ -233,7 +381,7 @@
+ 				regulator-always-on;
+ 			};
+ 
+-			vcc_18: REG11 {
++			vccio_wl: vcc_18: REG11 {
+ 				regulator-name = "VCC_18";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+@@ -250,10 +398,59 @@
+ 	};
+ };
+ 
++/* in the original dtb i2c up to 4 are enabled and 5 is disabled, but 5 seems to be required for hdmi to work */
++&i2c2 {
++	status = "okay";
++};
++
++&i2c3 {
++	status = "okay";
++};
++
++&i2c4 {
++	/*
++	 * Here should go the RK1000 audio codec parts, but seems that
++	 * there is no driver in linux kernel at the moment, so we can't
++	 * describe it.
++	 * Datasheet is available here:
++	 * http://dl.radxa.com/rock/docs/hw/ds/RK1000-S%20DATASHEET%20V14.pdf
++	 */
++	status = "okay";
++};
++
+ &i2c5 {
+ 	status = "okay";
+ };
+ 
++&pinctrl {
++	pcfg_pull_up_drv_8ma: pcfg-pull-up-drv-8ma {
++		bias-pull-up;
++		drive-strength = <8>;
++	};
++
++	pcfg_pull_none_8ma: pcfg-pull-none-8ma {
++		bias-disable;
++		drive-strength = <8>;
++	};
++};
++
++&io_domains {
++	status = "okay";
++
++	/* not sure if those are really needed */
++	audio-supply = <&vcca_33>;
++	bb-supply = <&vcc_io>;
++	dvp-supply = <&vcc_18>;
++	flash1-supply = <&vcc_lan>;
++	gpio30-supply = <&vcc_io>;
++	gpio1830-supply = <&vcc_io>;
++	lcdc-supply = <&vcc_io>;
++
++        flash0-supply = <&vcc_flash>;
++        sdcard-supply = <&vccio_sd>;
++        wifi-supply = <&vccio_wl>;
++};
++
+ &pinctrl {
+ 	pcfg_output_high: pcfg-output-high {
+ 		output-high;
+@@ -279,6 +476,12 @@
+ 		};
+ 	};
+ 
++	hym8563 {
++		rtc_int: rtc-int {
++			rockchip,pins = <7 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
+ 	ir {
+ 		ir_int: ir-int {
+ 			rockchip,pins = <7 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
+@@ -291,11 +494,57 @@
+ 		};
+ 	};
+ 
++	sdio {
++		wifi_enable: wifi-enable {
++			rockchip,pins = <4 RK_PD4 RK_FUNC_GPIO &pcfg_pull_none>; /* wifi power on */
++		};
++
++		bt_enable: bt-enable {
++			rockchip,pins = <4 RK_PD3 RK_FUNC_GPIO &pcfg_pull_none>; /* bt power on */
++		};
++	};
++
++	wireless-bluetooth {
++		uart0_gpios: uart0-gpios {
++			rockchip,pins = <4 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>; /* rts gpio */
++		};
++	};
++
++	sdmmc {
++		/*
++		 * Copied from firefly board definition to give more drive to
++		 * the sdmmc pins. The r89 seems to be quite able to drive
++		 * ultra high speed uSD cards, so we give a bit more energy
++		 * to the gpio pins
++		 */
++		sdmmc_bus4: sdmmc-bus4 {
++			rockchip,pins = <6 RK_PC0 1 &pcfg_pull_up_drv_8ma>,
++					<6 RK_PC1 1 &pcfg_pull_up_drv_8ma>,
++					<6 RK_PC2 1 &pcfg_pull_up_drv_8ma>,
++					<6 RK_PC3 1 &pcfg_pull_up_drv_8ma>;
++		};
++
++		sdmmc_clk: sdmmc-clk {
++			rockchip,pins = <6 RK_PC4 1 &pcfg_pull_none_8ma>;
++		};
++
++		sdmmc_cmd: sdmmc-cmd {
++			rockchip,pins = <6 RK_PC5 1 &pcfg_pull_up_drv_8ma>;
++		};
++		sdmmc_pwr: sdmmc-pwr {
++			rockchip,pins = <7 RK_PB3 1 &pcfg_pull_none>;
++		};
++	};
++
+ 	usb {
+ 		host_vbus_drv: host-vbus-drv {
+ 			rockchip,pins = <0 RK_PB6 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 
++		usbhub_rst: usbhub-rst {
++			rockchip,pins = <8 RK_PA3 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++
+ 		otg_vbus_drv: otg-vbus-drv {
+ 			rockchip,pins = <0 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+@@ -311,12 +560,57 @@
+ 	status = "okay";
+ };
+ 
++&sdio0 {
++	bus-width = <4>;
++	cap-sd-highspeed;
++	cap-sdio-irq;
++	no-mmc;
++	no-sd;
++	supports-sdio;
++	non-removable;
++	disable-wp;
++	keep-power-in-suspend;
++	mmc-pwrseq = <&sdio_pwrseq>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdio0_bus4>, <&sdio0_cmd>, <&sdio0_clk>, <&sdio0_int>;
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-ddr50;
++	vmmc-supply = <&vbat_wl>;
++	vqmmc-supply = <&vccio_wl>;
++	status = "okay";
++
++/* lets think about this one later - it gives quite a few warnings right now
++	brcmf: bcrmf@1 {
++		reg = <1>;
++		compatible = "brcm,bcm4329-fmac";
++		interrupt-parent = <&gpio4>;
++		interrupts = <30 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-names = "host-wake";
++		status = "okay";
++	}; */
++};
++
+ &sdmmc {
+ 	bus-width = <4>;
+ 	cap-mmc-highspeed;
+ 	cap-sd-highspeed;
++	supports-sd;
++	supports-cqe;
+ 	card-detect-delay = <200>;
++	/* really? */
+ 	disable-wp;
++/* looks like the r89 does not really support uhs - all tries so far did not go beyond normal hs mode
++	max-frequency = <100000000>;
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
++	sd-uhs-ddr50;
++*/
++	/* taken from armbian xt-q8l-v10 device tree */
++/*	post-power-on-delay-ms = <50>; */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
+ 	vmmc-supply = <&vcc_sdmmc>;
+@@ -324,6 +618,18 @@
+ 	status = "okay";
+ };
+ 
++&emmc {
++        bus-width = <8>;
++        cap-mmc-highspeed;
++        disable-wp;
++        non-removable;
++        pinctrl-names = "default";
++        pinctrl-0 = <&emmc_clk>, <&emmc_cmd>, <&emmc_pwr>, <&emmc_bus8>;
++        vmmc-supply = <&vcc_io>;
++        vqmmc-supply = <&vcc_flash>;
++        status = "okay";
++};
++
+ &tsadc {
+ 	rockchip,hw-tshut-mode = <0>;
+ 	rockchip,hw-tshut-polarity = <0>;
+@@ -331,6 +637,8 @@
+ };
+ 
+ &uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_xfer>, <&uart0_cts>, <&uart0_rts>;
+ 	status = "okay";
+ };
+ 
+@@ -346,15 +654,15 @@
+ 	status = "okay";
+ };
+ 
+-&uart4 {
+-	status = "okay";
+-};
+ 
++/* there might be room for some usb fine tuning - see armbian xt-q8l-v10 device tree */
+ &usb_host0_ehci {
+ 	status = "okay";
+ };
+ 
+ &usb_host1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&usbhub_rst>;
+ 	status = "okay";
+ };
+ 
+@@ -385,3 +693,46 @@
+ &wdt {
+ 	status = "okay";
+ };
++
++// i2s bus is present on r89 device, enable it
++&i2s {
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
++// spdif is present on r89 device, enable it
++&spdif {
++	status = "okay";
++};
++
++/*
++ * Redefine some thermals to give a bit more headroom (+10°C)
++ * Done in rk3288.dsi too as well still
++ */
++/*
++&cpu_alert0 {
++	temperature = <80000>;
++};
++
++&cpu_alert1 {
++	temperature = <85000>;
++};
++
++&gpu_alert0 {
++	temperature = <80000>;
++}; */
++
++/*
++ * Retouch the operating points for higher frequencies to reduce
++ * the voltage required
++ */
++/* something more to consider from https://github.com/armbian/build/blob/master/patch/kernel/rockchip-dev/xt-q8l-v10-add-device-tree.patch
++&cpu_opp_table {
++	opp-1512000000 {
++		opp-microvolt = <1250000>;
++	};
++
++	opp-1608000000 {
++		opp-microvolt = <1300000>;
++	};
++}; */
