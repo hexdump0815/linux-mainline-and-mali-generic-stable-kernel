@@ -1,0 +1,67 @@
+# this sepearate config from av7 exists, as with av7 the system hangs on boot
+#
+# see misc.cbr: pulse default.pa required (not required: and mrvl firmware needs to go into the initramfs via hook)
+# rk3288 mainline only has a light suspend mode without powering down everything
+# https://irclog.whitequark.org/linux-rockchip/2018-04-03#21712549
+# "for suspend/resume but at least between ChromeOS 3.14 and mainline there is a huge
+# difference in handling of ddr self-refresh (not done in mainline at all, so you
+# only get a light suspend)"
+# "rk3288 does have a light suspend mode, without putting the ddr in self-refresh - so
+# that doesn't save to much" - would need uboot or lower level support for more
+#
+# if the keyboard does not work in 4.19+, change those two lines by hand in .config
+# CONFIG_CROS_EC_I2C=y
+# CONFIG_CROS_EC_SPI=y
+
+#
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+#
+# patches:
+# add rk3288 mali support for the rockchip chromebook (veyron)
+# TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
+# use the files from misc.av7 as we need exactly the same ones here
+patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-complete.patch
+cp -r /compile/doc/stable/misc.av7/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
+# v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
+patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-v5.0.patch
+# v5.4 - fix mali compile
+patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.4.patch
+
+cp /compile/doc/stable/config.cbr /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+export ARCH=arm
+make oldconfig
+make -j 4 bzImage dtbs modules
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+#find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-veyron-*.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.cbr /compile/doc/stable/config.cbr.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbr
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbr-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+
+
+#
+# extlinux.conf entry
+#
+LABEL v5414
+      MENU LABEL v5.4.14 kernel via zImage mmcblk0
+      LINUX ../boot/zImage-5.4.14-stb-cbr+
+      INITRD ../boot/initrd.img-5.4.14-stb-cbr+
+      FDT ../boot/dtb-5.4.14-stb-cbr+/rk3288-veyron-jaq.dtb
+      APPEND console=tty1 init=/sbin/init gpt root=/dev/mmcblk2p3 ro rootwait net.ifnames=0 fsck.repair=yes
