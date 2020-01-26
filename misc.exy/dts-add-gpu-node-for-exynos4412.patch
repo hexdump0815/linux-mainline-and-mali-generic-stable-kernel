@@ -1,0 +1,62 @@
+from: https://github.com/tobiasjakobi/linux-odroid-public/commit/14f338a78301bd3d648ba2eabf7798ced7c1afa5
+
+From 14f338a78301bd3d648ba2eabf7798ced7c1afa5 Mon Sep 17 00:00:00 2001
+From: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>
+Date: Wed, 2 Nov 2016 13:30:29 +0100
+Subject: [PATCH] ARM: dts: exynos: add GPU node for Exynos4412
+
+---
+ arch/arm/boot/dts/exynos4412.dtsi | 40 +++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
+
+diff --git a/arch/arm/boot/dts/exynos4412.dtsi b/arch/arm/boot/dts/exynos4412.dtsi
+index 26ad6ab3c6af..e3468570beaf 100644
+--- a/arch/arm/boot/dts/exynos4412.dtsi
++++ b/arch/arm/boot/dts/exynos4412.dtsi
+@@ -295,6 +295,46 @@
+ 			iommus = <&sysmmu_g2d>;
+ 		};
+ 
++		gpu: gpu@13000000 {
++			compatible = "arm,mali-400", "arm,mali-utgard";
++
++			power-domains = <&pd_g3d>;
++
++			/*
++			 * Propagate VPLL output clock to SCLK_G3D and
++			 * ensure that the DIV_G3D divider is 1.
++			 */
++			assigned-clocks = <&clock CLK_MOUT_G3D1>, <&clock CLK_MOUT_G3D>,
++					  <&clock CLK_FOUT_VPLL>, <&clock CLK_SCLK_G3D>;
++			assigned-clock-parents = <&clock CLK_SCLK_VPLL>,
++						 <&clock CLK_MOUT_G3D1>;
++			assigned-clock-rates = <0>, <0>, <160000000>, <160000000>;
++
++			clocks = <&clock CLK_SCLK_G3D>, <&clock CLK_G3D>;
++			clock-names = "sclk_g3d", "g3d";
++
++			reg = <0x13000000 0x30000>;
++
++			interrupts = <0 118 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 119 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 120 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 121 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 122 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 123 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 124 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 125 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 126 IRQ_TYPE_LEVEL_HIGH>,
++				     <0 127 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "IRQPPMMU0", "IRQPPMMU1", "IRQPPMMU2",
++					  "IRQPPMMU3", "IRQGPMMU", "IRQPP0",
++					  "IRQPP1", "IRQPP2", "IRQPP3", "IRQGP";
++
++			/* G3D is part of the leftbus domain. */
++			devfreq = <&bus_leftbus>;
++
++			status = "disabled";
++		};
++
+ 		mshc_0: mmc@12550000 {
+ 			compatible = "samsung,exynos4412-dw-mshc";
+ 			reg = <0x12550000 0x1000>;

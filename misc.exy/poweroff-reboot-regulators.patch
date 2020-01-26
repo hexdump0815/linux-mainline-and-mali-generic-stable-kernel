@@ -1,0 +1,45 @@
+based on:
+https://github.com/tobiasjakobi/linux-odroid-public/commit/5e1348cdc2409036bfcd2f8d33ec21881c628e4f
+https://github.com/tobiasjakobi/linux-odroid-public/commit/b08b932c470225a219de8d6d7520f3e73535ca8b
+https://github.com/tobiasjakobi/linux-odroid-public/blob/ad0d0df3efac360973d4dba0bbe6d7e131e820ad/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+
+diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+index ea55f377d17c..b678af85b5e2 100644
+--- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
++++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+@@ -36,6 +36,33 @@
+ 		};
+ 	};
+ 
++	regulators {
++		compatible = "simple-bus";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		reg_p3v3: regulator@1 {
++			compatible = "regulator-fixed";
++			reg = <0x1>;
++			regulator-name = "p3v3";
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			gpio = <&gpa1 1 GPIO_ACTIVE_HIGH>;
++			enable-active-high;
++			regulator-always-on;
++		};
++	};
++
+ 	sound: sound {
+ 		compatible = "hardkernel,odroid-xu4-audio";
+ 
+@@ -562,3 +592,11 @@
+ 	vtmu-supply = <&ldo10_reg>;
+ 	status = "okay";
+ };
++
++&poweroff {
++	vdd-supply = <&reg_p3v3>;
++};
++
++&reboot {
++	vdd-supply = <&reg_p3v3>;
++};

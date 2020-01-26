@@ -1,0 +1,31 @@
+from: https://github.com/tobiasjakobi/linux-odroid-public/commit/543c72a03a3519725290e73ec7b83f6df6df5875
+
+From 543c72a03a3519725290e73ec7b83f6df6df5875 Mon Sep 17 00:00:00 2001
+From: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>
+Date: Mon, 16 Nov 2015 12:21:11 +0100
+Subject: [PATCH] ARM: dts: exynos4412-odroid: setup GPU node
+
+Add the G3D regulator and enable the node.
+---
+ arch/arm/boot/dts/exynos4412-odroid-common.dtsi | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+index 71021cdba034..2f23826ac12f 100644
+--- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
++++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+@@ -256,6 +256,14 @@
+ 	assigned-clock-rates = <0>, <176000000>;
+ };
+ 
++&gpu {
++	status = "okay";
++	gpu-supply = <&buck4_reg>;
++
++	regulator-microvolt-offset = <50000>;
++	regulator-microsecs-delay = <50>;
++};
++
+ &hdmi {
+ 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
+ 	pinctrl-names = "default";

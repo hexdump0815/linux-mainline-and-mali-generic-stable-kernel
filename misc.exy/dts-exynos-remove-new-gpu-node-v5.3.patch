@@ -1,0 +1,202 @@
+diff --git a/arch/arm/boot/dts/exynos4.dtsi b/arch/arm/boot/dts/exynos4.dtsi
+index 1264cc431ff6..dde27451faa8 100644
+--- a/arch/arm/boot/dts/exynos4.dtsi
++++ b/arch/arm/boot/dts/exynos4.dtsi
+@@ -415,20 +415,6 @@
+ 			};
+ 		};
+ 
+-		gpu: gpu@13000000 {
+-			compatible = "samsung,exynos4210-mali", "arm,mali-400";
+-			reg = <0x13000000 0x10000>;
+-			/*
+-			 * CLK_G3D is not actually bus clock but a IP-level clock.
+-			 * The bus clock is not described in hardware manual.
+-			 */
+-			clocks = <&clock CLK_G3D>,
+-				 <&clock CLK_SCLK_G3D>;
+-			clock-names = "bus", "core";
+-			power-domains = <&pd_g3d>;
+-			status = "disabled";
+-		};
+-
+ 		i2s1: i2s@13960000 {
+ 			compatible = "samsung,s3c6410-i2s";
+ 			reg = <0x13960000 0x100>;
+diff --git a/arch/arm/boot/dts/exynos4210-origen.dts b/arch/arm/boot/dts/exynos4210-origen.dts
+index 0d1e1a9c2f6e..36b1edea254a 100644
+--- a/arch/arm/boot/dts/exynos4210-origen.dts
++++ b/arch/arm/boot/dts/exynos4210-origen.dts
+@@ -132,11 +132,6 @@
+ 	status = "okay";
+ };
+ 
+-&gpu {
+-	mali-supply = <&buck3_reg>;
+-	status = "okay";
+-};
+-
+ &hsotg {
+ 	vusb_d-supply = <&ldo3_reg>;
+ 	vusb_a-supply = <&ldo8_reg>;
+diff --git a/arch/arm/boot/dts/exynos4210-trats.dts b/arch/arm/boot/dts/exynos4210-trats.dts
+index 7c39dd1c4d3a..6882480dbaf7 100644
+--- a/arch/arm/boot/dts/exynos4210-trats.dts
++++ b/arch/arm/boot/dts/exynos4210-trats.dts
+@@ -239,10 +239,6 @@
+ 	status = "okay";
+ };
+ 
+-&gpu {
+-	status = "okay";
+-};
+-
+ &hsotg {
+ 	vusb_d-supply = <&vusb_reg>;
+ 	vusb_a-supply = <&vusbdac_reg>;
+diff --git a/arch/arm/boot/dts/exynos4210-universal_c210.dts b/arch/arm/boot/dts/exynos4210-universal_c210.dts
+index 82a8b5449978..bf092e97e14f 100644
+--- a/arch/arm/boot/dts/exynos4210-universal_c210.dts
++++ b/arch/arm/boot/dts/exynos4210-universal_c210.dts
+@@ -262,11 +262,6 @@
+ 	};
+ };
+ 
+-&gpu {
+-	mali-supply = <&buck2_reg>;
+-	status = "okay";
+-};
+-
+ &hdmi {
+ 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
+ 	pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/exynos4210.dtsi b/arch/arm/boot/dts/exynos4210.dtsi
+index f220716239db..8ffa9ae95ac2 100644
+--- a/arch/arm/boot/dts/exynos4210.dtsi
++++ b/arch/arm/boot/dts/exynos4210.dtsi
+@@ -449,43 +429,6 @@
+ 	samsung,lcd-wb;
+ };
+ 
+-&gpu {
+-	interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 122 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 124 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 121 IRQ_TYPE_LEVEL_HIGH>;
+-	interrupt-names = "gp",
+-			  "gpmmu",
+-			  "pp0",
+-			  "ppmmu0",
+-			  "pp1",
+-			  "ppmmu1",
+-			  "pp2",
+-			  "ppmmu2",
+-			  "pp3",
+-			  "ppmmu3";
+-	operating-points-v2 = <&gpu_opp_table>;
+-
+-	gpu_opp_table: opp_table {
+-		compatible = "operating-points-v2";
+-
+-		opp-160000000 {
+-			opp-hz = /bits/ 64 <160000000>;
+-			opp-microvolt = <950000>;
+-		};
+-		opp-267000000 {
+-			opp-hz = /bits/ 64 <267000000>;
+-			opp-microvolt = <1050000>;
+-		};
+-	};
+-};
+-
+ &mdma1 {
+ 	power-domains = <&pd_lcd0>;
+ };
+diff --git a/arch/arm/boot/dts/exynos4412-prime.dtsi b/arch/arm/boot/dts/exynos4412-prime.dtsi
+index 3731a225f779..d83fbd4e434c 100644
+--- a/arch/arm/boot/dts/exynos4412-prime.dtsi
++++ b/arch/arm/boot/dts/exynos4412-prime.dtsi
+@@ -38,10 +38,3 @@
+ 	cooling-device = <&cpu0 15 15>, <&cpu1 15 15>,
+ 			 <&cpu2 15 15>, <&cpu3 15 15>;
+ };
+-
+-&gpu_opp_table {
+-	opp-533000000 {
+-		opp-hz = /bits/ 64 <533000000>;
+-		opp-microvolt = <1075000>;
+-	};
+-};
+diff --git a/arch/arm/boot/dts/exynos4412.dtsi b/arch/arm/boot/dts/exynos4412.dtsi
+index d20db2dfe8e2..e8397f8c82fa 100644
+--- a/arch/arm/boot/dts/exynos4412.dtsi
++++ b/arch/arm/boot/dts/exynos4412.dtsi
+@@ -779,53 +779,6 @@
+ };
+ 
+ &gpu {
+-	interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 122 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 124 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 121 IRQ_TYPE_LEVEL_HIGH>,
+-		     <GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>;
+-	interrupt-names = "gp",
+-			  "gpmmu",
+-			  "pp0",
+-			  "ppmmu0",
+-			  "pp1",
+-			  "ppmmu1",
+-			  "pp2",
+-			  "ppmmu2",
+-			  "pp3",
+-			  "ppmmu3",
+-			  "pmu";
+-	operating-points-v2 = <&gpu_opp_table>;
+-
+-	gpu_opp_table: opp_table {
+-		compatible = "operating-points-v2";
+-
+-		opp-160000000 {
+-			opp-hz = /bits/ 64 <160000000>;
+-			opp-microvolt = <875000>;
+-		};
+-		opp-267000000 {
+-			opp-hz = /bits/ 64 <267000000>;
+-			opp-microvolt = <900000>;
+-		};
+-		opp-350000000 {
+-			opp-hz = /bits/ 64 <350000000>;
+-			opp-microvolt = <950000>;
+-		};
+-		opp-440000000 {
+-			opp-hz = /bits/ 64 <440000000>;
+-			opp-microvolt = <1025000>;
+-		};
+-	};
+-};
+-
+-&gpu {
+ 	operating-points-v2 = <&g3d_opp_table>;
+ };
+ 
+@@ -850,8 +803,6 @@
+ 
+ &pmu {
+ 	interrupts = <2 2>, <3 2>, <18 2>, <19 2>;
+-	interrupt-affinity = <&cpu0>, <&cpu1>, <&cpu2>, <&cpu3>;
+-	status = "okay";
+ };
+ 
+ &pmu_system_controller {

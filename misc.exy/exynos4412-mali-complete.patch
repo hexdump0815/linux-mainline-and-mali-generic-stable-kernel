@@ -1,0 +1,23 @@
+diff --git a/drivers/gpu/Makefile b/drivers/gpu/Makefile
+index f17d01f076c7..43c37d08dac6 100644
+--- a/drivers/gpu/Makefile
++++ b/drivers/gpu/Makefile
+@@ -3,5 +3,5 @@
+ # taken to initialize them in the correct order. Link order is the only way
+ # to ensure this currently.
+ obj-$(CONFIG_TEGRA_HOST1X)	+= host1x/
+-obj-y			+= drm/ vga/
++obj-y			+= drm/ vga/ arm/
+ obj-$(CONFIG_IMX_IPUV3_CORE)	+= ipu-v3/
+diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
+index 427a993c7f57..fe116adcc1d5 100644
+--- a/drivers/video/Kconfig
++++ b/drivers/video/Kconfig
+@@ -16,6 +16,7 @@ source "drivers/gpu/vga/Kconfig"
+ 
+ source "drivers/gpu/host1x/Kconfig"
+ source "drivers/gpu/ipu-v3/Kconfig"
++source "drivers/gpu/arm/Kconfig"
+ 
+ source "drivers/gpu/drm/Kconfig"
+ 

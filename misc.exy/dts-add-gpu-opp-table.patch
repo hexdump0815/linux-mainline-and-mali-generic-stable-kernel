@@ -1,0 +1,55 @@
+from: https://github.com/tobiasjakobi/linux-odroid-public/commit/367364e92247f292a38d932a5fd20be3dff8c05a
+
+From 367364e92247f292a38d932a5fd20be3dff8c05a Mon Sep 17 00:00:00 2001
+From: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>
+Date: Wed, 2 Nov 2016 14:20:18 +0100
+Subject: [PATCH] ARM: dts: exynos4412: add OPP table for GPU
+
+---
+ arch/arm/boot/dts/exynos4412.dtsi | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/arch/arm/boot/dts/exynos4412.dtsi b/arch/arm/boot/dts/exynos4412.dtsi
+index e3468570beaf..db01b3b9c5c4 100644
+--- a/arch/arm/boot/dts/exynos4412.dtsi
++++ b/arch/arm/boot/dts/exynos4412.dtsi
+@@ -600,6 +600,28 @@
+ 				opp-hz = /bits/ 64 <100000000>;
+ 			};
+ 		};
++
++		g3d_opp_table: opp_table7 {
++			compatible = "operating-points-v2";
++			opp-shared;
++
++			opp-160000000 {
++				opp-hz = /bits/ 64 <160000000>;
++				opp-microvolt = <875000>;
++			};
++			opp-266000000 {
++				opp-hz = /bits/ 64 <266000000>;
++				opp-microvolt = <900000>;
++			};
++			opp-350000000 {
++				opp-hz = /bits/ 64 <350000000>;
++				opp-microvolt = <950000>;
++			};
++			opp-440000000 {
++				opp-hz = /bits/ 64 <440000000>;
++				opp-microvolt = <1025000>;
++			};
++		};
+ 	};
+ };
+ 
+@@ -756,6 +778,10 @@
+ 	cpu-offset = <0x4000>;
+ };
+ 
++&gpu {
++	operating-points-v2 = <&g3d_opp_table>;
++};
++
+ &hdmi {
+ 	compatible = "samsung,exynos4212-hdmi";
+ };

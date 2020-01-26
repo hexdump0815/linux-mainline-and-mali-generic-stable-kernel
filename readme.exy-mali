@@ -1,0 +1,31 @@
+# all below is based on ubuntu 18.04 and might differ for other dists
+# other things required:
+- user in video group
+usermod -a -G video <username>
+- mali udev rules
+root@odroid:~# cat /etc/udev/rules.d/50-mali.rules 
+KERNEL=="mali", MODE="0660", GROUP="video"
+KERNEL=="mali0", MODE="0660", GROUP="video"
+- xorg.conf
+01-armsoc.conf
+
+# mali kernel module
+- included in patches
+
+# xorg server
+apt-get install xserver-xorg-dev libtool automake xutils-dev libudev-dev
+git clone https://github.com/paolosabatino/xf86-video-armsoc.git
+mv xf86-video-armsoc rockchip-xf86-video-armsoc
+cd rockchip-xf86-video-armsoc
+./autogen.sh
+make
+result: src/.libs/armsoc_drv.so
+
+# gl4es
+git clone https://github.com/ptitSeb/gl4es.git
+cd gl4es
+apt-get install cmake
+cd gl4es
+cmake . -DODROID=1
+make
+result: lib/libGl.so.1

@@ -1,0 +1,121 @@
+config MALI400
+	tristate "Mali-300/400/450 support"
+	depends on OF && ARM && ARMGPU
+	select DMA_SHARED_BUFFER
+	---help---
+	  This enables support for the ARM Mali-300, Mali-400, and Mali-450
+	  GPUs.
+
+	  To compile this driver as a module, choose M here: the module will be
+	  called mali.
+
+config MALI_TARGET_PLATFORM
+	string "Mali target platform"
+	default "exynos4412"
+	depends on MALI400
+	---help---
+	  This select the target platform for the Mali driver.
+
+config MALI450
+	bool "Enable Mali-450 support"
+	depends on MALI400
+	---help---
+	  This enables support for Mali-450 specific features.
+
+config MALI400_DEBUG
+	bool "Enable debug in Mali driver"
+	depends on MALI400
+	---help---
+	  This enabled extra debug checks and messages in the Mali driver.
+
+config MALI400_PROFILING
+	bool "Enable Mali profiling"
+	depends on MALI400
+	select TRACEPOINTS
+	default y
+	---help---
+	  This enables gator profiling of Mali GPU events.
+
+config MALI400_INTERNAL_PROFILING
+	bool "Enable internal Mali profiling API"
+	depends on MALI400_PROFILING
+	default n
+	---help---
+	  This enables the internal legacy Mali profiling API.
+
+choice
+	prompt "Mali power management"
+	default MALI_PM_NONE
+	depends on MALI400
+	help
+	  The power management implementation for the Mali GPU can be
+	  selected here. Note that the platform glue has to support
+	  the implementation.
+
+	  If in doubt, select 'None'
+
+config MALI_PM_NONE
+	bool "None"
+	help
+	  This disables all power management of the GPU, effectively
+	  locking the operating frequency to a static rate.
+
+config MALI_PM_DVFS
+	bool "Dynamic frequency change (DVFS)"
+	help
+	  This enables support for dynamic change frequency of Mali with
+	  the goal of lowering power consumption.
+
+	  The operating frequency is selected by the Mali core. The
+	  core then requests the platform glue to set the frequency.
+
+config MALI_PM_UTILIZATION
+	bool "GPU utilization mode"
+	help
+	  This enables the GPU utilization mode.
+
+	  In contrast to the DVFS power management implementation, the
+	  operating frequency here is selected by the platform glue. The
+	  core only informs the platform glue about the current GPU load.
+
+endchoice
+
+config MALI_DMA_BUF_MAP_ON_ATTACH
+	bool "Map dma-buf attachments on attach"
+	depends on MALI400 && DMA_SHARED_BUFFER
+	default y
+	---help---
+	  This makes the Mali driver map dma-buf attachments after doing
+	  attach. If this is not set the dma-buf attachments will be mapped for
+	  every time the GPU need to access the buffer.
+
+	  Mapping for each access can cause lower performance.
+
+config MALI_SHARED_INTERRUPTS
+	bool "Support for shared interrupts"
+	depends on MALI400
+	default n
+	---help---
+	  Adds functionality required to properly support shared interrupts.  Without this support,
+	  the device driver will fail during insmod if it detects shared interrupts.  This also
+	  works when the GPU is not using shared interrupts, but might have a slight performance
+	  impact.
+
+config MALI_PMU_PARALLEL_POWER_UP
+	bool "Power up Mali PMU domains in parallel"
+	depends on MALI400
+	default n
+	---help---
+	  This makes the Mali driver power up all PMU power domains in parallel, instead of
+	  powering up domains one by one, with a slight delay in between. Powering on all power
+	  domains at the same time may cause peak currents higher than what some systems can handle.
+	  These systems must not enable this option.
+
+config MALI_QUIET
+	bool "Make Mali driver very quiet"
+	depends on MALI400 && !MALI400_DEBUG
+	default n
+	---help---
+	  This forces the Mali driver to never print any messages.
+
+	  If unsure, say N.
