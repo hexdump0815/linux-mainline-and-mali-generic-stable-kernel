@@ -1,0 +1,31 @@
+based on: https://github.com/superna9999/meson_gx_mali_450/issues/8
+and: https://github.com/superna9999/linux/commit/90dc377aa5ed708a38a010e6861b468cd9373f4f
+
+diff --git a/drivers/gpu/drm/meson/meson_plane.c b/drivers/gpu/drm/meson/meson_plane.c
+index f494a54cbf..9061aaa557 100644
+--- a/drivers/gpu/drm/meson/meson_plane.c
++++ b/drivers/gpu/drm/meson/meson_plane.c
+@@ -162,6 +162,7 @@ static void meson_plane_atomic_update(struct drm_plane *plane,
+ 		priv->viu.osd1_blk0_cfg[0] |= OSD_OUTPUT_COLOR_RGB;
+ 
+ 	switch (fb->format->format) {
++	case DRM_FORMAT_ARGB8888:
+ 	case DRM_FORMAT_XRGB8888:
+ 		/* For XRGB, replace the pixel's alpha by 0xFF */
+ 		writel_bits_relaxed(OSD_REPLACE_EN, OSD_REPLACE_EN,
+@@ -169,6 +170,7 @@ static void meson_plane_atomic_update(struct drm_plane *plane,
+ 		priv->viu.osd1_blk0_cfg[0] |= OSD_BLK_MODE_32 |
+ 					      OSD_COLOR_MATRIX_32_ARGB;
+ 		break;
++#if 0
+ 	case DRM_FORMAT_ARGB8888:
+ 		/* For ARGB, use the pixel's alpha */
+ 		writel_bits_relaxed(OSD_REPLACE_EN, 0,
+@@ -176,6 +178,7 @@ static void meson_plane_atomic_update(struct drm_plane *plane,
+ 		priv->viu.osd1_blk0_cfg[0] |= OSD_BLK_MODE_32 |
+ 					      OSD_COLOR_MATRIX_32_ARGB;
+ 		break;
++#endif
+ 	case DRM_FORMAT_RGB888:
+ 		priv->viu.osd1_blk0_cfg[0] |= OSD_BLK_MODE_24 |
+ 					      OSD_COLOR_MATRIX_24_RGB;

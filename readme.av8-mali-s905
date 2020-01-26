@@ -1,0 +1,52 @@
+# all below is based on ubuntu 18.04 and might differ for other dists
+# other things required:
+- user in video group
+usermod -a -G video <username>
+- mali udev rules
+root@odroid:~# cat /etc/udev/rules.d/50-mali.rules
+KERNEL=="mali", MODE="0660", GROUP="video"
+KERNEL=="mali0", MODE="0660", GROUP="video"
+- xorg.conf
+01-armsoc.conf
+
+# mali kernel module - utgard
+git clone https://github.com/superna9999/meson_gx_mali_450.git
+mv meson_gx_mali_450 amlogic-meson_gx_mali_450
+cd amlogic-meson_gx_mali_450
+git checkout DX910-SW-99002-r9p0-01rel0_meson_gx
+# v5.4 compile patch needed
+patch -p1 < /compile/doc/stable/misc.av8/fix-meson-gx-mali450-compile-v5.4.patch
+KDIR=/compile/source/linux-stable ARCH=arm64 CROSS_COMPILE= ./build.sh
+export kver=5.4.3-stb-av8+
+mkdir /lib/modules/${kver}/extra
+cp mali.ko /lib/modules/${kver}/extra
+tar czf /compile/result/stable/${kver}-mali-utgard.tar.gz /lib/modules/${kver}/extra/mali.ko
+# clean up the extra dir for possible further pure kernel packaging
+rm -rf /lib/modules/${kver}/extra
+
+# xorg server
+apt-get install xserver-xorg-dev libtool automake xutils-dev libudev-dev
+git clone https://github.com/paolosabatino/xf86-video-armsoc.git
+mv xf86-video-armsoc rockchip-xf86-video-armsoc
+cd rockchip-xf86-video-armsoc
+./autogen.sh
+make
+result: src/.libs/armsoc_drv.so
+
+# or ...
+apt-get install xserver-xorg-dev libtool automake xutils-dev libudev-dev
+git clone https://github.com/superna9999/xf86-video-armsoc.git
+mv xf86-video-armsoc amlogic-meson-xf86-video-armsoc
+cd amlogic-meson-xf86-video-armsoc
+./autogen.sh
+make
+result: src/.libs/armsoc_drv.so
+
+# gl4es
+git clone https://github.com/ptitSeb/gl4es.git
+cd gl4es
+apt-get install cmake
+cd gl4es
+cmake . -DODROID=1
+make
+result: lib/libGl.so.1

@@ -1,0 +1,73 @@
+#
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+#
+# patches:
+# fix black background when using the mali blob hack
+patch -p1 < /compile/doc/stable/misc.av8/s90-amlogic-s90x-mali-hack.patch
+# v5.4 - fix v3d power setup for rpi3
+patch -p1 < /compile/doc/stable/misc.av8/rpi3-v3d-power-fix.patch
+# enable cpufreq on odroid c2
+patch -p1 < /compile/doc/stable/misc.av8/enable-cpufreq-on-odroid-c2.patch
+# reduce cma mem for amlogic
+patch -p1 < /compile/doc/stable/misc.av8/reduce-cma-mem-for-amlogic.patch
+
+cp /compile/doc/stable/config.av8 /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+export ARCH=arm64
+# make defconfig + fix options - see misc.av8/options
+make oldconfig
+make -j 4 Image dtbs modules
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and wanted
+# find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+# for all except amlogic 64bit socs
+cp -v arch/arm64/boot/Image /boot/Image-${kver}
+# for amlogic 64bit socs (legacy u-boot)
+mkimage -A arm64 -O linux -T kernel -C none -a 0x1080000 -e 0x1080000 -n linux-${kver} -d arch/arm64/boot/Image /boot/uImage-${kver}
+mkdir /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/rockchip/rk33*.dtb /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/amlogic/meson-g*.dtb /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/amlogic/meson-sm1*.dtb /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/broadcom/bcm*-rpi-*.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm64 -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.av8 /compile/doc/stable/config.av8.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av8
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av8-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+
+
+# s905w tv box - /boot/s905_autoscript.txt:
+setenv kver 5.4.3-stb-av8+
+# hardcode the eth mac addr in uboot as otherwise we will get a new one each time
+setenv ethaddr 11:22:33:44:55:66
+setenv mac 11:22:33:44:55:66
+setenv bootargs "console=ttyAML0,115200n8 console=tty0 no_console_suspend consoleblank=0 root=/dev/sda3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 zswap.enabled=0 threadirqs noresume"
+#fatload usb 0 0x11000000 Image-${kver}
+fatload usb 0 0x01080000 uImage-${kver}
+fatload usb 0 0x13000000 uInitrd-${kver}
+fatload usb 0 ${dtb_mem_addr} dtb-${kver}/meson-gxl-s905w-p281.dtb
+# booti only works out of the box with blb kernels due some patches - otherwise mkimage is required
+#booti 0x11000000 0x13000000 ${dtb_mem_addr}
+# as describe at linux-meson.com
+bootm 0x1080000 0x13000000 $dtb_mem_addr
+# use: mkimage -A arm64 -T script -O linux -d s905_autoscript.txt s905_autoscript.scr
+
+# rpi 3 aarch64 - /boot/boot.txt:
+setenv kver 5.4.3-stb-av8+
+setenv bootargs "console=ttyS1,115200n8 console=tty0 root=/dev/mmcblk0p3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 smsc95xx.macaddr=${usbethaddr} threadirqs noresume"
+fatload mmc 0 ${kernel_addr_r} Image-${kver}
+fatload mmc 0 ${ramdisk_addr_r} uInitrd-${kver}
+fatload mmc 0 ${fdt_addr_r} dtb-${kver}/bcm2837-rpi-3-b.dtb
+booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+# use: mkimage -A arm -T script -O linux -d boot.txt boot.scr

@@ -1,0 +1,17 @@
+from: https://forum.odroid.com/viewtopic.php?t=22717&start=1050#p272378
+
+might not work with hardkernel u-boot as it provides too high scpi clocks
+
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+index 6039adda12ee..86abb2429884 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
++++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+@@ -244,7 +244,7 @@
+ };
+ 
+ &scpi_clocks {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ /* SD */
