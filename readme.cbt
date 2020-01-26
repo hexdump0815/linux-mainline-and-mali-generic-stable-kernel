@@ -1,0 +1,68 @@
+#
+# see misc.cbt: pulse default.pa required (not required: and mrvl firmware needs to go into the initramfs via hook)
+#
+# if the keyboard does not work in 4.19+, change those two lines by hand in .config
+# CONFIG_CROS_EC_I2C=y
+# CONFIG_CROS_EC_SPI=y
+#
+# this fixes the blank screen on boot
+#patch -p1 < /compile/doc/stable/misc.cbt/tegra-cbt-blank-screen-fix.patch
+
+cp /compile/doc/stable/config.cbt /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+export ARCH=arm
+make oldconfig
+make -j 4 bzImage dtbs modules
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+#find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+cp -v arch/arm/boot/dts/tegra124-nyan-big.dtb /boot/dtb-${kver}/tegra124-nyan-big.dtb
+cp -v System.map /boot/System.map-${kver}
+# start chromebook special
+cp ../../doc/stable/misc.cbt/kernel-nyan.its-stable kernel.its
+mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
+dd if=/dev/zero of=bootloader.bin bs=512 count=1
+cp ../../doc/chromebook/misc.cbt/tegra-PKGBUILDs/core/linux-nyan/kernel.keyblock .
+cp ../../doc/chromebook/misc.cbt/tegra-PKGBUILDs/core/linux-nyan/kernel_data_key.vbprivk .
+cp ../../doc/stable/misc.cbt/cmdline-stable cmdline
+cp /etc/cb-tools/libcrypto.so.1.1 /usr/lib
+/etc/cb-tools/vbutil_kernel --pack vmlinux.kpart --version 1 --vmlinuz vmlinux.uimg --arch arm --keyblock kernel.keyblock --signprivate kernel_data_key.vbprivk --config cmdline --bootloader bootloader.bin
+cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
+# mkdir -p /lib/firmware/mrvl
+# cp ../../doc/chromebook/misc/sd8787_uapsta_cros.bin /lib/firmware/mrvl
+# cp ../../doc/chromebook/misc/sd8797_uapsta_cros.bin /lib/firmware/mrvl
+# cp ../../doc/chromebook/misc/sd8897_uapsta_cros.bin /lib/firmware/mrvl
+# install -D -m644 ../../doc/chromebook/misc.cbt/coreboot/src/soc/nvidia/tegra124/lp0/tegra_lp0_resume.fw /lib/firmware/tegra12x/tegra_lp0_resume.fw
+# end chromebook special
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.cbt /compile/doc/stable/config.cbt.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbt
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbt-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+# start chromebook special
+cd /compile/source/linux-stable
+rm -f /usr/lib/libcrypto.so.1.1
+rm -f firmware/nvidia/tegra124/xusb.bin
+rm -f kernel.its vmlinux.uimg bootloader.bin kernel.keyblock kernel_data_key.vbprivk cmdline vmlinux.kpart
+# end chromebook special
+cd /compile/source/linux-stable
+make distclean
+rm /compile/source/linux-stable/${kver}.tar.gz
+
+#
+# extlinux.conf entry
+#
+LABEL v41510
+      MENU LABEL v4.15.1 kernel via zImage mmcblk0
+      LINUX ../boot/zImage-4.15.1-stb-cbt
+      INITRD ../boot/initrd.img-4.15.1-stb-cbt
+      FDT ../boot/rk3288-veyron-jaq.dtb-4.15.1-stb-cbt
+      APPEND console=tty1 init=/sbin/init gpt root=/dev/mmcblk2p3 ro rootwait net.ifnames=0 fsck.repair=yes
