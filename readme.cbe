@@ -19,7 +19,7 @@ cp /compile/doc/stable/config.cbe /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 export ARCH=arm
 make oldconfig
-make -j 2 zImage dtbs modules
+make -j 4 zImage dtbs modules
 export kver=`make kernelrelease`
 echo ${kver}
 # remove debug info if there and not wanted

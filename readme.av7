@@ -83,9 +83,7 @@ cp -v /compile/doc/stable/config.av7 /compile/doc/stable/config.av7.old
 cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av7
 cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av7-${kver}
 cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
-cd /compile/source/linux-stable
-make distclean
-rm ${kver}.tar.gz
+
 
 # s805 tv box mxq - /boot/s805_autoscript.txt:
 setenv kver 5.4.3-stb-av7+
