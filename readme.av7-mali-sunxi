@@ -25,6 +25,8 @@ export kver=5.4.3-stb-av7+
 mkdir /lib/modules/${kver}/extra
 cp mali.ko /lib/modules/${kver}/extra
 tar czf /compile/result/stable/${kver}-mali-sunxi.tar.gz /lib/modules/${kver}/extra/mali.ko
+# clean up the extra dir for possible further pure kernel packaging
+rm -rf /lib/modules/${kver}/extra
 
 # xorg server
 apt-get install xserver-xorg-dev libtool automake xutils-dev libudev-dev

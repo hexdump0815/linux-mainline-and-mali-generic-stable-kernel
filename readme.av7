@@ -51,6 +51,8 @@ mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/module
 rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
 tar cvzf /compile/source/linux-stable/${kver}-mali-rk3288.tar.gz /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/extra
+# redo the depmod without the mali module
+depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 # for all except amlogic 32bit socs
