@@ -1,0 +1,55 @@
+#
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+#
+# patches:
+# this one is needed to make suspend work with v5.4+
+patch -p1 < /compile/doc/stable/misc.cbe/snow-v5-4-suspend-fix.patch
+# disable the usb3 port on snow - it makes trouble with suspend etc.
+patch -p1 < /compile/doc/stable/misc.cbe/disable-usb3.patch
+# add mali support
+patch -p1 < /compile/doc/stable/misc.cbe/exynos5250-mali-complete.patch
+cp -r /compile/doc/stable/misc.cbe/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
+# v5.4 - disable panfrost gpu node
+patch -p1 < /compile/doc/stable/misc.cbe/disable-panfrost-gpu-node-v5.4.patch
+
+cp /compile/doc/stable/config.cbe /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+export ARCH=arm
+make oldconfig
+make -j 2 zImage dtbs modules
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+# find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-snow.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-snow-rev5.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.cbe /compile/doc/stable/config.cbe.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbe
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbe-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+
+
+/etc/extlinux/extlinux.conf
+TIMEOUT 30
+DEFAULT v543
+
+MENU TITLE snow sd boot options
+
+LABEL v543
+      MENU LABEL v5.4.3 kernel mmcblk0
+      LINUX ../zImage-5.4.3-stb-cbe+
+      FDT ../dtb-5.4.3-stb-cbe+/exynos5250-snow.dtb
+      APPEND console=tty1 init=/sbin/init root=/dev/mmcblk0p4 ro rootwait noinitrd net.ifnames=0 ipv6.disable=1 fsck.repair=yes
