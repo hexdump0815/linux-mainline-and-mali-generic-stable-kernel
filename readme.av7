@@ -59,7 +59,7 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 # for amlogic 32bit socs (legacy u-boot)
 mkimage -A arm -O linux -T kernel -C none -a 0x00208000 -e 0x00208000 -n linux-${kver} -d arch/arm/boot/zImage /boot/uImage-${kver}
-mkdir /boot/dtb-${kver}
+mkdir -p /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/meson8b-mxq.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/meson8m2*.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/sun7i-a20-bananapi.dtb /boot/dtb-${kver}

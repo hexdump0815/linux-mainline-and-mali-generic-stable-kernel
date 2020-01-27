@@ -31,7 +31,7 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm64/boot/Image /boot/Image-${kver}
 # for amlogic 64bit socs (legacy u-boot)
 mkimage -A arm64 -O linux -T kernel -C none -a 0x1080000 -e 0x1080000 -n linux-${kver} -d arch/arm64/boot/Image /boot/uImage-${kver}
-mkdir /boot/dtb-${kver}
+mkdir -p /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/rockchip/rk33*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-g*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-sm1*.dtb /boot/dtb-${kver}
