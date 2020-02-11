@@ -1,0 +1,78 @@
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+index f826365c979d..ac0809f1c7c4 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+@@ -48,6 +48,12 @@
+ #define	STMMAC_ALIGN(x)		__ALIGN_KERNEL(x, SMP_CACHE_BYTES)
+ #define	TSO_MAX_BUFF_SIZE	(SZ_16K - 1)
+ 
++/* hack to set the mac addr on the kernel cmdline */
++#define MAC_ADDR_LEN                    (6)
++static char *macaddr = ":";
++module_param(macaddr, charp, 0);
++MODULE_PARM_DESC(macaddr, "MAC address");
++
+ /* Module parameters */
+ #define TX_TIMEO	5000
+ static int watchdog = TX_TIMEO;
+@@ -2163,6 +2169,50 @@ static int stmmac_get_hw_features(struct stmmac_priv *priv)
+ 	return stmmac_get_hw_feature(priv, priv->ioaddr, &priv->dma_cap) == 0;
+ }
+ 
++/* Check the macaddr module parameter for a MAC address */
++static int stmmac_is_macaddr_param(u8 *dev_mac)
++{
++       int i, j, got_num, num;
++       u8 mtbl[MAC_ADDR_LEN];
++
++       if (macaddr[0] == ':')
++               return 0;
++
++       i = 0;
++       j = 0;
++       num = 0;
++       got_num = 0;
++       while (j < MAC_ADDR_LEN) {
++               if (macaddr[i] && macaddr[i] != ':') {
++                       got_num++;
++                       if ('0' <= macaddr[i] && macaddr[i] <= '9')
++                               num = num * 16 + macaddr[i] - '0';
++                       else if ('A' <= macaddr[i] && macaddr[i] <= 'F')
++                               num = num * 16 + 10 + macaddr[i] - 'A';
++                       else if ('a' <= macaddr[i] && macaddr[i] <= 'f')
++                               num = num * 16 + 10 + macaddr[i] - 'a';
++                       else
++                               break;
++                       i++;
++               } else if (got_num == 2) {
++                       mtbl[j++] = (u8) num;
++                       num = 0;
++                       got_num = 0;
++                       i++;
++               } else {
++                       break;
++               }
++       }
++
++       if (j == MAC_ADDR_LEN) {
++               for (i = 0; i < MAC_ADDR_LEN; i++)
++                       dev_mac[i] = mtbl[i];
++               return 1;
++       } else {
++               return 0;
++       }
++}
++
+ /**
+  * stmmac_check_ether_addr - check if the MAC addr is valid
+  * @priv: driver private structure
+@@ -2175,7 +2225,8 @@ static void stmmac_check_ether_addr(struct stmmac_priv *priv)
+ 	if (!is_valid_ether_addr(priv->dev->dev_addr)) {
+ 		stmmac_get_umac_addr(priv, priv->hw, priv->dev->dev_addr, 0);
+ 		if (!is_valid_ether_addr(priv->dev->dev_addr))
+-			eth_hw_addr_random(priv->dev);
++			if (!stmmac_is_macaddr_param(priv->dev->dev_addr))
++				eth_hw_addr_random(priv->dev);
+ 		dev_info(priv->device, "device MAC address %pM\n",
+ 			 priv->dev->dev_addr);
+ 	}

@@ -5,6 +5,8 @@
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 #
 # patches:
+# set mac addr on kernel cmdline - otherwise a random one is generated
+patch -p1 < /compile/doc/stable/misc.av7/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
 # fix black background when using the mali blob hack
 patch -p1 < /compile/doc/stable/misc.av8/s90-amlogic-s90x-mali-hack.patch
 # v5.4 - fix v3d power setup for rpi3
