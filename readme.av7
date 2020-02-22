@@ -86,21 +86,20 @@ cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
 
 
 # s805 tv box mxq - /boot/s805_autoscript.txt:
-setenv kver 5.4.3-stb-av7+
-# rootfs on mmc - not sure if the disableuhs is still required
-#setenv bootargs "console=ttyAML0,115200 root=/dev/mmcblk0p3 rootwait ro loglevel=8 disableuhs fsck.repair=yes net.ifnames=0 ipv6.disable=1 stmmac.macaddr=11:22:33:44:55:66 threadirqs noresume"
+setenv kver 5.4.20-stb-av7+
+setenv bootargs "console=ttyAML0,115200 root=/dev/mmcblk0p3 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1 stmmac.macaddr=00:1d:72:64:21:53 noresume"
 # rootfs on usb
-setenv bootargs "console=ttyAML0,115200 root=/dev/sda3 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1 stmmac.macaddr=11:22:33:44:55:66 threadirqs noresume"
+#setenv bootargs "console=ttyAML0,115200 root=/dev/sda3 rootwait ro loglevel=8 fsck.repair=yes net.ifnames=0 ipv6.disable=1 stmmac.macaddr=00:1d:72:64:21:53 noresume"
 # this is to startup the mmc
-#mmcinfo
+mmcinfo
 # kernel etc. on mmc
-#fatload mmc 0 0x14000000 uImage-${kver}
-#fatload mmc 0 0x15000000 uInitrd-${kver}
-#fatload mmc 0 0x11800000 dtb-${kver}/meson8b-mxq.dtb
+fatload mmc 0 0x14000000 uImage-${kver}
+fatload mmc 0 0x15000000 uInitrd-${kver}
+fatload mmc 0 0x11800000 dtb-${kver}/meson8b-mxq.dtb
 # kernel etc. on usb
-fatload usb 0 0x14000000 uImage-${kver}
-fatload usb 0 0x15000000 uInitrd-${kver}
-fatload usb 0 0x11800000 dtb-${kver}/meson8b-mxq.dtb
+#fatload usb 0 0x14000000 uImage-${kver}
+#fatload usb 0 0x15000000 uInitrd-${kver}
+#fatload usb 0 0x11800000 dtb-${kver}/meson8b-mxq.dtb
 bootm 0x14000000 0x15000000 0x11800000
 # use: mkimage -A arm -T script -O linux -d s805_autoscript.txt s805_autoscript
 
