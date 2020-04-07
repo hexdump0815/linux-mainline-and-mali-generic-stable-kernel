@@ -16,6 +16,8 @@ cd amlogic-meson_gx_mali_450
 git checkout DX910-SW-99002-r9p0-01rel0_meson_gx
 # v5.4 compile patch needed
 patch -p1 < /compile/doc/stable/misc.av8/fix-meson-gx-mali450-compile-v5.4.patch
+# v5.6 compile patch needed instead of the above v5.4 patch
+#patch -p1 < /compile/doc/stable/misc.av8/fix-meson-gx-mali450-compile-v5.6.patch
 KDIR=/compile/source/linux-stable ARCH=arm64 CROSS_COMPILE= ./build.sh
 export kver=5.4.3-stb-av8+
 mkdir /lib/modules/${kver}/extra

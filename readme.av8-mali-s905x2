@@ -14,6 +14,8 @@ git clone https://github.com/superna9999/meson_g12a_mali_bifrost.git
 mv meson_g12a_mali_bifrost amlogic-meson_g12a_mali_bifrost
 cd /compile/source/amlogic-meson_g12a_mali_bifrost
 git checkout BX301A01B-SW-99002-r12p0-01rel0_meson-g12a
+patch -p1 < /compile/doc/stable/misc.av8/fix-meson_g12a_mali_bifrost-compile-v5.4.patch
+#patch -p1 < /compile/doc/stable/misc.av8/fix-meson_g12a_mali_bifrost-compile-v5.6.patch
 make KDIR=/compile/source/linux-stable ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_NAME=config.meson-g12a
 export kver=5.4.3-stb-av8+
 mkdir /lib/modules/${kver}/extra
