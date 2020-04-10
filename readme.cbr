@@ -29,6 +29,8 @@ cp -r /compile/doc/stable/misc.av7/rk3288-mali-complete/drivers/gpu/arm drivers/
 patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-v5.0.patch
 # v5.4 - fix mali compile
 patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.4.patch
+# fix jackd audio for veyron
+patch -p0 < /compile/doc/stable/misc.cbr/veyron-fix-audio-v5.4.patch
 
 cp /compile/doc/stable/config.cbr /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
