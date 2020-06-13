@@ -30,7 +30,7 @@ patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-v5.0.patch
 patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.4.patch
 # v5.1 - add more meson8m2 dtbs
 patch -p1 < /compile/doc/stable/misc.av7/meson8m2-dtb.patch
-cp /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
+cp -i /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
 # v5.4 - fix v3d power setup for rpi3
 patch -p1 < /compile/doc/stable/misc.av7/rpi3-v3d-power-fix-armv7l.patch
 
