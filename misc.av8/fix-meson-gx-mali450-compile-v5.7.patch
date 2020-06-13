@@ -1,0 +1,11 @@
+--- driver/src/devicedrv/mali/linux/mali_memory_dma_buf.c.org	2020-06-13 14:41:43.173497258 +0200
++++ driver/src/devicedrv/mali/linux/mali_memory_dma_buf.c	2020-06-13 14:40:33.672225721 +0200
+@@ -281,7 +281,7 @@
+ 	buf = dma_buf_get(fd);
+ 	if (IS_ERR_OR_NULL(buf)) {
+ 		MALI_DEBUG_PRINT_ERROR(("Failed to get dma-buf from fd: %d\n", fd));
+-		return PTR_RET(buf);
++		return PTR_ERR_OR_ZERO(buf);
+ 	}
+ 
+ 	if (0 != put_user(buf->size, &user_arg->size)) {
