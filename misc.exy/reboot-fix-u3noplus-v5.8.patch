@@ -1,0 +1,38 @@
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index b21b3a64641a..a8ab54a98c09 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -181,6 +181,7 @@ dtb-$(CONFIG_ARCH_EXYNOS4) += \
+ 	exynos4412-itop-elite.dtb \
+ 	exynos4412-n710x.dtb \
+ 	exynos4412-odroidu3.dtb \
++	exynos4412-odroidu3noplus.dtb \
+ 	exynos4412-odroidx.dtb \
+ 	exynos4412-odroidx2.dtb \
+ 	exynos4412-origen.dtb \
+diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+index 8aa19ba..8e2d94e 100644
+--- a/arch/arm/boot/dts/exynos4412-odroid-common-u3noplus.dtsi
++++ b/arch/arm/boot/dts/exynos4412-odroid-common-u3noplus.dtsi
+@@ -447,7 +447,7 @@
+ 
+ 			buck2_reg: BUCK2 {
+ 				regulator-name = "VDD_ARM";
+-				regulator-min-microvolt = <900000>;
++				regulator-min-microvolt = <1100000>;
+ 				regulator-max-microvolt = <1350000>;
+ 				regulator-always-on;
+ 				regulator-boot-on;
+diff --git a/arch/arm/boot/dts/exynos4412-odroidu3.dts b/arch/arm/boot/dts/exynos4412-odroidu3.dts
+index 8ff243ba4542..cb924811a073 100644
+--- a/arch/arm/boot/dts/exynos4412-odroidu3noplus.dts
++++ b/arch/arm/boot/dts/exynos4412-odroidu3noplus.dts
+@@ -9,7 +9,7 @@
+  */
+ 
+ /dts-v1/;
+-#include "exynos4412-odroid-common.dtsi"
++#include "exynos4412-odroid-common-u3noplus.dtsi"
+ #include "exynos4412-prime.dtsi"
+ 
+ / {
