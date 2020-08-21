@@ -9,15 +9,21 @@
 patch -p1 < /compile/doc/stable/misc.exy/eth-hw-addr.patch 
 # fix thermal cpu cooling for the odroid u3 and x2
 patch -p1 < /compile/doc/stable/misc.exy/fix-odroid-u3-cpu-cooling.patch
-# add mali support - no more - lets try to live with lima from v5.8 on ...
-#patch -p1 < /compile/doc/stable/misc.exy/exynos4412-mali-complete.patch
-#cp -r /compile/doc/stable/misc.exy/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
-#patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver.patch 
-#patch -p1 < /compile/doc/stable/misc.exy/export-cma-symbols.patch
-#patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-node-for-exynos4412.patch 
-#patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-opp-table.patch 
-#patch -p1 < /compile/doc/stable/misc.exy/dts-setup-gpu-node.patch
-#patch -p1 < /compile/doc/stable/misc.exy/dts-exynos-remove-new-gpu-node-v5.3.patch
+# fix odroid x/x2 usb
+# see: https://lore.kernel.org/lkml/26ff3deb-4b8d-7dd2-2418-d56f6dcea313@samsung.com/
+# via: https://forum.odroid.com/viewtopic.php?p=296896#p296896
+patch -p1 < /compile/doc/stable/misc.exy/fix-odroid-x2-usb-v5.4.patch
+# add some extra cpu clocks for odroid x - disabled by default
+patch -p1 < /compile/doc/stable/misc.exy/add-disabled-extra-cpu-clocks-odroid-x.patch
+# add mali support
+patch -p1 < /compile/doc/stable/misc.exy/exynos4412-mali-complete.patch
+cp -r /compile/doc/stable/misc.exy/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
+patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver.patch
+patch -p1 < /compile/doc/stable/misc.exy/export-cma-symbols.patch
+patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-node-for-exynos4412.patch
+patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-opp-table.patch
+patch -p1 < /compile/doc/stable/misc.exy/dts-setup-gpu-node.patch
+patch -p1 < /compile/doc/stable/misc.exy/dts-exynos-remove-new-gpu-node-v5.3.patch
 # v5.4: the below patches are no longer used, as they do not seem to make any real difference
 # some more useful patches from the tobias jakobi tree
 #patch -p1 < /compile/doc/stable/misc.exy/poweroff-reboot-regulators.patch
@@ -36,7 +42,9 @@ cd /compile/source/linux-stable
 git checkout -- arch/arm/boot/dts/Makefile
 cp arch/arm/boot/dts/exynos4412-odroidu3.dts arch/arm/boot/dts/exynos4412-odroidu3noplus.dts
 cp arch/arm/boot/dts/exynos4412-odroid-common.dtsi arch/arm/boot/dts/exynos4412-odroid-common-u3noplus.dtsi
-patch -p1 < /compile/doc/stable/misc.exy/reboot-fix-u3noplus-v5.8.patch
+# v5.8 will need an adjusted patch
+#patch -p1 < /compile/doc/stable/misc.exy/reboot-fix-u3noplus-v5.8.patch
+patch -p1 < /compile/doc/stable/misc.exy/reboot-fix-u3noplus.patch
 
 export ARCH=arm
 # make exynos_defconfig + fix options - see misc.exy/options
