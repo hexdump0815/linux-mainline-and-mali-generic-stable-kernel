@@ -9,11 +9,12 @@
 patch -p1 < /compile/doc/stable/misc.cbe/snow-v5-4-suspend-fix.patch
 # disable the usb3 port on snow - it makes trouble with suspend etc.
 patch -p1 < /compile/doc/stable/misc.cbe/disable-usb3.patch
-# add mali support
-patch -p1 < /compile/doc/stable/misc.cbe/exynos5250-mali-complete.patch
-cp -r /compile/doc/stable/misc.cbe/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
-# v5.4 - disable panfrost gpu node
-patch -p1 < /compile/doc/stable/misc.cbe/disable-panfrost-gpu-node-v5.4.patch
+# this is not needed for panfrost
+# # add mali support
+# patch -p1 < /compile/doc/stable/misc.cbe/exynos5250-mali-complete.patch
+# cp -r /compile/doc/stable/misc.cbe/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
+# # v5.4 - disable panfrost gpu node
+# patch -p1 < /compile/doc/stable/misc.cbe/disable-panfrost-gpu-node-v5.4.patch
 
 cp /compile/doc/stable/config.cbe /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
