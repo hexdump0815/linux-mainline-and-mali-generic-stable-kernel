@@ -15,6 +15,8 @@ patch -p1 < /compile/doc/stable/misc.av8/rpi3-v3d-power-fix.patch
 patch -p1 < /compile/doc/stable/misc.av8/enable-cpufreq-on-odroid-c2.patch
 # reduce cma mem for amlogic
 patch -p1 < /compile/doc/stable/misc.av8/reduce-cma-mem-for-amlogic.patch
+# many s905w tv boxes have very low spec emmc chips so lower the freq for them
+patch -p1 < /compile/doc/stable-am/misc.aml/lower-emmc-frequency-for-s905w.patch
 
 cp /compile/doc/stable/config.av8 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
