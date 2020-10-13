@@ -40,6 +40,11 @@ export ARCH=arm
 # make multi_v7_defconfig + fix options - see misc.av7/options
 make oldconfig
 make -j 4 zImage dtbs modules
+cd tools/perf
+make
+cd ../power/cpupower
+make
+cd ../../..
 export kver=`make kernelrelease`
 echo ${kver}
 # remove debug info if there and not wanted
@@ -59,6 +64,9 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 # for amlogic 32bit socs (legacy u-boot)
 mkimage -A arm -O linux -T kernel -C none -a 0x00208000 -e 0x00208000 -n linux-${kver} -d arch/arm/boot/zImage /boot/uImage-${kver}
+mkdir -p /boot/tools-${kver}
+cp -v tools/perf/perf /boot/tools-${kver}
+cp -av tools/power/cpupower/cpupower tools/power/cpupower/libcpupower* /boot/tools-${kver}
 mkdir -p /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/meson8b-mxq.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/meson8m2*.dtb /boot/dtb-${kver}
