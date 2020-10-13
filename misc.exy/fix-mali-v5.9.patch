@@ -1,0 +1,98 @@
+see: https://vt-tech.eu/articles/linux/289-error-struct-file-operations-has-no-member-named-ioctl.html
+and: https://lkml.org/lkml/2020/6/20/28
+
+see: https://lore.kernel.org/lkml/20191209135823.28465-3-hch@lst.de/
+
+--- drivers/gpu/arm/mali/linux/mali_kernel_linux.c.org	2020-10-13 18:24:35.736168853 +0200
++++ drivers/gpu/arm/mali/linux/mali_kernel_linux.c	2020-10-13 18:30:14.484416518 +0200
+@@ -138,11 +138,11 @@
+ 
+ static int mali_open(struct inode *inode, struct file *filp);
+ static int mali_release(struct inode *inode, struct file *filp);
+-#ifdef HAVE_UNLOCKED_IOCTL
++// #ifdef HAVE_UNLOCKED_IOCTL
+ static long mali_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+-#else
+-static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
+-#endif
++// #else
++// static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
++// #endif
+ 
+ static int mali_probe(struct platform_device *pdev);
+ static int mali_remove(struct platform_device *pdev);
+@@ -205,11 +205,11 @@
+ 	.owner = THIS_MODULE,
+ 	.open = mali_open,
+ 	.release = mali_release,
+-#ifdef HAVE_UNLOCKED_IOCTL
++// #ifdef HAVE_UNLOCKED_IOCTL
+ 	.unlocked_ioctl = mali_ioctl,
+-#else
+-	.ioctl = mali_ioctl,
+-#endif
++// #else
++// 	.ioctl = mali_ioctl,
++// #endif
+ 	.compat_ioctl = mali_ioctl,
+ 	.mmap = mali_mmap
+ };
+@@ -680,19 +680,19 @@
+ 	}
+ }
+ 
+-#ifdef HAVE_UNLOCKED_IOCTL
++// #ifdef HAVE_UNLOCKED_IOCTL
+ static long mali_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+-#else
+-static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
+-#endif
++// #else
++// static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
++// #endif
+ {
+ 	int err;
+ 	struct mali_session_data *session_data;
+ 
+-#ifndef HAVE_UNLOCKED_IOCTL
+-	/* inode not used */
+-	(void)inode;
+-#endif
++// #ifndef HAVE_UNLOCKED_IOCTL
++//	/* inode not used */
++//	(void)inode;
++// #endif
+ 
+ 	MALI_DEBUG_PRINT(7, "Ioctl received 0x%08X 0x%08lX\n", cmd, arg);
+ 
+--- drivers/gpu/arm/mali/common/mali_hw_core.c.org	2020-10-13 18:38:00.910847758 +0200
++++ drivers/gpu/arm/mali/common/mali_hw_core.c	2020-10-13 18:38:16.079432546 +0200
+@@ -24,7 +24,7 @@
+ 
+ 	MALI_DEBUG_ASSERT(core->phys_offset < core->phys_addr);
+ 
+-	core->mapped_registers = (mali_io_address)ioremap_nocache(core->phys_addr, core->size);
++	core->mapped_registers = (mali_io_address)ioremap(core->phys_addr, core->size);
+ 	if (NULL != core->mapped_registers) {
+ 		return _MALI_OSK_ERR_OK;
+ 	} else {
+--- drivers/gpu/arm/mali/linux/mali_memory_dma_buf.c.org	2020-10-13 18:40:46.945360655 +0200
++++ drivers/gpu/arm/mali/linux/mali_memory_dma_buf.c	2020-10-13 18:42:07.357862612 +0200
+@@ -284,7 +284,7 @@
+ 	buf = dma_buf_get(fd);
+ 	if (IS_ERR_OR_NULL(buf)) {
+ 		MALI_DEBUG_PRINT_ERROR("Failed to get dma-buf from fd: %d\n", fd);
+-		return PTR_RET(buf);
++		return PTR_ERR_OR_ZERO(buf);
+ 	}
+ 
+ 	/* Currently, mapping of the full buffer are supported. */
+@@ -441,7 +441,7 @@
+ 	buf = dma_buf_get(fd);
+ 	if (IS_ERR_OR_NULL(buf)) {
+ 		MALI_DEBUG_PRINT_ERROR("Failed to get dma-buf from fd: %d\n", fd);
+-		return PTR_RET(buf);
++		return PTR_ERR_OR_ZERO(buf);
+ 	}
+ 
+ 	if (0 != put_user(buf->size, &user_arg->size)) {
