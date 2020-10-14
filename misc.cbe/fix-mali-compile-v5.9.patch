@@ -1,0 +1,622 @@
+diff -u -r drivers/gpu/arm.org/midgard/backend/gpu/mali_kbase_time.c drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.c
+--- drivers/gpu/arm.org/midgard/backend/gpu/mali_kbase_time.c	2020-10-14 18:42:29.951569725 +0200
++++ drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.c	2020-10-14 18:56:41.291407335 +0200
+@@ -21,7 +21,7 @@
+ #include <backend/gpu/mali_kbase_pm_internal.h>
+ 
+ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+-				u64 *system_time, struct timespec *ts)
++				u64 *system_time, struct timespec64 *ts)
+ {
+ 	u32 hi1, hi2;
+ 
+@@ -52,7 +52,7 @@
+ 	} while (hi1 != hi2);
+ 
+ 	/* Record the CPU's idea of current time */
+-	getrawmonotonic(ts);
++	ktime_get_raw_ts64(ts);
+ 
+ 	kbase_pm_release_gpu_cycle_counter(kbdev);
+ }
+diff -u -r drivers/gpu/arm.org/midgard/backend/gpu/mali_kbase_time.h drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.h
+--- drivers/gpu/arm.org/midgard/backend/gpu/mali_kbase_time.h	2020-10-14 18:42:29.961568788 +0200
++++ drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.h	2020-10-14 18:56:40.791453345 +0200
+@@ -23,11 +23,11 @@
+  * @kbdev:		Device pointer
+  * @cycle_counter:	Pointer to u64 to store cycle counter in
+  * @system_time:	Pointer to u64 to store system time in
+- * @ts:			Pointer to struct timespec to store current monotonic
++ * @ts:			Pointer to struct timespec64 to store current monotonic
+  *			time in
+  */
+ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+-				u64 *system_time, struct timespec *ts);
++				u64 *system_time, struct timespec64 *ts);
+ 
+ /**
+  * kbase_wait_write_flush() -  Wait for GPU write flush
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_defs.h drivers/gpu/arm/midgard/mali_kbase_defs.h
+--- drivers/gpu/arm.org/midgard/mali_kbase_defs.h	2020-10-14 18:42:29.641598768 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_defs.h	2020-10-14 18:56:43.081243707 +0200
+@@ -736,7 +736,7 @@
+ #define KBASE_TRACE_FLAG_JOBSLOT  (((u8)1) << 1)
+ 
+ struct kbase_trace {
+-	struct timespec timestamp;
++	struct timespec64 timestamp;
+ 	u32 thread_id;
+ 	u32 cpu;
+ 	void *ctx;
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_device.c drivers/gpu/arm/midgard/mali_kbase_device.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_device.c	2020-10-14 18:42:29.641598768 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_device.c	2020-10-14 18:56:40.511479343 +0200
+@@ -443,7 +443,7 @@
+ 	trace_msg->thread_id = task_pid_nr(current);
+ 	trace_msg->cpu = task_cpu(current);
+ 
+-	getnstimeofday(&trace_msg->timestamp);
++	ktime_get_real_ts64(&trace_msg->timestamp);
+ 
+ 	trace_msg->code = code;
+ 	trace_msg->ctx = ctx;
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_hwaccess_time.h drivers/gpu/arm/midgard/mali_kbase_hwaccess_time.h
+--- drivers/gpu/arm.org/midgard/mali_kbase_hwaccess_time.h	2020-10-14 18:42:29.701593147 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_hwaccess_time.h	2020-10-14 18:56:40.741457987 +0200
+@@ -28,11 +28,11 @@
+  * @kbdev:		Device pointer
+  * @cycle_counter:	Pointer to u64 to store cycle counter in
+  * @system_time:	Pointer to u64 to store system time in
+- * @ts:			Pointer to struct timespec to store current monotonic
++ * @ts:			Pointer to struct timespec64 to store current monotonic
+  *			time in
+  */
+ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+-				u64 *system_time, struct timespec *ts);
++				u64 *system_time, struct timespec64 *ts);
+ 
+ /**
+  * kbase_wait_write_flush() -  Wait for GPU write flush
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_jd.c drivers/gpu/arm/midgard/mali_kbase_jd.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_jd.c	2020-10-14 18:42:29.711592210 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_jd.c	2020-10-14 18:56:41.951347004 +0200
+@@ -260,7 +260,7 @@
+ #endif /* CONFIG_MALI_DMA_FENCE */
+ 
+ 	/* Take the processes mmap lock */
+-	down_read(&current->mm->mmap_sem);
++	down_read(&current->mm->mmap_lock);
+ 
+ 	/* need to keep the GPU VM locked while we set up UMM buffers */
+ 	kbase_gpu_vm_lock(katom->kctx);
+@@ -320,7 +320,7 @@
+ 	kbase_gpu_vm_unlock(katom->kctx);
+ 
+ 	/* Release the processes mmap lock */
+-	up_read(&current->mm->mmap_sem);
++	up_read(&current->mm->mmap_lock);
+ 
+ #ifdef CONFIG_MALI_DMA_FENCE
+ 	if (implicit_sync) {
+@@ -345,7 +345,7 @@
+ #ifdef CONFIG_MALI_DMA_FENCE
+ failed_dma_fence_setup:
+ 	/* Lock the processes mmap lock */
+-	down_read(&current->mm->mmap_sem);
++	down_read(&current->mm->mmap_lock);
+ 
+ 	/* lock before we unmap */
+ 	kbase_gpu_vm_lock(katom->kctx);
+@@ -361,7 +361,7 @@
+ 	kbase_gpu_vm_unlock(katom->kctx);
+ 
+ 	/* Release the processes mmap lock */
+-	up_read(&current->mm->mmap_sem);
++	up_read(&current->mm->mmap_lock);
+ 
+  early_err_out:
+ 	kfree(katom->extres);
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_mem.c drivers/gpu/arm/midgard/mali_kbase_mem.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_mem.c	2020-10-14 18:42:29.741589399 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_mem.c	2020-10-14 18:56:42.821267474 +0200
+@@ -1032,7 +1032,7 @@
+ 	unsigned long map_start;
+ 	size_t map_size;
+ 
+-	lockdep_assert_held(&current->mm->mmap_sem);
++	lockdep_assert_held(&current->mm->mmap_lock);
+ 
+ 	if ((uintptr_t) uaddr + size < (uintptr_t) uaddr) /* overflow check */
+ 		return NULL;
+@@ -2408,7 +2408,7 @@
+ 			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,
+ 			pages, NULL);
+ #else
+-	pinned_pages = get_user_pages_remote(NULL, mm,
++	pinned_pages = get_user_pages_remote(mm,
+ 			address,
+ 			alloc->imported.user_buf.nr_pages,
+ 			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_mem_linux.c drivers/gpu/arm/midgard/mali_kbase_mem_linux.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_mem_linux.c	2020-10-14 18:42:29.751588462 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_mem_linux.c	2020-10-14 18:09:41.714537512 +0200
+@@ -46,6 +46,8 @@
+ #include <mali_kbase_tlstream.h>
+ #include <mali_kbase_ioctl.h>
+ 
++void mm_trace_rss_stat(struct mm_struct *mm, int member, long count) {}
++
+ /*
+  * From 4.20.0 kernel vm_insert_pfn was dropped
+  * Make wrapper to preserve compatibility
+@@ -70,7 +72,7 @@
+  * Shrink (or completely remove) all CPU mappings which reference the shrunk
+  * part of the allocation.
+  *
+- * Note: Caller must be holding the processes mmap_sem lock.
++ * Note: Caller must be holding the processes mmap_lock lock.
+  */
+ static void kbase_mem_shrink_cpu_mapping(struct kbase_context *kctx,
+ 		struct kbase_va_region *reg,
+@@ -583,7 +585,7 @@
+ 		/* Bulk update all the zones */
+ 		list_for_each_entry(zone_cache, &alloc->zone_cache, zone_node) {
+ 			zone_page_state_add(zone_cache->count,
+-					zone_cache->zone, NR_SLAB_RECLAIMABLE);
++					zone_cache->zone, NR_SLAB_RECLAIMABLE_B);
+ 		}
+ 	} else {
+ 		/* Fall-back to page by page updates */
+@@ -596,7 +598,7 @@
+ 			p = phys_to_page(as_phys_addr_t(alloc->pages[i]));
+ 			zone = page_zone(p);
+ 
+-			zone_page_state_add(1, zone, NR_SLAB_RECLAIMABLE);
++			zone_page_state_add(1, zone, NR_SLAB_RECLAIMABLE_B);
+ 		}
+ 	}
+ 
+@@ -637,7 +639,7 @@
+ 		/* Bulk update all the zones */
+ 		list_for_each_entry(zone_cache, &alloc->zone_cache, zone_node) {
+ 			zone_page_state_add(-zone_cache->count,
+-					zone_cache->zone, NR_SLAB_RECLAIMABLE);
++					zone_cache->zone, NR_SLAB_RECLAIMABLE_B);
+ 		}
+ 	} else {
+ 		/* Fall-back to page by page updates */
+@@ -649,7 +651,7 @@
+ 
+ 			p = phys_to_page(as_phys_addr_t(alloc->pages[i]));
+ 			zone = page_zone(p);
+-			zone_page_state_add(-1, zone, NR_SLAB_RECLAIMABLE);
++			zone_page_state_add(-1, zone, NR_SLAB_RECLAIMABLE_B);
+ 		}
+ 	}
+ 
+@@ -763,7 +765,7 @@
+ 		real_flags |= KBASE_REG_SHARE_IN;
+ 
+ 	/* now we can lock down the context, and find the region */
+-	down_write(&current->mm->mmap_sem);
++	down_write(&current->mm->mmap_lock);
+ 	kbase_gpu_vm_lock(kctx);
+ 
+ 	/* Validate the region */
+@@ -837,7 +839,7 @@
+ 
+ out_unlock:
+ 	kbase_gpu_vm_unlock(kctx);
+-	up_write(&current->mm->mmap_sem);
++	up_write(&current->mm->mmap_lock);
+ out:
+ 	return ret;
+ }
+@@ -1176,7 +1178,7 @@
+ 		*flags |= KBASE_MEM_IMPORT_HAVE_PAGES;
+ 	}
+ 
+-	down_read(&current->mm->mmap_sem);
++	down_read(&current->mm->mmap_lock);
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+ 	faulted_pages = get_user_pages(current, current->mm, address, *va_pages,
+@@ -1190,7 +1192,7 @@
+ 			pages, NULL);
+ #endif
+ 
+-	up_read(&current->mm->mmap_sem);
++	up_read(&current->mm->mmap_lock);
+ 
+ 	if (faulted_pages != *va_pages)
+ 		goto fault_mismatch;
+@@ -1655,7 +1657,7 @@
+ 		return -EINVAL;
+ 	}
+ 
+-	down_write(&current->mm->mmap_sem);
++	down_write(&current->mm->mmap_lock);
+ 	kbase_gpu_vm_lock(kctx);
+ 
+ 	/* Validate the region */
+@@ -1697,7 +1699,7 @@
+ 		 * No update to the mm so downgrade the writer lock to a read
+ 		 * lock so other readers aren't blocked after this point.
+ 		 */
+-		downgrade_write(&current->mm->mmap_sem);
++		downgrade_write(&current->mm->mmap_lock);
+ 		read_locked = true;
+ 
+ 		/* Allocate some more pages */
+@@ -1753,9 +1755,9 @@
+ out_unlock:
+ 	kbase_gpu_vm_unlock(kctx);
+ 	if (read_locked)
+-		up_read(&current->mm->mmap_sem);
++		up_read(&current->mm->mmap_lock);
+ 	else
+-		up_write(&current->mm->mmap_sem);
++		up_write(&current->mm->mmap_lock);
+ 
+ 	return res;
+ }
+@@ -2112,14 +2114,14 @@
+ {
+ 	struct mm_struct *mm = current->mm;
+ 	(void)kctx;
+-	down_read(&mm->mmap_sem);
++	down_read(&mm->mmap_lock);
+ }
+ 
+ void kbase_os_mem_map_unlock(struct kbase_context *kctx)
+ {
+ 	struct mm_struct *mm = current->mm;
+ 	(void)kctx;
+-	up_read(&mm->mmap_sem);
++	up_read(&mm->mmap_lock);
+ }
+ 
+ static int kbasep_reg_mmap(struct kbase_context *kctx,
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_mem_linux.h drivers/gpu/arm/midgard/mali_kbase_mem_linux.h
+--- drivers/gpu/arm.org/midgard/mali_kbase_mem_linux.h	2020-10-14 18:42:29.751588462 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_mem_linux.h	2020-10-14 18:56:41.551383568 +0200
+@@ -98,7 +98,7 @@
+  * Take the provided region and make all the physical pages within it
+  * reclaimable by the kernel, updating the per-process VM stats as well.
+  * Remove any CPU mappings (as these can't be removed in the shrinker callback
+- * as mmap_sem might already be taken) but leave the GPU mapping intact as
++ * as mmap_lock might already be taken) but leave the GPU mapping intact as
+  * and until the shrinker reclaims the allocation.
+  *
+  * Note: Must be called with the region lock of the containing context.
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_mem_pool.c drivers/gpu/arm/midgard/mali_kbase_mem_pool.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_mem_pool.c	2020-10-14 18:42:29.761587525 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_mem_pool.c	2020-10-14 18:05:09.789878750 +0200
+@@ -70,7 +70,7 @@
+ 	list_add(&p->lru, &pool->page_list);
+ 	pool->cur_size++;
+ 
+-	zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE);
++	zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE_B);
+ 
+ 	pool_dbg(pool, "added page\n");
+ }
+@@ -90,7 +90,7 @@
+ 	lockdep_assert_held(&pool->pool_lock);
+ 
+ 	list_for_each_entry(p, page_list, lru) {
+-		zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE);
++		zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE_B);
+ 	}
+ 
+ 	list_splice(page_list, &pool->page_list);
+@@ -120,7 +120,7 @@
+ 	list_del_init(&p->lru);
+ 	pool->cur_size--;
+ 
+-	zone_page_state_add(-1, page_zone(p), NR_SLAB_RECLAIMABLE);
++	zone_page_state_add(-1, page_zone(p), NR_SLAB_RECLAIMABLE_B);
+ 
+ 	pool_dbg(pool, "removed page\n");
+ 
+@@ -641,7 +641,7 @@
+ 
+ 		if (reclaimed)
+ 			zone_page_state_add(-1, page_zone(p),
+-					NR_SLAB_RECLAIMABLE);
++					NR_SLAB_RECLAIMABLE_B);
+ 
+ 		kbase_mem_pool_free_page(pool, p);
+ 		pages[i] = as_tagged(0);
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_softjobs.c drivers/gpu/arm/midgard/mali_kbase_softjobs.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_softjobs.c	2020-10-14 18:42:29.801583778 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_softjobs.c	2020-10-14 18:56:42.961254677 +0200
+@@ -130,7 +130,7 @@
+ {
+ 	struct kbase_vmap_struct map;
+ 	void *user_result;
+-	struct timespec ts;
++	struct timespec64 ts;
+ 	struct base_dump_cpu_gpu_counters data;
+ 	u64 system_time;
+ 	u64 cycle_counter;
+@@ -821,7 +821,7 @@
+ 
+ 		for (i = 0; i < dma_to_copy/PAGE_SIZE; i++) {
+ 
+-			void *extres_page = dma_buf_kmap(dma_buf, i);
++			void *extres_page = NULL; // dma_buf_kmap(dma_buf, i);
+ 
+ 			if (extres_page)
+ 				kbase_mem_copy_from_extres_page(kctx,
+@@ -830,7 +830,7 @@
+ 						&target_page_nr,
+ 						offset, &to_copy);
+ 
+-			dma_buf_kunmap(dma_buf, i, extres_page);
++			// dma_buf_kunmap(dma_buf, i, extres_page);
+ 			if (target_page_nr >= buf_data->nr_pages)
+ 				break;
+ 		}
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_tlstream.c drivers/gpu/arm/midgard/mali_kbase_tlstream.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_tlstream.c	2020-10-14 18:42:29.811582841 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_tlstream.c	2020-10-14 18:56:42.691279358 +0200
+@@ -587,10 +587,10 @@
+  */
+ static u64 kbasep_tlstream_get_timestamp(void)
+ {
+-	struct timespec ts;
++	struct timespec64 ts;
+ 	u64             timestamp;
+ 
+-	getrawmonotonic(&ts);
++	ktime_get_raw_ts64(&ts);
+ 	timestamp = (u64)ts.tv_sec * NSECS_IN_SEC + ts.tv_nsec;
+ 	return timestamp;
+ }
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_trace_timeline.h drivers/gpu/arm/midgard/mali_kbase_trace_timeline.h
+--- drivers/gpu/arm.org/midgard/mali_kbase_trace_timeline.h	2020-10-14 18:42:29.821581904 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_trace_timeline.h	2020-10-14 18:56:42.721276616 +0200
+@@ -49,8 +49,8 @@
+    process of being returned to user */
+ #define KBASE_TIMELINE_ATOMS_IN_FLIGHT(kctx, count)                          \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_atoms_in_flight(ts.tv_sec, ts.tv_nsec,   \
+ 				(int)kctx->timeline.owner_tgid,              \
+ 				count);                                      \
+@@ -59,8 +59,8 @@
+ /* Trace atom_id being Ready to Run */
+ #define KBASE_TIMELINE_ATOM_READY(kctx, atom_id)                             \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_atom(ts.tv_sec, ts.tv_nsec,              \
+ 				CTX_FLOW_ATOM_READY,                         \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -76,8 +76,8 @@
+  * utilization easily and accurately */
+ #define KBASE_TIMELINE_ATOMS_SUBMITTED(kctx, js, count)                      \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_active(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_ACTIVE,                      \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -88,8 +88,8 @@
+ /* Trace atoms present in JS_NEXT */
+ #define KBASE_TIMELINE_JOB_START_NEXT(kctx, js, count)                       \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_action(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_NEXT,                        \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -99,8 +99,8 @@
+ /* Trace atoms present in JS_HEAD */
+ #define KBASE_TIMELINE_JOB_START_HEAD(kctx, js, count)                       \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_action(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_HEAD,                        \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -110,8 +110,8 @@
+ /* Trace that a soft stop/evict from next is being attempted on a slot */
+ #define KBASE_TIMELINE_TRY_SOFT_STOP(kctx, js, count) \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_action(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_STOPPING,                    \
+ 				(kctx) ? (int)kctx->timeline.owner_tgid : 0, \
+@@ -123,8 +123,8 @@
+ /* Trace state of overall GPU power */
+ #define KBASE_TIMELINE_GPU_POWER(kbdev, active)                              \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_ACTIVE, active);            \
+ 	} while (0)
+@@ -132,8 +132,8 @@
+ /* Trace state of tiler power */
+ #define KBASE_TIMELINE_POWER_TILER(kbdev, bitmap)                            \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_TILER_ACTIVE,               \
+ 				hweight64(bitmap));                          \
+@@ -142,8 +142,8 @@
+ /* Trace number of shaders currently powered */
+ #define KBASE_TIMELINE_POWER_SHADER(kbdev, bitmap)                           \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_SHADER_ACTIVE,              \
+ 				hweight64(bitmap));                          \
+@@ -152,8 +152,8 @@
+ /* Trace state of L2 power */
+ #define KBASE_TIMELINE_POWER_L2(kbdev, bitmap)                               \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_L2_ACTIVE,                  \
+ 				hweight64(bitmap));                          \
+@@ -162,8 +162,8 @@
+ /* Trace state of L2 cache*/
+ #define KBASE_TIMELINE_POWERING_L2(kbdev)                                    \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_l2_power_active(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_FLOW_GPU_POWER_L2_POWERING,               \
+ 				1);                                          \
+@@ -171,8 +171,8 @@
+ 
+ #define KBASE_TIMELINE_POWERED_L2(kbdev)                                     \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_l2_power_active(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_FLOW_GPU_POWER_L2_ACTIVE,                 \
+ 				1);                                          \
+@@ -181,8 +181,8 @@
+ /* Trace kbase_pm_send_event message send */
+ #define KBASE_TIMELINE_PM_SEND_EVENT(kbdev, event_type, pm_event_id)         \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_pm_event(ts.tv_sec, ts.tv_nsec,          \
+ 				SW_FLOW_PM_SEND_EVENT,                       \
+ 				event_type, pm_event_id);                    \
+@@ -191,8 +191,8 @@
+ /* Trace kbase_pm_worker message receive */
+ #define KBASE_TIMELINE_PM_HANDLE_EVENT(kbdev, event_type, pm_event_id)       \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_pm_event(ts.tv_sec, ts.tv_nsec,          \
+ 				SW_FLOW_PM_HANDLE_EVENT,                     \
+ 				event_type, pm_event_id);                    \
+@@ -202,8 +202,8 @@
+ /* Trace atom_id starting in JS_HEAD */
+ #define KBASE_TIMELINE_JOB_START(kctx, js, _consumerof_atom_number)          \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_slot_atom(ts.tv_sec, ts.tv_nsec,         \
+ 				HW_START_GPU_JOB_CHAIN_SW_APPROX,            \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -213,8 +213,8 @@
+ /* Trace atom_id stopping on JS_HEAD */
+ #define KBASE_TIMELINE_JOB_STOP(kctx, js, _producerof_atom_number_completed) \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_slot_atom(ts.tv_sec, ts.tv_nsec,         \
+ 				HW_STOP_GPU_JOB_CHAIN_SW_APPROX,             \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -225,8 +225,8 @@
+  * certin caller */
+ #define KBASE_TIMELINE_PM_CHECKTRANS(kbdev, trace_code)                      \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_pm_checktrans(ts.tv_sec, ts.tv_nsec,     \
+ 				trace_code, 1);                              \
+ 	} while (0)
+@@ -234,8 +234,8 @@
+ /* Trace number of contexts active */
+ #define KBASE_TIMELINE_CONTEXT_ACTIVE(kbdev, count)                          \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_context_active(ts.tv_sec, ts.tv_nsec,    \
+ 				count);                                      \
+ 	} while (0)
+diff -u -r drivers/gpu/arm.org/midgard/mali_kbase_vinstr.c drivers/gpu/arm/midgard/mali_kbase_vinstr.c
+--- drivers/gpu/arm.org/midgard/mali_kbase_vinstr.c	2020-10-14 18:42:29.831580967 +0200
++++ drivers/gpu/arm/midgard/mali_kbase_vinstr.c	2020-10-14 18:56:42.551292156 +0200
+@@ -902,9 +902,9 @@
+  */
+ static u64 kbasep_vinstr_get_timestamp(void)
+ {
+-	struct timespec ts;
++	struct timespec64 ts;
+ 
+-	getrawmonotonic(&ts);
++	ktime_get_raw_ts64(&ts);
+ 	return (u64)ts.tv_sec * NSECS_IN_SEC + ts.tv_nsec;
+ }
+ 
+diff -u -r drivers/gpu/arm.org/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c drivers/gpu/arm/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c
+--- drivers/gpu/arm.org/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c	2020-10-14 18:42:30.071558504 +0200
++++ drivers/gpu/arm/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c	2020-10-14 18:56:43.731184286 +0200
+@@ -87,9 +87,9 @@
+ 
+ 	val = kbase_reg_read(kbdev, GPU_CONTROL_REG(GPU_IRQ_STATUS), NULL);
+ 	if (val & TEST_IRQ) {
+-		struct timespec tval;
++		struct timespec64 tval;
+ 
+-		getnstimeofday(&tval);
++		ktime_get_real_ts64(&tval);
+ 		irq_time = SEC_TO_NANO(tval.tv_sec) + (tval.tv_nsec);
+ 
+ 		kbase_reg_write(kbdev, GPU_CONTROL_REG(GPU_IRQ_CLEAR), val,
+@@ -179,12 +179,12 @@
+ 			GPU_IRQ_HANDLER);
+ 
+ 	for (i = 0; i < NR_TEST_IRQS; i++) {
+-		struct timespec tval;
++		struct timespec64 tval;
+ 		u64 start_time;
+ 		int ret;
+ 
+ 		triggered = false;
+-		getnstimeofday(&tval);
++		ktime_get_real_ts64(&tval);
+ 		start_time = SEC_TO_NANO(tval.tv_sec) + (tval.tv_nsec);
+ 
+ 		/* Trigger fake IRQ */

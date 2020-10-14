@@ -29,7 +29,8 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/tools-${kver}
 cp -v tools/perf/perf /boot/tools-${kver}
-cp -av tools/power/cpupower/cpupower tools/power/cpupower/libcpupower* /boot/tools-${kver}
+cp -v tools/power/cpupower/cpupower /boot/tools-${kver}
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /boot/tools-${kver}/libcpupower.so.0
 mkdir -p /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/tegra124-nyan-big.dtb /boot/dtb-${kver}/tegra124-nyan-big.dtb
 cp -v System.map /boot/System.map-${kver}

@@ -12,6 +12,8 @@ patch -p1 < /compile/doc/stable/misc.cbe/disable-usb3.patch
 # add mali support
 patch -p1 < /compile/doc/stable/misc.cbe/exynos5250-mali-complete.patch
 cp -r /compile/doc/stable/misc.cbe/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
+# fix mali compile for v5.9
+patch -p0 < /compile/doc/stable/misc.cbe/fix-mali-compile-v5.9.patch
 # v5.4 - disable panfrost gpu node
 patch -p1 < /compile/doc/stable/misc.cbe/disable-panfrost-gpu-node-v5.4.patch
 
@@ -35,7 +37,8 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/tools-${kver}
 cp -v tools/perf/perf /boot/tools-${kver}
-cp -av tools/power/cpupower/cpupower tools/power/cpupower/libcpupower* /boot/tools-${kver}
+cp -v tools/power/cpupower/cpupower /boot/tools-${kver}
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /boot/tools-${kver}/libcpupower.so.0
 mkdir -p /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/exynos5250-snow.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/exynos5250-snow-rev5.dtb /boot/dtb-${kver}
