@@ -17,6 +17,8 @@ cd /compile/source/sunxi-mali
 export CROSS_COMPILE=""
 export KDIR=/compile/source/linux-stable
 export INSTALL_MOD_PATH=/
+cp /compile/doc/stable/misc.av7/0024-mali-support-building-against-5.9.patch patches
+patch -p0 < /compile/doc/stable/misc.av7/sunxi-mali-add-patch-0024.patch
 ./build.sh -r r6p2 -b
 #./build.sh -r r6p2 -i
 # for recompile: run ./build.sh -r r6p2 -c before to unapply patches
