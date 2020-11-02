@@ -19,7 +19,8 @@ patch -p1 < /compile/doc/stable/misc.exy/add-disabled-extra-cpu-clocks-odroid-x.
 patch -p1 < /compile/doc/stable/misc.exy/exynos4412-mali-complete.patch
 cp -r /compile/doc/stable/misc.exy/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
 patch -p0 < /compile/doc/stable/misc.exy/fix-mali-kconfig-v5.9.patch
-patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver.patch
+#patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver.patch
+patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver-v5.9.patch
 patch -p1 < /compile/doc/stable/misc.exy/export-cma-symbols.patch
 patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-node-for-exynos4412.patch
 patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-opp-table.patch
