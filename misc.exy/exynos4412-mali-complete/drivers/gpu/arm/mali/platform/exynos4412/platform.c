@@ -19,7 +19,7 @@
 #include <linux/cma.h>
 #include <linux/delay.h>
 #include <linux/devfreq.h>
-#include <linux/dma-contiguous.h>
+#include <linux/dma-map-ops.h>
 #include <linux/dma-mapping.h>
 #include <linux/err.h>
 #include <linux/platform_device.h>
@@ -245,6 +245,16 @@ out:
 	return ret;
 }
 
+static struct devfreq *exynos_bus_get_parent_devfreq(struct device_node *np)
+{
+	struct device_node *node = of_parse_phandle(np, "devfreq", 0);
+
+	if (!node)
+		return ERR_PTR(-ENODEV);
+
+	return devfreq_get_devfreq_by_node(node);
+}
+
 static int exynos4412_opp_init(struct device *dev, struct exynos4412_drvdata *data)
 {
 	int ret;
@@ -257,7 +267,7 @@ static int exynos4412_opp_init(struct device *dev, struct exynos4412_drvdata *da
 	if (ret < 0)
 		goto fail_update;
 
-	data->leftbus_devfreq = devfreq_get_devfreq_by_phandle(dev, 0);
+	data->leftbus_devfreq = exynos_bus_get_parent_devfreq(dev->of_node);
 	if (IS_ERR(data->leftbus_devfreq)) {
 		ret = PTR_ERR(data->leftbus_devfreq);
 		goto fail_update;
@@ -300,13 +310,13 @@ static int exynos4412_clock_init(struct device *dev, struct exynos4412_drvdata *
 
 	np = dev->of_node;
 
-	sclk = of_clk_get_by_name(np, "sclk_g3d");
+	sclk = of_clk_get_by_name(np, "core");
 	if (IS_ERR(sclk)) {
 		dev_err(dev, MSG_PREFIX "failed to get G3D core clock\n");
 		goto fail_sclk;
 	}
 
-	clk = of_clk_get_by_name(np, "g3d");
+	clk = of_clk_get_by_name(np, "bus");
 	if (IS_ERR(clk)) {
 		dev_err(dev, MSG_PREFIX "failed to get G3D clock\n");
 		goto fail_clk;
@@ -360,7 +370,7 @@ static int exynos4412_regulator_init(struct device *dev, struct exynos4412_drvda
 	unsigned int i;
 	int ret;
 
-	regulator = regulator_get(dev, "gpu");
+	regulator = regulator_get(dev, "mali");
 
 	if (IS_ERR(regulator)) {
 		if (PTR_ERR(regulator) != -EPROBE_DEFER)
@@ -555,7 +565,7 @@ int mali_platform_device_disable(struct device *dev)
 int mali_platform_device_init(struct platform_device *pdev)
 {
 	int ret;
-	u32 pval;
+//	u32 pval;
 	struct device *dev;
 	struct exynos4412_drvdata *data;
 
@@ -576,11 +586,13 @@ int mali_platform_device_init(struct platform_device *pdev)
 	if (of_property_read_bool(dev->of_node, "regulator-power-cycle"))
 		set_bit(exynos4412_power_cycle, &data->flags);
 
-	if (!of_property_read_u32(dev->of_node, "regulator-microvolt-offset", &pval))
-		data->regulator_offset = pval;
+//	if (!of_property_read_u32(dev->of_node, "regulator-microvolt-offset", &pval))
+//		data->regulator_offset = pval;
+	data->regulator_offset = 50000;
 
-	if (!of_property_read_u32(dev->of_node, "regulator-microsecs-delay", &pval))
-		data->regulator_delay = pval;
+//	if (!of_property_read_u32(dev->of_node, "regulator-microsecs-delay", &pval))
+//		data->regulator_delay = pval;
+	data->regulator_delay = 50;
 
 	data->dev = dev;
 	set_bit(exynos4412_runpm_suspended, &data->flags);

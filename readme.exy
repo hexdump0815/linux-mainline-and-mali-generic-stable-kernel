@@ -5,10 +5,9 @@
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 #
 # patches:
-# add cmdline option to set a fixed ethernet mac address on the kernel cmdline to avoid getting a randomone on each boot
-patch -p1 < /compile/doc/stable/misc.exy/eth-hw-addr.patch 
-# fix thermal cpu cooling for the odroid u3 and x2
-patch -p1 < /compile/doc/stable/misc.exy/fix-odroid-u3-cpu-cooling.patch
+# add cmdline option to set a fixed ethernet mac address on the kernel
+# cmdline to avoid getting a randomone on each boot
+patch -p1 < /compile/doc/stable/misc.exy/eth-hw-addr-v5.10.patch 
 # fix odroid x/x2 usb
 # see: https://lore.kernel.org/lkml/26ff3deb-4b8d-7dd2-2418-d56f6dcea313@samsung.com/
 # via: https://forum.odroid.com/viewtopic.php?p=296896#p296896
@@ -18,28 +17,11 @@ patch -p1 < /compile/doc/stable/misc.exy/add-disabled-extra-cpu-clocks-odroid-x.
 # add mali support
 patch -p1 < /compile/doc/stable/misc.exy/exynos4412-mali-complete.patch
 cp -r /compile/doc/stable/misc.exy/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
-patch -p0 < /compile/doc/stable/misc.exy/fix-mali-kconfig-v5.9.patch
-#patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver.patch
+# some things required for legacy mali to work
 patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver-v5.9.patch
 patch -p1 < /compile/doc/stable/misc.exy/export-cma-symbols.patch
-patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-node-for-exynos4412.patch
-patch -p1 < /compile/doc/stable/misc.exy/dts-add-gpu-opp-table.patch
-patch -p1 < /compile/doc/stable/misc.exy/dts-setup-gpu-node.patch
-patch -p1 < /compile/doc/stable/misc.exy/dts-exynos-remove-new-gpu-node-v5.3.patch
-# fix legacy mali to compile with v5.9
-patch -p0 < /compile/doc/stable/misc.exy/fix-mali-v5.9.patch
-# hack to make the dts compile work for the exynos4210-i9100 dts due to our rolled back mali gpu entry
-patch -p1 < /compile/doc/stable/misc.exy/compile-hack-exynos4210-i9100-dts-v5.9.patch
-# v5.4: the below patches are no longer used, as they do not seem to make any real difference
-# some more useful patches from the tobias jakobi tree
-#patch -p1 < /compile/doc/stable/misc.exy/poweroff-reboot-regulators.patch
-#patch -p1 < /compile/doc/stable/misc.exy/add-power-sequence-handling-for-usb-devices.patch
-#patch -p1 < /compile/doc/stable/misc.exy/add-power-sequence-library.patch
-#patch -p1 < /compile/doc/stable/misc.exy/fix-exynos4412-isp-cmu-reset-in-aftr-mode.patch
-#patch -p1 < /compile/doc/stable/misc.exy/fix-lan9730-on-odroid-u3-after-tftpboot.patch
-#patch -p1 < /compile/doc/stable/misc.exy/remove-unnecessary-null-test-for-to_devfreq_event.patch
-#patch -p1 < /compile/doc/stable/misc.exy/suspend-all-devices-on-system-shutdown.patch
-#patch -p1 < /compile/doc/stable/misc.exy/verify-devicetree-nodes-for-usb-devices.patch
+# in the legacy mali should be used the following patch is required to adjust the dts
+#patch -p1 < /compile/doc/stable/misc.exy/dts-switch-to-legacy-mali.patch
 
 cp /compile/doc/stable/config.exy /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
@@ -66,6 +48,14 @@ echo ${kver}
 # remove debug info if there and not wanted
 # find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
 make modules_install
+# move away the exynos4412 mali module and tar it separately beforehand
+mkdir -p /lib/modules/${kver}/extra
+mv /lib/modules/${kver}/kernel/drivers/gpu/arm/mali/maligpu.ko /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
+tar cvzf /compile/source/linux-stable/${kver}-mali-exynos4412.tar.gz /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/extra
+# redo the depmod without the mali module
+depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
