@@ -30,8 +30,6 @@ cd /compile/source/linux-stable
 git checkout -- arch/arm/boot/dts/Makefile
 cp arch/arm/boot/dts/exynos4412-odroidu3.dts arch/arm/boot/dts/exynos4412-odroidu3noplus.dts
 cp arch/arm/boot/dts/exynos4412-odroid-common.dtsi arch/arm/boot/dts/exynos4412-odroid-common-u3noplus.dtsi
-#patch -p1 < /compile/doc/stable/misc.exy/reboot-fix-u3noplus.patch
-# v5.8 will need an adjusted patch
 patch -p1 < /compile/doc/stable/misc.exy/reboot-fix-u3noplus-v5.8.patch
 
 export ARCH=arm
