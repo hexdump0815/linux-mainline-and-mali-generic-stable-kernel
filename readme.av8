@@ -34,16 +34,16 @@ echo ${kver}
 # remove debug info if there and wanted
 # find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
 make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 # for all except amlogic 64bit socs
 cp -v arch/arm64/boot/Image /boot/Image-${kver}
 # for amlogic 64bit socs (legacy u-boot)
 mkimage -A arm64 -O linux -T kernel -C none -a 0x1080000 -e 0x1080000 -n linux-${kver} -d arch/arm64/boot/Image /boot/uImage-${kver}
-mkdir -p /boot/tools-${kver}
-cp -v tools/perf/perf /boot/tools-${kver}
-cp -v tools/power/cpupower/cpupower /boot/tools-${kver}
-cp -v tools/power/cpupower/libcpupower.so.0.0.1 /boot/tools-${kver}/libcpupower.so.0
 mkdir -p /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/rockchip/rk33*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-g*.dtb /boot/dtb-${kver}
