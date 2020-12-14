@@ -1,27 +1,26 @@
-#
 # directories:
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
-#
+
 # patches:
 # add cmdline option to set a fixed ethernet mac address on the kernel
 # cmdline to avoid getting a randomone on each boot
-patch -p1 < /compile/doc/stable/misc.exy/eth-hw-addr-v5.10.patch 
+patch -p1 < /compile/doc/stable/misc.exy/patches/eth-hw-addr-v5.10.patch 
 # fix odroid x/x2 usb
 # see: https://lore.kernel.org/lkml/26ff3deb-4b8d-7dd2-2418-d56f6dcea313@samsung.com/
 # via: https://forum.odroid.com/viewtopic.php?p=296896#p296896
-patch -p1 < /compile/doc/stable/misc.exy/fix-odroid-x2-usb.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/fix-odroid-x2-usb.patch
 # add some extra cpu clocks for odroid x - disabled by default
-patch -p1 < /compile/doc/stable/misc.exy/add-disabled-extra-cpu-clocks-odroid-x.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/add-disabled-extra-cpu-clocks-odroid-x.patch
 # add mali support
-patch -p1 < /compile/doc/stable/misc.exy/exynos4412-mali-complete.patch
-cp -r /compile/doc/stable/misc.exy/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
+patch -p1 < /compile/doc/stable/misc.exy/patches/exynos4412-mali-complete.patch
+cp -r /compile/doc/stable/misc.exy/patches/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
 # some things required for legacy mali to work
-patch -p1 < /compile/doc/stable/misc.exy/devfreq-turbo-for-mali-gpu-driver-v5.9.patch
-patch -p1 < /compile/doc/stable/misc.exy/export-cma-symbols.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/devfreq-turbo-for-mali-gpu-driver-v5.9.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/export-cma-symbols.patch
 # in the legacy mali should be used the following patch is required to adjust the dts
-#patch -p1 < /compile/doc/stable/misc.exy/dts-switch-to-legacy-mali.patch
+#patch -p1 < /compile/doc/stable/misc.exy/patches/dts-switch-to-legacy-mali.patch
 
 cp /compile/doc/stable/config.exy /compile/source/linux-stable/.config
 cd /compile/source/linux-stable

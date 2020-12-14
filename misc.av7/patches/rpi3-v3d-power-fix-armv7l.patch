@@ -1,0 +1,50 @@
+from: https://github.com/raspberrypi/linux/issues/3046#issuecomment-557812312
+
+diff --git a/arch/arm/boot/dts/bcm2836-rpi-2-b.dts b/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
+index 0455a680394a..581ff94dbbf3 100644
+--- a/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
++++ b/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
+@@ -128,3 +128,7 @@
+ 	pinctrl-0 = <&uart0_gpio14>;
+ 	status = "okay";
+ };
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts b/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts
+index 66ab35eccba7..7fddede92b68 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts
+@@ -176,3 +176,7 @@
+ 	pinctrl-0 = <&uart1_gpio14>;
+ 	status = "okay";
+ };
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts b/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
+index 74ed6d047807..f3c95b8d236f 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
+@@ -179,3 +179,7 @@
+ 	pinctrl-0 = <&uart1_gpio14>;
+ 	status = "okay";
+ };
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-b.dts b/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
+index 054ecaa355c9..fba4cbced771 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
+@@ -174,3 +174,7 @@
+ 	status = "okay";
+ 	bus-width = <4>;
+ };
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};

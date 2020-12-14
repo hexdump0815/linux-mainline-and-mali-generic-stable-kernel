@@ -1,0 +1,35 @@
+from: https://github.com/raspberrypi/linux/issues/3046#issuecomment-557812312
+
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-a-plus.dts b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-a-plus.dts
+index f0ec56a1c4d7..9d94bb709e22 100644
+--- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-a-plus.dts
++++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-a-plus.dts
+@@ -1,2 +1,6 @@
+ // SPDX-License-Identifier: GPL-2.0
+ #include "arm/bcm2837-rpi-3-a-plus.dts"
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b-plus.dts b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b-plus.dts
+index 46ad2023cccf..83b3d20e43ce 100644
+--- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b-plus.dts
++++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b-plus.dts
+@@ -1,2 +1,6 @@
+ // SPDX-License-Identifier: GPL-2.0
+ #include "arm/bcm2837-rpi-3-b-plus.dts"
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
+index 89b78d6c19bf..309b13d79a41 100644
+--- a/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
++++ b/arch/arm64/boot/dts/broadcom/bcm2837-rpi-3-b.dts
+@@ -1,2 +1,6 @@
+ // SPDX-License-Identifier: GPL-2.0
+ #include "arm/bcm2837-rpi-3-b.dts"
++
++&v3d {
++	power-domains = <&power RPI_POWER_DOMAIN_V3D>;
++};

@@ -1,0 +1,98 @@
+diff --git a/arch/arm/boot/dts/exynos5250-snow-common.dtsi b/arch/arm/boot/dts/exynos5250-snow-common.dtsi
+index fd9226d3b207..c952a615148e 100644
+--- a/arch/arm/boot/dts/exynos5250-snow-common.dtsi
++++ b/arch/arm/boot/dts/exynos5250-snow-common.dtsi
+@@ -529,6 +529,11 @@
+ 	status = "okay";
+ };
+ 
++&mali {
++	mali-supply = <&buck4_reg>;
++	status = "okay";
++};
++
+ &mixer {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/boot/dts/exynos5250.dtsi b/arch/arm/boot/dts/exynos5250.dtsi
+index d5e0392b409e..9a59f74019ec 100644
+--- a/arch/arm/boot/dts/exynos5250.dtsi
++++ b/arch/arm/boot/dts/exynos5250.dtsi
+@@ -1097,6 +1097,53 @@
+ 		 */
+ 		clock-frequency = <24000000>;
+ 	};
++
++	mali: gpu@0x11800000 {
++		compatible = "samsung,exynos5250-mali", "arm,malit604", "arm,malit60x", "arm,malit6xx", "arm,mali-midgard";
++		reg = <0x11800000 0x5000>;
++		interrupts = <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
++		             <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>,
++			     <GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "job", "mmu", "gpu";
++		clocks = <&clock CLK_G3D>;
++		clock-names = "g3d";
++		operating-points-v2 = <&gpu_opp_table>;
++		power-domains = <&pd_g3d>;
++		status = "disabled";
++	};
++
++	gpu_opp_table: gpu-opp-table {
++		compatible = "operating-points-v2";
++
++		opp-100000000 {
++			opp-hz = /bits/ 64 <100000000>;
++			opp-microvolt = <925000>;
++		};
++		opp-160000000 {
++			opp-hz = /bits/ 64 <160000000>;
++			opp-microvolt = <925000>;
++		};
++		opp-266000000 {
++			opp-hz = /bits/ 64 <266000000>;
++			opp-microvolt = <1025000>;
++		};
++		opp-350000000 {
++			opp-hz = /bits/ 64 <350000000>;
++			opp-microvolt = <1075000>;
++		};
++		opp-400000000 {
++			opp-hz = /bits/ 64 <400000000>;
++			opp-microvolt = <1125000>;
++		};
++		opp-450000000 {
++			opp-hz = /bits/ 64 <450000000>;
++			opp-microvolt = <1150000>;
++		};
++		opp-533000000 {
++			opp-hz = /bits/ 64 <533000000>;
++			opp-microvolt = <1250000>;
++		};
++	};
+ };
+ 
+ &dp {
+diff --git a/drivers/gpu/Makefile b/drivers/gpu/Makefile
+index f17d01f076c7..43c37d08dac6 100644
+--- a/drivers/gpu/Makefile
++++ b/drivers/gpu/Makefile
+@@ -3,5 +3,5 @@
+ # taken to initialize them in the correct order. Link order is the only way
+ # to ensure this currently.
+ obj-$(CONFIG_TEGRA_HOST1X)	+= host1x/
+-obj-y			+= drm/ vga/
++obj-y			+= drm/ vga/ arm/
+ obj-$(CONFIG_IMX_IPUV3_CORE)	+= ipu-v3/
+diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
+index 427a993c7f57..c844d513537e 100644
+--- a/drivers/video/Kconfig
++++ b/drivers/video/Kconfig
+@@ -19,6 +19,8 @@ source "drivers/gpu/ipu-v3/Kconfig"
+ 
+ source "drivers/gpu/drm/Kconfig"
+ 
++source "drivers/gpu/arm/Kconfig"
++
+ menu "Frame buffer Devices"
+ source "drivers/video/fbdev/Kconfig"
+ endmenu

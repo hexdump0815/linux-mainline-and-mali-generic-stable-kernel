@@ -1,0 +1,27 @@
+from: https://github.com/reey/PKGBUILDs/blob/master/core/linux-nyan/enable-cec-for-nyan.patch
+
+From 317719a97c3213de156d2c479709c93443608a0c Mon Sep 17 00:00:00 2001
+From: reey <23506385+reey@users.noreply.github.com>
+Date: Tue, 5 Mar 2019 19:41:40 +0100
+Subject: [PATCH] ARM: tegra: tegra124: nyan: enable HDMI CEC
+
+This patch enables HDMI CEC for all nyan devices.
+---
+ arch/arm/boot/dts/tegra124-nyan.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/boot/dts/tegra124-nyan.dtsi b/arch/arm/boot/dts/tegra124-nyan.dtsi
+index bc85b6a166c79..4ec1f853c0942 100644
+--- a/arch/arm/boot/dts/tegra124-nyan.dtsi
++++ b/arch/arm/boot/dts/tegra124-nyan.dtsi
+@@ -57,6 +57,10 @@
+ 			status = "okay";
+ 		};
+ 	};
++	
++	cec@70015000 {
++		status = "okay";
++	};
+ 
+ 	gpu@0,57000000 {
+ 		status = "okay";

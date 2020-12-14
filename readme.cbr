@@ -8,34 +8,30 @@
 # only get a light suspend)"
 # "rk3288 does have a light suspend mode, without putting the ddr in self-refresh - so
 # that doesn't save to much" - would need uboot or lower level support for more
-#
-# if the keyboard does not work in 4.19+, change those two lines by hand in .config
-# CONFIG_CROS_EC_I2C=y
-# CONFIG_CROS_EC_SPI=y
 
-#
 # directories:
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
-#
+
 # patches:
 # add rk3288 mali support for the rockchip chromebook (veyron)
 # TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
 # use the files from misc.av7 as we need exactly the same ones here
-patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-complete.patch
-cp -r /compile/doc/stable/misc.av7/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
+cp -r /compile/doc/stable/misc.av7/patches/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9
-patch -p0 < /compile/doc/stable/misc.cbr/fix-mali-compile-v5.9.patch
+patch -p0 < /compile/doc/stable/misc.cbr/patches/fix-mali-compile-v5.9.patch
 # v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
-patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-v5.0.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-v5.0.patch
 # v5.4 - fix mali compile
-patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.4.patch
+patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.4.patch
 # fix jackd audio for veyron
-patch -p1 < /compile/doc/stable/misc.cbr/veyron-fix-audio-v5.4.patch
+patch -p1 < /compile/doc/stable/misc.cbr/patches/veyron-fix-audio-v5.4.patch
 
 cp /compile/doc/stable/config.cbr /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
+
 export ARCH=arm
 make oldconfig
 make -j 4 bzImage dtbs modules

@@ -1,0 +1,399 @@
+inspired by:
+https://github.com/chewitt/mali-bifrost/commit/309ae446a5345f0c0189f47b6ff96d8a1c585c18
+https://github.com/chewitt/mali-bifrost/commit/0e2454533dfd27fb36331610b4c81bb58233788b
+https://forum.odroid.com/viewtopic.php?t=34183#p284407
+
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.c b/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.c
+index cef0745..5038805 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.c
+@@ -26,7 +26,7 @@
+ #include <backend/gpu/mali_kbase_pm_internal.h>
+ 
+ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+-				u64 *system_time, struct timespec *ts)
++				u64 *system_time, struct timespec64 *ts)
+ {
+ 	u32 hi1, hi2;
+ 
+@@ -57,7 +57,7 @@ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+ 	} while (hi1 != hi2);
+ 
+ 	/* Record the CPU's idea of current time */
+-	getrawmonotonic(ts);
++	ktime_get_raw_ts64(ts);
+ 
+ 	kbase_pm_release_gpu_cycle_counter(kbdev);
+ }
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.h b/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.h
+index e1bd263..b766c1c 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.h
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/backend/gpu/mali_kbase_time.h
+@@ -28,11 +28,11 @@
+  * @kbdev:		Device pointer
+  * @cycle_counter:	Pointer to u64 to store cycle counter in
+  * @system_time:	Pointer to u64 to store system time in
+- * @ts:			Pointer to struct timespec to store current monotonic
++ * @ts:			Pointer to struct timespec64 to store current monotonic
+  *			time in
+  */
+ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+-				u64 *system_time, struct timespec *ts);
++				u64 *system_time, struct timespec64 *ts);
+ 
+ /**
+  * kbase_wait_write_flush() -  Wait for GPU write flush
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_defs.h b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_defs.h
+index 3df17ac..47e7c2a 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_defs.h
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_defs.h
+@@ -930,7 +930,7 @@ enum kbase_trace_code {
+  *                      in the trace message, used during dumping of the message.
+  */
+ struct kbase_trace {
+-	struct timespec timestamp;
++	struct timespec64 timestamp;
+ 	u32 thread_id;
+ 	u32 cpu;
+ 	void *ctx;
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_device.c b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_device.c
+index e58e27c..14a63f0 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_device.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_device.c
+@@ -444,7 +444,7 @@ void kbasep_trace_add(struct kbase_device *kbdev, enum kbase_trace_code code, vo
+ 	trace_msg->thread_id = task_pid_nr(current);
+ 	trace_msg->cpu = task_cpu(current);
+ 
+-	getnstimeofday(&trace_msg->timestamp);
++	ktime_get_real_ts64(&trace_msg->timestamp);
+ 
+ 	trace_msg->code = code;
+ 	trace_msg->ctx = ctx;
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_hwaccess_time.h b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_hwaccess_time.h
+index 7f64936..22ef846 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_hwaccess_time.h
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_hwaccess_time.h
+@@ -33,11 +33,11 @@
+  * @kbdev:		Device pointer
+  * @cycle_counter:	Pointer to u64 to store cycle counter in
+  * @system_time:	Pointer to u64 to store system time in
+- * @ts:			Pointer to struct timespec to store current monotonic
++ * @ts:			Pointer to struct timespec64 to store current monotonic
+  *			time in
+  */
+ void kbase_backend_get_gpu_time(struct kbase_device *kbdev, u64 *cycle_counter,
+-				u64 *system_time, struct timespec *ts);
++				u64 *system_time, struct timespec64 *ts);
+ 
+ /**
+  * kbase_wait_write_flush() -  Wait for GPU write flush
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem_linux.c b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem_linux.c
+index a5ea7b0..0d42ece 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem_linux.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem_linux.c
+@@ -51,6 +51,8 @@
+ #include <mali_kbase_tlstream.h>
+ #include <mali_kbase_ioctl.h>
+ 
++void mm_trace_rss_stat(struct mm_struct *mm, int member, long count) {}
++
+ static int kbase_tracking_page_setup(struct kbase_context *kctx, struct vm_area_struct *vma);
+ 
+ struct kbase_va_region *kbase_mem_alloc(struct kbase_context *kctx,
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_softjobs.c b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_softjobs.c
+index 01b3087..563aea5 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_softjobs.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_softjobs.c
+@@ -135,7 +135,7 @@ static int kbase_dump_cpu_gpu_time(struct kbase_jd_atom *katom)
+ {
+ 	struct kbase_vmap_struct map;
+ 	void *user_result;
+-	struct timespec ts;
++	struct timespec64 ts;
+ 	struct base_dump_cpu_gpu_counters data;
+ 	u64 system_time;
+ 	u64 cycle_counter;
+@@ -819,7 +819,7 @@ static int kbase_mem_copy_from_extres(struct kbase_context *kctx,
+ 
+ 		for (i = 0; i < dma_to_copy/PAGE_SIZE; i++) {
+ 
+-			void *extres_page = dma_buf_kmap(dma_buf, i);
++			void *extres_page = NULL; //dma_buf_kmap(dma_buf, i);
+ 
+ 			if (extres_page)
+ 				kbase_mem_copy_from_extres_page(kctx,
+@@ -828,7 +828,7 @@ static int kbase_mem_copy_from_extres(struct kbase_context *kctx,
+ 						&target_page_nr,
+ 						offset, &to_copy);
+ 
+-			dma_buf_kunmap(dma_buf, i, extres_page);
++			// dma_buf_kunmap(dma_buf, i, extres_page);
+ 			if (target_page_nr >= buf_data->nr_pages)
+ 				break;
+ 		}
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_tlstream.c b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_tlstream.c
+index 2ff45f5..2d51892 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_tlstream.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_tlstream.c
+@@ -608,10 +608,10 @@ atomic_t kbase_tlstream_enabled = {0};
+  */
+ static u64 kbasep_tlstream_get_timestamp(void)
+ {
+-	struct timespec ts;
++	struct timespec64 ts;
+ 	u64             timestamp;
+ 
+-	getrawmonotonic(&ts);
++	ktime_get_raw_ts64(&ts);
+ 	timestamp = (u64)ts.tv_sec * NSECS_IN_SEC + ts.tv_nsec;
+ 	return timestamp;
+ }
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_trace_timeline.h b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_trace_timeline.h
+index c1a3dfc..85940bf 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_trace_timeline.h
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_trace_timeline.h
+@@ -54,8 +54,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+    process of being returned to user */
+ #define KBASE_TIMELINE_ATOMS_IN_FLIGHT(kctx, count)                          \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_atoms_in_flight(ts.tv_sec, ts.tv_nsec,   \
+ 				(int)kctx->timeline.owner_tgid,              \
+ 				count);                                      \
+@@ -64,8 +64,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace atom_id being Ready to Run */
+ #define KBASE_TIMELINE_ATOM_READY(kctx, atom_id)                             \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_atom(ts.tv_sec, ts.tv_nsec,              \
+ 				CTX_FLOW_ATOM_READY,                         \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -81,8 +81,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+  * utilization easily and accurately */
+ #define KBASE_TIMELINE_ATOMS_SUBMITTED(kctx, js, count)                      \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_active(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_ACTIVE,                      \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -93,8 +93,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace atoms present in JS_NEXT */
+ #define KBASE_TIMELINE_JOB_START_NEXT(kctx, js, count)                       \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_action(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_NEXT,                        \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -104,8 +104,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace atoms present in JS_HEAD */
+ #define KBASE_TIMELINE_JOB_START_HEAD(kctx, js, count)                       \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_action(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_HEAD,                        \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -115,8 +115,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace that a soft stop/evict from next is being attempted on a slot */
+ #define KBASE_TIMELINE_TRY_SOFT_STOP(kctx, js, count) \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_slot_action(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_SET_GPU_SLOT_STOPPING,                    \
+ 				(kctx) ? (int)kctx->timeline.owner_tgid : 0, \
+@@ -128,8 +128,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace state of overall GPU power */
+ #define KBASE_TIMELINE_GPU_POWER(kbdev, active)                              \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_ACTIVE, active);            \
+ 	} while (0)
+@@ -137,8 +137,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace state of tiler power */
+ #define KBASE_TIMELINE_POWER_TILER(kbdev, bitmap)                            \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_TILER_ACTIVE,               \
+ 				hweight64(bitmap));                          \
+@@ -147,8 +147,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace number of shaders currently powered */
+ #define KBASE_TIMELINE_POWER_SHADER(kbdev, bitmap)                           \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_SHADER_ACTIVE,              \
+ 				hweight64(bitmap));                          \
+@@ -157,8 +157,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace state of L2 power */
+ #define KBASE_TIMELINE_POWER_L2(kbdev, bitmap)                               \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_gpu_power_active(ts.tv_sec, ts.tv_nsec,  \
+ 				SW_SET_GPU_POWER_L2_ACTIVE,                  \
+ 				hweight64(bitmap));                          \
+@@ -167,8 +167,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace state of L2 cache*/
+ #define KBASE_TIMELINE_POWERING_L2(kbdev)                                    \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_l2_power_active(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_FLOW_GPU_POWER_L2_POWERING,               \
+ 				1);                                          \
+@@ -176,8 +176,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ 
+ #define KBASE_TIMELINE_POWERED_L2(kbdev)                                     \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_l2_power_active(ts.tv_sec, ts.tv_nsec,   \
+ 				SW_FLOW_GPU_POWER_L2_ACTIVE,                 \
+ 				1);                                          \
+@@ -186,8 +186,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace kbase_pm_send_event message send */
+ #define KBASE_TIMELINE_PM_SEND_EVENT(kbdev, event_type, pm_event_id)         \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_pm_event(ts.tv_sec, ts.tv_nsec,          \
+ 				SW_FLOW_PM_SEND_EVENT,                       \
+ 				event_type, pm_event_id);                    \
+@@ -196,8 +196,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace kbase_pm_worker message receive */
+ #define KBASE_TIMELINE_PM_HANDLE_EVENT(kbdev, event_type, pm_event_id)       \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_pm_event(ts.tv_sec, ts.tv_nsec,          \
+ 				SW_FLOW_PM_HANDLE_EVENT,                     \
+ 				event_type, pm_event_id);                    \
+@@ -207,8 +207,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace atom_id starting in JS_HEAD */
+ #define KBASE_TIMELINE_JOB_START(kctx, js, _consumerof_atom_number)          \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_slot_atom(ts.tv_sec, ts.tv_nsec,         \
+ 				HW_START_GPU_JOB_CHAIN_SW_APPROX,            \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -218,8 +218,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace atom_id stopping on JS_HEAD */
+ #define KBASE_TIMELINE_JOB_STOP(kctx, js, _producerof_atom_number_completed) \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_slot_atom(ts.tv_sec, ts.tv_nsec,         \
+ 				HW_STOP_GPU_JOB_CHAIN_SW_APPROX,             \
+ 				(int)kctx->timeline.owner_tgid,              \
+@@ -230,8 +230,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+  * certin caller */
+ #define KBASE_TIMELINE_PM_CHECKTRANS(kbdev, trace_code)                      \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_pm_checktrans(ts.tv_sec, ts.tv_nsec,     \
+ 				trace_code, 1);                              \
+ 	} while (0)
+@@ -239,8 +239,8 @@ void kbasep_trace_timeline_debugfs_init(struct kbase_device *kbdev);
+ /* Trace number of contexts active */
+ #define KBASE_TIMELINE_CONTEXT_ACTIVE(kbdev, count)                          \
+ 	do {                                                                 \
+-		struct timespec ts;                                          \
+-		getrawmonotonic(&ts);                                        \
++		struct timespec64 ts;                                          \
++		ktime_get_raw_ts64(&ts);                                        \
+ 		trace_mali_timeline_context_active(ts.tv_sec, ts.tv_nsec,    \
+ 				count);                                      \
+ 	} while (0)
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_vinstr.c b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_vinstr.c
+index 60e1800..ea0a54c 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_vinstr.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_vinstr.c
+@@ -964,9 +964,9 @@ static void accum_clients(struct kbase_vinstr_context *vinstr_ctx)
+  */
+ static u64 kbasep_vinstr_get_timestamp(void)
+ {
+-	struct timespec ts;
++	struct timespec64 ts;
+ 
+-	getrawmonotonic(&ts);
++	ktime_get_raw_ts64(&ts);
+ 	return (u64)ts.tv_sec * NSECS_IN_SEC + ts.tv_nsec;
+ }
+ 
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c b/driver/product/kernel/drivers/gpu/arm/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c
+index 5013a9d..33ec0dc 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/tests/mali_kutf_irq_test/mali_kutf_irq_test_main.c
+@@ -92,9 +92,9 @@ static irqreturn_t kbase_gpu_irq_custom_handler(int irq, void *data)
+ 
+ 	val = kbase_reg_read(kbdev, GPU_CONTROL_REG(GPU_IRQ_STATUS), NULL);
+ 	if (val & TEST_IRQ) {
+-		struct timespec tval;
++		struct timespec64 tval;
+ 
+-		getnstimeofday(&tval);
++		ktime_get_real_ts64(&tval);
+ 		irq_time = SEC_TO_NANO(tval.tv_sec) + (tval.tv_nsec);
+ 
+ 		kbase_reg_write(kbdev, GPU_CONTROL_REG(GPU_IRQ_CLEAR), val,
+@@ -184,12 +184,12 @@ static void mali_kutf_irq_latency(struct kutf_context *context)
+ 			GPU_IRQ_HANDLER);
+ 
+ 	for (i = 0; i < NR_TEST_IRQS; i++) {
+-		struct timespec tval;
++		struct timespec64 tval;
+ 		u64 start_time;
+ 		int ret;
+ 
+ 		triggered = false;
+-		getnstimeofday(&tval);
++		ktime_get_real_ts64(&tval);
+ 		start_time = SEC_TO_NANO(tval.tv_sec) + (tval.tv_nsec);
+ 
+ 		/* Trigger fake IRQ */

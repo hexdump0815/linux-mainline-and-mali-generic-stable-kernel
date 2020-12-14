@@ -1,0 +1,28 @@
+reduce the cma reserved memory from 256m to 128m, which is still plenty
+
+diff --git a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+index 3f39e020f74e..297b6fd05cab 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+@@ -79,7 +79,7 @@
+ 		linux,cma {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+-			size = <0x0 0x10000000>;
++			size = <0x0 0x8000000>;
+ 			alignment = <0x0 0x400000>;
+ 			linux,cma-default;
+ 		};
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gx.dtsi b/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
+index 6733050d735f..6ebd809bf55f 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
+@@ -44,7 +44,7 @@
+ 		linux,cma {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+-			size = <0x0 0x10000000>;
++			size = <0x0 0x8000000>;
+ 			alignment = <0x0 0x400000>;
+ 			linux,cma-default;
+ 		};

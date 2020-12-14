@@ -1,0 +1,22 @@
+diff --git a/arch/arm/boot/dts/exynos5250.dtsi b/arch/arm/boot/dts/exynos5250.dtsi
+index fc966c10cf49..45eed0df3d46 100644
+--- a/arch/arm/boot/dts/exynos5250.dtsi
++++ b/arch/arm/boot/dts/exynos5250.dtsi
+@@ -328,7 +328,7 @@
+ 			iommus = <&sysmmu_rotator>;
+ 		};
+ 
+-		mali: gpu@11800000 {
++/*		mali: gpu@11800000 {
+ 			compatible = "samsung,exynos5250-mali", "arm,mali-t604";
+ 			reg = <0x11800000 0x5000>;
+ 			interrupts = <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
+@@ -373,7 +373,7 @@
+ 					opp-microvolt = <1250000>;
+ 				};
+ 			};
+-		};
++		}; */
+ 
+ 		tmu: tmu@10060000 {
+ 			compatible = "samsung,exynos5250-tmu";

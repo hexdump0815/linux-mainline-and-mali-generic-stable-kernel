@@ -1,0 +1,30 @@
+TIMEOUT 100
+DEFAULT v310180
+ 
+MENU TITLE veyron sd boot options
+ 
+LABEL v310180
+      MENU LABEL v3.10.18 kernel via zImage mmcblk0 emmc
+      LINUX ../boot/zImage-3.10.18-cbt
+      FDT ../boot/tegra124-nyan-big-rev3_7.dtb-3.10.18-cbt
+      APPEND console=tty1 init=/sbin/init root=/dev/mmcblk0p2 ro rootwait noinitrd lsm.module_locking=0 net.ifnames=0 fsck.repair=yes
+ 
+LABEL v310181
+      MENU LABEL v3.10.18 kernel via zImage mmcblk1 sd
+      LINUX ../boot/zImage-3.10.18-cbt
+      FDT ../boot/tegra124-nyan-big-rev3_7.dtb-3.10.18-cbt
+      APPEND console=tty1 init=/sbin/init root=/dev/mmcblk0p2 ro rootwait noinitrd lsm.module_locking=0 net.ifnames=0 fsck.repair=yes
+ 
+LABEL v41510
+      MENU LABEL v4.15.1 kernel via zImage mmcblk2 emmc
+      LINUX ../boot/zImage-4.15.1-stb-cbt
+      INITRD ../boot/initrd.img-4.15.1-stb-cbt
+      FDT ../boot/tegra124-nyan-big-4.15.1-stb-cbt
+      APPEND console=tty1 init=/sbin/init root=/dev/mmcblk2p2 ro rootwait net.ifnames=0 fsck.repair=yes
+ 
+LABEL v41511
+      MENU LABEL v4.15.1 kernel via zImage mmcblk0 sd
+      LINUX ../boot/zImage-4.15.1-stb-cbt
+      INITRD ../boot/initrd.img-4.15.1-stb-cbt
+      FDT ../boot/tegra124-nyan-big-4.15.1-stb-cbt
+      APPEND console=tty1 init=/sbin/init root=/dev/mmcblk0p2 ro rootwait net.ifnames=0 fsck.repair=yes

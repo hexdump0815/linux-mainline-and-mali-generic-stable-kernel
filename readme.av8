@@ -1,25 +1,25 @@
-#
 # directories:
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
-#
+
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
-patch -p1 < /compile/doc/stable/misc.av7/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
 # fix black background when using the mali blob hack
-patch -p1 < /compile/doc/stable/misc.av8/s90-amlogic-s90x-mali-hack.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/s90-amlogic-s90x-mali-hack.patch
 # v5.4 - fix v3d power setup for rpi3
-patch -p1 < /compile/doc/stable/misc.av8/rpi3-v3d-power-fix.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/rpi3-v3d-power-fix.patch
 # enable cpufreq on odroid c2
-patch -p1 < /compile/doc/stable/misc.av8/enable-cpufreq-on-odroid-c2.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/enable-cpufreq-on-odroid-c2.patch
 # reduce cma mem for amlogic
-patch -p1 < /compile/doc/stable/misc.av8/reduce-cma-mem-for-amlogic.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/reduce-cma-mem-for-amlogic.patch
 # many s905w tv boxes have very low spec emmc chips so lower the freq for them
-patch -p1 < /compile/doc/stable-am/misc.aml/lower-emmc-frequency-for-s905w.patch
+patch -p1 < /compile/doc/stable/misc.av8/lower-emmc-frequency-for-s905w.patch
 
 cp /compile/doc/stable/config.av8 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
+
 export ARCH=arm64
 # make defconfig + fix options - see misc.av8/options
 make oldconfig

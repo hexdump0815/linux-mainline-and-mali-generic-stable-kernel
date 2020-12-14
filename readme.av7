@@ -1,43 +1,43 @@
-#
 # directories:
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
-#
+
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
-patch -p1 < /compile/doc/stable/misc.av7/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
 # clock the bpi at 1.2ghz
-patch -p1 < /compile/doc/stable/misc.av7/bpi-enable-more-overclock.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/bpi-enable-more-overclock.patch
 # set bpi otg usb to host mode
-patch -p1 < /compile/doc/stable/misc.av7/bpi-usb-otg-host-mode.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/bpi-usb-otg-host-mode.patch
 # more clock speeds for r89, enable emmc, gpu node, hdmi fix
-patch -p1 < /compile/doc/stable/misc.av7/r89-dtb-more-and-higher-cpu-clocks-emmc-gpu-hdmi.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/r89-dtb-more-and-higher-cpu-clocks-emmc-gpu-hdmi.patch
 # raise the temp limits where thermal throttling starts
-patch -p1 < /compile/doc/stable/misc.av7/rk3288-higher-alert-temp.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-higher-alert-temp.patch
 # add higher cpu clocks for h3
-patch -p1 < /compile/doc/stable/misc.av7/sun8i-h3-higher-cpu-clocks.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/sun8i-h3-higher-cpu-clocks.patch
 # prepare for sunxi mali support for the bpi - from https://github.com/mripard/sunxi-mali/issues/63
-patch -p1 < /compile/doc/stable/misc.av7/sunxi-drm-gem-cma-Export-with-handle-allocator.patch
-patch -p1 < /compile/doc/stable/misc.av7/sunxi-drm-sun4i-Add-GEM-allocator.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/sunxi-drm-gem-cma-Export-with-handle-allocator.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/sunxi-drm-sun4i-Add-GEM-allocator.patch
 # add rk3288 mali support for the r89
 # TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
-patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-complete.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
 cp -r /compile/doc/stable/misc.av7/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9
-patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.9.patch
+patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.9.patch
 # v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
-patch -p1 < /compile/doc/stable/misc.av7/rk3288-mali-v5.0.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-v5.0.patch
 # v5.4 - fix mali compile
-patch -p0 < /compile/doc/stable/misc.av7/fix-mali-compile-v5.4.patch
+patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.4.patch
 # v5.1 - add more meson8m2 dtbs
-patch -p1 < /compile/doc/stable/misc.av7/meson8m2-dtb.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/meson8m2-dtb.patch
 cp -i /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
 # v5.4 - fix v3d power setup for rpi3
-patch -p1 < /compile/doc/stable/misc.av7/rpi3-v3d-power-fix-armv7l.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rpi3-v3d-power-fix-armv7l.patch
 
 cp /compile/doc/stable/config.av7 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
+
 export ARCH=arm
 # make multi_v7_defconfig + fix options - see misc.av7/options
 make oldconfig

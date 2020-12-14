@@ -1,0 +1,64 @@
+inspired by:
+https://github.com/chewitt/mali-bifrost/commit/0e2454533dfd27fb36331610b4c81bb58233788b
+https://lore.kernel.org/lkml/20191209135823.28465-3-hch@lst.de/
+
+diff --git a/driver/src/devicedrv/mali/linux/mali_memory_cow.c b/driver/src/devicedrv/mali/linux/mali_memory_cow.c
+index f1d44fe..d10818d 100644
+--- a/driver/src/devicedrv/mali/linux/mali_memory_cow.c
++++ b/driver/src/devicedrv/mali/linux/mali_memory_cow.c
+@@ -683,7 +683,7 @@ void _mali_mem_cow_copy_page(mali_page_node *src_node, mali_page_node *dst_node)
+ 		/*
+ 		* use ioremap to map src for BLOCK memory
+ 		*/
+-		src = ioremap_nocache(_mali_page_node_get_dma_addr(src_node), _MALI_OSK_MALI_PAGE_SIZE);
++		src = ioremap(_mali_page_node_get_dma_addr(src_node), _MALI_OSK_MALI_PAGE_SIZE);
+ 		memcpy(dst, src , _MALI_OSK_MALI_PAGE_SIZE);
+ 		iounmap(src);
+ 	}
+diff --git a/driver/src/devicedrv/mali/linux/mali_osk_low_level_mem.c b/driver/src/devicedrv/mali/linux/mali_osk_low_level_mem.c
+index 84f93d9..5a0a725 100644
+--- a/driver/src/devicedrv/mali/linux/mali_osk_low_level_mem.c
++++ b/driver/src/devicedrv/mali/linux/mali_osk_low_level_mem.c
+@@ -33,7 +33,11 @@ void _mali_osk_write_mem_barrier(void)
+ 
+ mali_io_address _mali_osk_mem_mapioregion(uintptr_t phys, u32 size, const char *description)
+ {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
++	return (mali_io_address)ioremap(phys, size);
++#else
+ 	return (mali_io_address)ioremap_nocache(phys, size);
++#endif
+ }
+ 
+ void _mali_osk_mem_unmapioregion(uintptr_t phys, u32 size, mali_io_address virt)
+diff --git a/driver/src/devicedrv/mali/linux/mali_osk_time.c b/driver/src/devicedrv/mali/linux/mali_osk_time.c
+index 9094b59..9667b7e 100644
+--- a/driver/src/devicedrv/mali/linux/mali_osk_time.c
++++ b/driver/src/devicedrv/mali/linux/mali_osk_time.c
+@@ -46,18 +46,20 @@ void _mali_osk_time_ubusydelay(u32 usecs)
+ 
+ u64 _mali_osk_time_get_ns(void)
+ {
+-	struct timespec tsval;
+-	getnstimeofday(&tsval);
+-	return (u64)timespec_to_ns(&tsval);
++	struct timespec64 tsval;
++	ktime_get_real_ts64(&tsval);
++	return (u64)timespec64_to_ns(&tsval);
+ }
+ 
+ u64 _mali_osk_boot_time_get_ns(void)
+ {
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)
++	return ktime_get_boottime_ns();
++#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)
+ 	return ktime_get_boot_ns();
+ #else
+-	struct timespec tsval;
++	struct timespec64 tsval;
+ 	get_monotonic_boottime(&tsval);
+-	return (u64)timespec_to_ns(&tsval);
++	return (u64)timespec64_to_ns(&tsval);
+ #endif
+ }

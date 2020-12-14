@@ -1,7 +1,0 @@
-v5.4.14
-- move in odroid u3 (exy), exynos snow chromebook (cbe), rockchip veyron
-chromebook, (cbr - wip), tegra nyan chromebook (cbt - even more wip), 64bit
-armv8 (av8 - wip)
-
-v5.4.3
-- initial import of 32bit armv7 (av7)
