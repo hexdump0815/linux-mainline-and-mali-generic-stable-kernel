@@ -36,6 +36,14 @@ mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# move away the exynos5250 mali module and tar it separately beforehand
+mkdir -p /lib/modules/${kver}/extra
+mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
+tar cvzf /compile/source/linux-stable/${kver}-mali-exynos5250.tar.gz /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/extra
+# redo the depmod without the mali module
+depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
