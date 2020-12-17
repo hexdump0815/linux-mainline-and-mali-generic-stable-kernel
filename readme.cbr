@@ -1,6 +1,13 @@
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# name: stb-cbr
+
 # this sepearate config from av7 exists, as with av7 the system hangs on boot
 #
-# see misc.cbr: pulse default.pa required (not required: and mrvl firmware needs to go into the initramfs via hook)
+# see misc.cbr: pulse default.pa required
+# (not required: and mrvl firmware needs to go into the initramfs via hook)
 # rk3288 mainline only has a light suspend mode without powering down everything
 # https://irclog.whitequark.org/linux-rockchip/2018-04-03#21712549
 # "for suspend/resume but at least between ChromeOS 3.14 and mainline there is a huge
@@ -8,16 +15,12 @@
 # only get a light suspend)"
 # "rk3288 does have a light suspend mode, without putting the ddr in self-refresh - so
 # that doesn't save to much" - would need uboot or lower level support for more
-
-# directories:
-# - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
-# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
-
 # patches:
 # add rk3288 mali support for the rockchip chromebook (veyron)
 # TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
 # use the files from misc.av7 as we need exactly the same ones here
+
+# patches:
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
 cp -r /compile/doc/stable/misc.av7/patches/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9

@@ -2,6 +2,7 @@
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# name: stb-exy
 
 # patches:
 # add cmdline option to set a fixed ethernet mac address on the kernel

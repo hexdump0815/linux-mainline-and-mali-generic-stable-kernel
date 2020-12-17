@@ -2,6 +2,7 @@
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# name: stb-av8
 
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated

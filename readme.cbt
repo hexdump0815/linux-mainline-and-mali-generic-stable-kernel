@@ -1,11 +1,12 @@
-# IMPORTANT: this is work in progress and not yet ready to use!
-#
-# see misc.cbt: pulse default.pa required (not required: and mrvl firmware needs to go into the initramfs via hook)
-
 # directories:
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# name: stb-cbt
+
+# IMPORTANT: this is work in progress and not yet ready to use!
+# see misc.cbt: pulse default.pa required
+# (not required: and mrvl firmware needs to go into the initramfs via hook)
 
 # patches:
 # this fixes the blank screen on boot
