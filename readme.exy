@@ -20,20 +20,23 @@ cp -r /compile/doc/stable/misc.exy/patches/exynos4412-mali-complete/drivers/gpu/
 # some things required for legacy mali to work
 patch -p1 < /compile/doc/stable/misc.exy/patches/devfreq-turbo-for-mali-gpu-driver-v5.9.patch
 patch -p1 < /compile/doc/stable/misc.exy/patches/export-cma-symbols.patch
-# in the legacy mali should be used the following patch is required to adjust the dts
-#patch -p1 < /compile/doc/stable/misc.exy/patches/dts-switch-to-legacy-mali.patch
 
-cp /compile/doc/stable/config.exy /compile/source/linux-stable/.config
-cd /compile/source/linux-stable
+# if the legacy mali should be used the following patch is required to adjust the dts
+#patch -p1 < /compile/doc/stable/misc.exy/patches/dts-switch-to-legacy-mali.patch
 
 # add u3noplus dtb for the non plus version to fix reboot for it - has to be redone for each new kernel version
 git checkout -- arch/arm/boot/dts/Makefile
 cp arch/arm/boot/dts/exynos4412-odroidu3.dts arch/arm/boot/dts/exynos4412-odroidu3noplus.dts
 cp arch/arm/boot/dts/exynos4412-odroid-common.dtsi arch/arm/boot/dts/exynos4412-odroid-common-u3noplus.dtsi
-patch -p1 < /compile/doc/stable/misc.exy/reboot-fix-u3noplus-v5.8.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/reboot-fix-u3noplus-v5.8.patch
+
+cp /compile/doc/stable/config.exy /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
 
 export ARCH=arm
-# make exynos_defconfig + fix options - see misc.exy/options
+# make exynos_defconfig
+# /compile/doc/stable/misc.exy/options/enable-docker-options.sh
+# /compile/doc/stable/misc.exy/options/enable-additional-options.sh
 make oldconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
