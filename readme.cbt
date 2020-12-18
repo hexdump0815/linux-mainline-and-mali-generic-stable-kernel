@@ -43,7 +43,7 @@ cp -v arch/arm/boot/dts/tegra124-nyan-big.dtb /boot/dtb-${kver}/tegra124-nyan-bi
 cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
-mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+#mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
 tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.cbt /compile/doc/stable/config.cbt.old
 cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbt
