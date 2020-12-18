@@ -21,6 +21,9 @@ cp /compile/doc/stable/config.cbe /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm
+# no defconfig as it is based on a handcrafted config
+# /compile/doc/stable/misc.cbe/options/enable-docker-options.sh
+# /compile/doc/stable/misc.cbe/options/enable-additional-options.sh
 make oldconfig
 make -j 4 zImage dtbs modules
 cd tools/perf

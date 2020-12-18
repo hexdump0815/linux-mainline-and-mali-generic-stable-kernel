@@ -22,7 +22,9 @@ cp /compile/doc/stable/config.av8 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm64
-# make defconfig + fix options - see misc.av8/options
+# make defconfig
+# /compile/doc/stable/misc.av8/options/enable-docker-options.sh
+# /compile/doc/stable/misc.av8/options/enable-additional-options.sh
 make oldconfig
 make -j 4 Image dtbs modules
 cd tools/perf
