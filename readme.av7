@@ -23,7 +23,7 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/sunxi-drm-sun4i-Add-GEM-allocat
 # add rk3288 mali support for the r89
 # TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
-cp -r /compile/doc/stable/misc.av7/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
+cp -r /compile/doc/stable/misc.av7/patches/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9
 patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.9.patch
 # v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
@@ -40,7 +40,9 @@ cp /compile/doc/stable/config.av7 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm
-# make multi_v7_defconfig + fix options - see misc.av7/options
+# make multi_v7_defconfig
+# /compile/doc/stable/misc.av7/options/enable-docker-options.sh
+# /compile/doc/stable/misc.av7/options/enable-additional-options.sh
 make oldconfig
 make -j 4 zImage dtbs modules
 cd tools/perf

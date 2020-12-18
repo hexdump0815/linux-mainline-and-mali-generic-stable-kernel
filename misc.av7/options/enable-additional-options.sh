@@ -17,6 +17,12 @@ cd /compile/source/linux-stable
 ./scripts/config -d CONFIG_REISERFS_FS
 ./scripts/config -d CONFIG_OCFS2_FS
 
+./scripts/config -d CONFIG_MALI_IRQ_LATENCY
+./scripts/config -d CONFIG_MALI_KUTF
+
+./scripts/config -d CONFIG_LOCALVERSION_AUTO
+./scripts/config --set-str CONFIG_LOCALVERSION "-stb-av7"
+
 for i in `cat /compile/doc/stable/misc.av7/options/additional-options-*-yes.txt`; do
   echo $i
   ./scripts/config -e $i
