@@ -20,15 +20,20 @@ cd /compile/source/linux-stable
 ./scripts/config -d CONFIG_REISERFS_FS
 ./scripts/config -d CONFIG_OCFS2_FS
 
+./scripts/config --set-str CONFIG_MALI_PLATFORM_NAME "devicetree"
+./scripts/config -d CONFIG_MALI_IRQ_LATENCY
+./scripts/config -d CONFIG_MALI_KUTF
+./scripts/config -d CONFIG_MALI_FENCE_DEBUG
+
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
 ./scripts/config --set-str CONFIG_LOCALVERSION "-stb-cbe"
 
-for i in `cat /compile/doc/stable/misc.exy/options/additional-options-*-yes.txt`; do
+for i in `cat /compile/doc/stable/misc.cbe/options/additional-options-*-yes.txt`; do
   echo $i
   ./scripts/config -e $i
 done
 
-for i in `cat /compile/doc/stable/misc.exy/options/additional-options-*-mod.txt`; do
+for i in `cat /compile/doc/stable/misc.cbe/options/additional-options-*-mod.txt`; do
   echo $i
   ./scripts/config -m $i
 done
