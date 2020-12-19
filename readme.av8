@@ -13,6 +13,8 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-
 patch -p1 < /compile/doc/stable/misc.av8/patches/dwmac-meson8b-clk-fix.patch
 # v5.4 - fix v3d power setup for rpi3
 patch -p1 < /compile/doc/stable/misc.av8/patches/rpi3-v3d-power-fix.patch
+# fix a typo to be able to enable the v3d driver
+patch -p1 < /compile/doc/stable/misc.av8/patches/fix-v3d-typo.patch
 # enable cpufreq on odroid c2
 patch -p1 < /compile/doc/stable/misc.av8/patches/enable-cpufreq-on-odroid-c2.patch
 # reduce cma mem for amlogic

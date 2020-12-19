@@ -3248,7 +3248,7 @@ CONFIG_IPMI_SI=m
 CONFIG_HW_RANDOM=y
 # CONFIG_HW_RANDOM_TIMERIOMEM is not set
 # CONFIG_HW_RANDOM_BA431 is not set
-CONFIG_HW_RANDOM_BCM2835=m
+CONFIG_HW_RANDOM_BCM2835=y
 CONFIG_HW_RANDOM_IPROC_RNG200=m
 CONFIG_HW_RANDOM_OMAP=m
 # CONFIG_HW_RANDOM_VIRTIO is not set
@@ -4898,6 +4898,7 @@ CONFIG_DRM_MSM_DSI_10NM_PHY=y
 CONFIG_DRM_MSM_DSI_7NM_PHY=y
 CONFIG_DRM_TEGRA=m
 # CONFIG_DRM_TEGRA_DEBUG is not set
+# CONFIG_DRM_TEGRA_STAGING is not set
 CONFIG_DRM_PANEL=y
 
 #
@@ -5001,6 +5002,7 @@ CONFIG_DRM_DW_MIPI_DSI=m
 # end of Display Interface Bridges
 
 # CONFIG_DRM_IMX_DCSS is not set
+CONFIG_DRM_V3D=m
 CONFIG_DRM_VC4=m
 # CONFIG_DRM_VC4_HDMI_CEC is not set
 CONFIG_DRM_ETNAVIV=m
@@ -6561,7 +6563,112 @@ CONFIG_XEN_AUTO_XLATE=y
 # end of Xen driver support
 
 # CONFIG_GREYBUS is not set
-# CONFIG_STAGING is not set
+CONFIG_STAGING=y
+# CONFIG_PRISM2_USB is not set
+# CONFIG_COMEDI is not set
+# CONFIG_RTL8192U is not set
+# CONFIG_RTLLIB is not set
+# CONFIG_RTL8723BS is not set
+# CONFIG_R8712U is not set
+# CONFIG_R8188EU is not set
+# CONFIG_RTS5208 is not set
+# CONFIG_VT6655 is not set
+# CONFIG_VT6656 is not set
+
+#
+# IIO staging drivers
+#
+
+#
+# Accelerometers
+#
+# CONFIG_ADIS16203 is not set
+# CONFIG_ADIS16240 is not set
+# end of Accelerometers
+
+#
+# Analog to digital converters
+#
+# CONFIG_AD7816 is not set
+# CONFIG_AD7280 is not set
+# end of Analog to digital converters
+
+#
+# Analog digital bi-direction converters
+#
+# CONFIG_ADT7316 is not set
+# end of Analog digital bi-direction converters
+
+#
+# Capacitance to digital converters
+#
+# CONFIG_AD7150 is not set
+# CONFIG_AD7746 is not set
+# end of Capacitance to digital converters
+
+#
+# Direct Digital Synthesis
+#
+# CONFIG_AD9832 is not set
+# CONFIG_AD9834 is not set
+# end of Direct Digital Synthesis
+
+#
+# Network Analyzer, Impedance Converters
+#
+# CONFIG_AD5933 is not set
+# end of Network Analyzer, Impedance Converters
+
+#
+# Active energy metering IC
+#
+# CONFIG_ADE7854 is not set
+# end of Active energy metering IC
+
+#
+# Resolver to digital converters
+#
+# CONFIG_AD2S1210 is not set
+# end of Resolver to digital converters
+# end of IIO staging drivers
+
+# CONFIG_FB_SM750 is not set
+# CONFIG_USB_EMXX is not set
+# CONFIG_MFD_NVEC is not set
+# CONFIG_STAGING_MEDIA is not set
+
+#
+# Android
+#
+# end of Android
+
+# CONFIG_STAGING_BOARD is not set
+# CONFIG_LTE_GDM724X is not set
+# CONFIG_GS_FPGABOOT is not set
+# CONFIG_UNISYSSPAR is not set
+# CONFIG_FB_TFT is not set
+# CONFIG_FSL_DPAA2 is not set
+# CONFIG_KS7010 is not set
+CONFIG_BCM_VIDEOCORE=y
+CONFIG_BCM2835_VCHIQ=m
+CONFIG_SND_BCM2835=m
+CONFIG_VIDEO_BCM2835=m
+CONFIG_BCM2835_VCHIQ_MMAL=m
+# CONFIG_PI433 is not set
+
+#
+# Gasket devices
+#
+# CONFIG_STAGING_GASKET_FRAMEWORK is not set
+# end of Gasket devices
+
+# CONFIG_XIL_AXIS_FIFO is not set
+# CONFIG_FIELDBUS_DEV is not set
+# CONFIG_QLGE is not set
+# CONFIG_WFX is not set
+# CONFIG_PHY_HI3670_USB is not set
+# CONFIG_SPMI_HISI3670 is not set
+# CONFIG_MFD_HI6421_SPMI is not set
 # CONFIG_GOLDFISH is not set
 CONFIG_CHROME_PLATFORMS=y
 # CONFIG_CHROMEOS_TBMC is not set
@@ -8576,6 +8683,7 @@ CONFIG_DECOMPRESS_LZO=y
 CONFIG_DECOMPRESS_LZ4=y
 CONFIG_DECOMPRESS_ZSTD=y
 CONFIG_GENERIC_ALLOCATOR=y
+CONFIG_BTREE=y
 CONFIG_INTERVAL_TREE=y
 CONFIG_XARRAY_MULTI=y
 CONFIG_ASSOCIATIVE_ARRAY=y
