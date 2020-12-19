@@ -24,6 +24,8 @@ cd /compile/source/linux-stable
 ./scripts/config -d CONFIG_MALI_IRQ_LATENCY
 ./scripts/config -d CONFIG_MALI_KUTF
 ./scripts/config -d CONFIG_MALI_FENCE_DEBUG
+./scripts/config -d CONFIG_DRM_SCHED
+./scripts/config -d CONFIG_DRM_PANFROST
 
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
 ./scripts/config --set-str CONFIG_LOCALVERSION "-stb-cbe"
