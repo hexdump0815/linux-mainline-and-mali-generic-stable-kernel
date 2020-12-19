@@ -43,7 +43,7 @@ cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
 # move away the exynos5422 mali module and tar it separately beforehand
 mkdir -p /lib/modules/${kver}/extra
-mv /lib/modules/${kver}/kernel/drivers/gpu/arm/mali/maligpu.ko /lib/modules/${kver}/extra
+mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
 tar cvzf /compile/source/linux-stable/${kver}-mali-exyno5422.tar.gz /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/extra
