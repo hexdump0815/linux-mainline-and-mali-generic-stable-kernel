@@ -70,7 +70,7 @@ static void kbase_mem_pool_add_locked(struct kbase_mem_pool *pool,
 	list_add(&p->lru, &pool->page_list);
 	pool->cur_size++;
 
-	zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE);
+	zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE_B);
 
 	pool_dbg(pool, "added page\n");
 }
@@ -90,7 +90,7 @@ static void kbase_mem_pool_add_list_locked(struct kbase_mem_pool *pool,
 	lockdep_assert_held(&pool->pool_lock);
 
 	list_for_each_entry(p, page_list, lru) {
-		zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE);
+		zone_page_state_add(1, page_zone(p), NR_SLAB_RECLAIMABLE_B);
 	}
 
 	list_splice(page_list, &pool->page_list);
@@ -120,7 +120,7 @@ static struct page *kbase_mem_pool_remove_locked(struct kbase_mem_pool *pool)
 	list_del_init(&p->lru);
 	pool->cur_size--;
 
-	zone_page_state_add(-1, page_zone(p), NR_SLAB_RECLAIMABLE);
+	zone_page_state_add(-1, page_zone(p), NR_SLAB_RECLAIMABLE_B);
 
 	pool_dbg(pool, "removed page\n");
 
@@ -641,7 +641,7 @@ void kbase_mem_pool_free_pages(struct kbase_mem_pool *pool, size_t nr_pages,
 
 		if (reclaimed)
 			zone_page_state_add(-1, page_zone(p),
-					NR_SLAB_RECLAIMABLE);
+					NR_SLAB_RECLAIMABLE_B);
 
 		kbase_mem_pool_free_page(pool, p);
 		pages[i] = as_tagged(0);

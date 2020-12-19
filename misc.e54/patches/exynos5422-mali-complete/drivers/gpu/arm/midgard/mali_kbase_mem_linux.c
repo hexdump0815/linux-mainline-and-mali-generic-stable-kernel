@@ -46,6 +46,8 @@
 #include <mali_kbase_tlstream.h>
 #include <mali_kbase_ioctl.h>
 
+void mm_trace_rss_stat(struct mm_struct *mm, int member, long count) {}
+
 /*
  * From 4.20.0 kernel vm_insert_pfn was dropped
  * Make wrapper to preserve compatibility
@@ -70,7 +72,7 @@ static int kbase_tracking_page_setup(struct kbase_context *kctx, struct vm_area_
  * Shrink (or completely remove) all CPU mappings which reference the shrunk
  * part of the allocation.
  *
- * Note: Caller must be holding the processes mmap_sem lock.
+ * Note: Caller must be holding the processes mmap_lock lock.
  */
 static void kbase_mem_shrink_cpu_mapping(struct kbase_context *kctx,
 		struct kbase_va_region *reg,
@@ -583,7 +585,7 @@ static void kbase_mem_evictable_mark_reclaim(struct kbase_mem_phy_alloc *alloc)
 		/* Bulk update all the zones */
 		list_for_each_entry(zone_cache, &alloc->zone_cache, zone_node) {
 			zone_page_state_add(zone_cache->count,
-					zone_cache->zone, NR_SLAB_RECLAIMABLE);
+					zone_cache->zone, NR_SLAB_RECLAIMABLE_B);
 		}
 	} else {
 		/* Fall-back to page by page updates */
@@ -596,7 +598,7 @@ static void kbase_mem_evictable_mark_reclaim(struct kbase_mem_phy_alloc *alloc)
 			p = phys_to_page(as_phys_addr_t(alloc->pages[i]));
 			zone = page_zone(p);
 
-			zone_page_state_add(1, zone, NR_SLAB_RECLAIMABLE);
+			zone_page_state_add(1, zone, NR_SLAB_RECLAIMABLE_B);
 		}
 	}
 
@@ -637,7 +639,7 @@ void kbase_mem_evictable_unmark_reclaim(struct kbase_mem_phy_alloc *alloc)
 		/* Bulk update all the zones */
 		list_for_each_entry(zone_cache, &alloc->zone_cache, zone_node) {
 			zone_page_state_add(-zone_cache->count,
-					zone_cache->zone, NR_SLAB_RECLAIMABLE);
+					zone_cache->zone, NR_SLAB_RECLAIMABLE_B);
 		}
 	} else {
 		/* Fall-back to page by page updates */
@@ -649,7 +651,7 @@ void kbase_mem_evictable_unmark_reclaim(struct kbase_mem_phy_alloc *alloc)
 
 			p = phys_to_page(as_phys_addr_t(alloc->pages[i]));
 			zone = page_zone(p);
-			zone_page_state_add(-1, zone, NR_SLAB_RECLAIMABLE);
+			zone_page_state_add(-1, zone, NR_SLAB_RECLAIMABLE_B);
 		}
 	}
 
@@ -763,7 +765,7 @@ int kbase_mem_flags_change(struct kbase_context *kctx, u64 gpu_addr, unsigned in
 		real_flags |= KBASE_REG_SHARE_IN;
 
 	/* now we can lock down the context, and find the region */
-	down_write(&current->mm->mmap_sem);
+	down_write(&current->mm->mmap_lock);
 	kbase_gpu_vm_lock(kctx);
 
 	/* Validate the region */
@@ -837,7 +839,7 @@ int kbase_mem_flags_change(struct kbase_context *kctx, u64 gpu_addr, unsigned in
 
 out_unlock:
 	kbase_gpu_vm_unlock(kctx);
-	up_write(&current->mm->mmap_sem);
+	up_write(&current->mm->mmap_lock);
 out:
 	return ret;
 }
@@ -1176,7 +1178,7 @@ static struct kbase_va_region *kbase_mem_from_user_buffer(
 		*flags |= KBASE_MEM_IMPORT_HAVE_PAGES;
 	}
 
-	down_read(&current->mm->mmap_sem);
+	down_read(&current->mm->mmap_lock);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
 	faulted_pages = get_user_pages(current, current->mm, address, *va_pages,
@@ -1190,7 +1192,7 @@ static struct kbase_va_region *kbase_mem_from_user_buffer(
 			pages, NULL);
 #endif
 
-	up_read(&current->mm->mmap_sem);
+	up_read(&current->mm->mmap_lock);
 
 	if (faulted_pages != *va_pages)
 		goto fault_mismatch;
@@ -1655,7 +1657,7 @@ int kbase_mem_commit(struct kbase_context *kctx, u64 gpu_addr, u64 new_pages)
 		return -EINVAL;
 	}
 
-	down_write(&current->mm->mmap_sem);
+	down_write(&current->mm->mmap_lock);
 	kbase_gpu_vm_lock(kctx);
 
 	/* Validate the region */
@@ -1697,7 +1699,7 @@ int kbase_mem_commit(struct kbase_context *kctx, u64 gpu_addr, u64 new_pages)
 		 * No update to the mm so downgrade the writer lock to a read
 		 * lock so other readers aren't blocked after this point.
 		 */
-		downgrade_write(&current->mm->mmap_sem);
+		downgrade_write(&current->mm->mmap_lock);
 		read_locked = true;
 
 		/* Allocate some more pages */
@@ -1753,9 +1755,9 @@ int kbase_mem_commit(struct kbase_context *kctx, u64 gpu_addr, u64 new_pages)
 out_unlock:
 	kbase_gpu_vm_unlock(kctx);
 	if (read_locked)
-		up_read(&current->mm->mmap_sem);
+		up_read(&current->mm->mmap_lock);
 	else
-		up_write(&current->mm->mmap_sem);
+		up_write(&current->mm->mmap_lock);
 
 	return res;
 }
@@ -2108,14 +2110,14 @@ void kbase_os_mem_map_lock(struct kbase_context *kctx)
 {
 	struct mm_struct *mm = current->mm;
 	(void)kctx;
-	down_read(&mm->mmap_sem);
+	down_read(&mm->mmap_lock);
 }
 
 void kbase_os_mem_map_unlock(struct kbase_context *kctx)
 {
 	struct mm_struct *mm = current->mm;
 	(void)kctx;
-	up_read(&mm->mmap_sem);
+	up_read(&mm->mmap_lock);
 }
 
 static int kbasep_reg_mmap(struct kbase_context *kctx,

@@ -130,7 +130,7 @@ static int kbase_dump_cpu_gpu_time(struct kbase_jd_atom *katom)
 {
 	struct kbase_vmap_struct map;
 	void *user_result;
-	struct timespec ts;
+	struct timespec64 ts;
 	struct base_dump_cpu_gpu_counters data;
 	u64 system_time;
 	u64 cycle_counter;
@@ -821,7 +821,7 @@ static int kbase_mem_copy_from_extres(struct kbase_context *kctx,
 
 		for (i = 0; i < dma_to_copy/PAGE_SIZE; i++) {
 
-			void *extres_page = dma_buf_kmap(dma_buf, i);
+			void *extres_page = NULL;
 
 			if (extres_page)
 				kbase_mem_copy_from_extres_page(kctx,
@@ -830,7 +830,7 @@ static int kbase_mem_copy_from_extres(struct kbase_context *kctx,
 						&target_page_nr,
 						offset, &to_copy);
 
-			dma_buf_kunmap(dma_buf, i, extres_page);
+//			dma_buf_kunmap(dma_buf, i, extres_page);
 			if (target_page_nr >= buf_data->nr_pages)
 				break;
 		}

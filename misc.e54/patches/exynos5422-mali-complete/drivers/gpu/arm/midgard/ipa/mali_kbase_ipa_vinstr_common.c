@@ -26,11 +26,11 @@ static ktime_t dummy_time;
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 3, 0)
-#define ktime_get() (ACCESS_ONCE(dummy_time))
+#define ktime_get() (READ_ONCE(dummy_time))
 
 void kbase_ipa_set_dummy_time(ktime_t t)
 {
-	ACCESS_ONCE(dummy_time) = t;
+	WRITE_ONCE(dummy_time, t);
 }
 KBASE_EXPORT_TEST_API(kbase_ipa_set_dummy_time);
 #else
