@@ -1,0 +1,88 @@
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# name: stb-e54
+
+# patches:
+# add mali gpu support
+patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete.patch
+cp -r /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete/drivers/gpu/arm drivers/gpu
+
+# create and enable mc1 dtb - it is basically an xu4 one with hc1 cooling config (i.e. no fan)
+# it should also work for a fanless xu4 most probably although with quite a bit of thermal throttling
+cp arch/arm/boot/dts/exynos5422-odroidxu4.dts arch/arm/boot/dts/exynos5422-odroidmc1.dts
+sed -i 's,exynos5422-odroidxu3-common.dtsi,exynos5422-odroidmc1-common.dtsi,g' arch/arm/boot/dts/exynos5422-odroidmc1.dts
+cp arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi arch/arm/boot/dts/exynos5422-odroidmc1-common.dtsi
+sed -i 's,exynos5422-odroidxu3-trip-points.dtsi,exynos5422-odroidmc1-trip-points.dtsi,g' arch/arm/boot/dts/exynos5422-odroidmc1-common.dtsi
+patch -p0 < /compile/doc/stable/misc.e54/patches/mc1-reduce-cpu-clocks.patch
+patch -p1 < /compile/doc/stable/misc.e54/patches/mc1-enable-dtb.patch
+
+cp /compile/doc/stable/config.e54 /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+
+export ARCH=arm
+# make exynos_defconfig
+# /compile/doc/stable/misc.e54/options/enable-docker-options.sh
+# /compile/doc/stable/misc.e54/options/enable-additional-options.sh
+make oldconfig
+make -j 4 zImage dtbs modules
+cd tools/perf
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+# find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# move away the exynos5422 mali module and tar it separately beforehand
+mkdir -p /lib/modules/${kver}/extra
+mv /lib/modules/${kver}/kernel/drivers/gpu/arm/mali/maligpu.ko /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
+tar cvzf /compile/source/linux-stable/${kver}-mali-exyno5422.tar.gz /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/extra
+# redo the depmod without the mali module
+depmod ${kver}
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+mkimage -A arm -O linux -T kernel -C none -a 0x00208000 -e 0x00208000 -n linux-${kver} -d arch/arm/boot/zImage /boot/uImage-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos542**.dtb /boot/dtb-${kver}/
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.e54 /compile/doc/stable/config.e54.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.e54
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.e54-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+
+
+# boot.ini when using the legacy armbian u-boot 2017.05
+cat /boot/boot.ini
+ODROIDXU-UBOOT-CONFIG
+
+setenv kver "5.4.35-stb-e54+"
+
+setenv initrd_high "0xffffffff"
+setenv fdt_high "0xffffffff"
+
+fdt addr 0x44000000
+fdt rm /cec@101B0000
+
+ext4load mmc 0:1 0x40008000 zImage-${kver}
+ext4load mmc 0:1 0x42000000 uInitrd-${kver}
+#ext4load mmc 0:1 0x44000000 dtb-${kver}/exynos5422-odroidxu4.dtb
+ext4load mmc 0:1 0x44000000 dtb-${kver}/exynos5422-odroidmc1.dtb
+
+setenv bootargs "console=ttySAC2,115200n8 root=/dev/mmcblk1p3 ro loglevel=8 rootwait net.ifnames=0 ipv6.disable=1 fsck.repair=yes"
+
+bootz 0x40008000 0x42000000 0x44000000

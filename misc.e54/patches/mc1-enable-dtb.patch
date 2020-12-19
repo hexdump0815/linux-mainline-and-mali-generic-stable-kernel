@@ -1,0 +1,12 @@
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index fa4c633c9619..f9ab9a0c3ae3 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -199,6 +199,7 @@ dtb-$(CONFIG_ARCH_EXYNOS5) += \
+ 	exynos5420-arndale-octa.dtb \
+ 	exynos5420-peach-pit.dtb \
+ 	exynos5420-smdk5420.dtb \
++	exynos5422-odroidmc1.dtb \
+ 	exynos5422-odroidhc1.dtb \
+ 	exynos5422-odroidxu3.dtb \
+ 	exynos5422-odroidxu3-lite.dtb \

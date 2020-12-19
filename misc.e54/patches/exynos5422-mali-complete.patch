@@ -1,0 +1,22 @@
+diff --git a/drivers/gpu/Makefile b/drivers/gpu/Makefile
+index 835c88318cec..98ed73ada23a 100644
+--- a/drivers/gpu/Makefile
++++ b/drivers/gpu/Makefile
+@@ -6,3 +6,4 @@ obj-$(CONFIG_TEGRA_HOST1X)	+= host1x/
+ obj-y			+= drm/ vga/
+ obj-$(CONFIG_IMX_IPUV3_CORE)	+= ipu-v3/
+ obj-$(CONFIG_TRACE_GPU_MEM)		+= trace/
++obj-y                   += arm/
+diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
+index 427a993c7f57..c844d513537e 100644
+--- a/drivers/video/Kconfig
++++ b/drivers/video/Kconfig
+@@ -19,6 +19,8 @@ source "drivers/gpu/ipu-v3/Kconfig"
+ 
+ source "drivers/gpu/drm/Kconfig"
+ 
++source "drivers/gpu/arm/Kconfig"
++
+ menu "Frame buffer Devices"
+ source "drivers/video/fbdev/Kconfig"
+ endmenu

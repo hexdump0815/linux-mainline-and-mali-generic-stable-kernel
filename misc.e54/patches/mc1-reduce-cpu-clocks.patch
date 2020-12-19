@@ -1,0 +1,31 @@
+--- arch/arm/boot/dts/exynos5422-odroidmc1.dts.org	2020-05-10 11:41:51.842123393 +0200
++++ arch/arm/boot/dts/exynos5422-odroidmc1.dts	2020-05-10 11:40:53.421971491 +0200
+@@ -14,7 +14,7 @@
+ #include <dt-bindings/gpio/gpio.h>
+ 
+ / {
+-	model = "Hardkernel Odroid XU4";
++	model = "Hardkernel Odroid MC1";
+ 	compatible = "hardkernel,odroid-xu4", "samsung,exynos5800", \
+ 		     "samsung,exynos5";
+ 
+@@ -120,6 +120,19 @@
+ 			       <196608000>;
+ };
+ 
++/* cut the highest frequencies for both clusters like on
++   the xu3 lite as my mc1 solo did only run stable this
++   way even with adapted cooling maps from the hc1
++*/
++&cluster_a15_opp_table {
++	/delete-node/opp-2000000000;
++	/delete-node/opp-1900000000;
++};
++
++&cluster_a7_opp_table {
++	/delete-node/opp-1400000000;
++};
++
+ &i2s0 {
+ 	status = "okay";
+ 	assigned-clocks = <&i2s0 CLK_I2S_RCLK_SRC>;
