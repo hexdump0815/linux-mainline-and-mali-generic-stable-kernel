@@ -1,5 +1,5 @@
 required changes for v5.9:
-- dma_buf_map/dma_buf_unmap is no more (comment out of NULL)
+- dma_buf_kmap/dma_buf_kunmap is no more (comment out or NULL)
 - drop first arg of get_user_pages_remote
 - add dummy mm_trace_rss_stat function in drivers/gpu/arm/midgard/mali_kbase_mem_linux.c
 - find drivers/gpu/arm -type f -exec sed -i 's,struct timespec,struct timespec64,g' {} \;
