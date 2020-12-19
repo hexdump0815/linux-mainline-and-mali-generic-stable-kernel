@@ -7,8 +7,10 @@
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
 patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
-# fix black background when using the mali blob hack
-patch -p1 < /compile/doc/stable/misc.av8/patches/s90-amlogic-s90x-mali-hack.patch
+# add picoseconds delay for eth to work properly on some g12a and sm1 boxes
+patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-fix.patch
+# some dwmac-meson8b clock fixes
+patch -p1 < /compile/doc/stable/misc.av8/patches/dwmac-meson8b-clk-fix.patch
 # v5.4 - fix v3d power setup for rpi3
 patch -p1 < /compile/doc/stable/misc.av8/patches/rpi3-v3d-power-fix.patch
 # enable cpufreq on odroid c2
@@ -16,7 +18,15 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/enable-cpufreq-on-odroid-c2.pat
 # reduce cma mem for amlogic
 patch -p1 < /compile/doc/stable/misc.av8/patches/reduce-cma-mem-for-amlogic.patch
 # many s905w tv boxes have very low spec emmc chips so lower the freq for them
-patch -p1 < /compile/doc/stable/misc.av8/lower-emmc-frequency-for-s905w.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/lower-emmc-frequency-for-s905w.patch
+# add some extra but disabled opp entries for g12a, g12b and sm1
+patch -p1 < /compile/doc/stable/misc.av8/patches/additional-disabled-opp-entires-v5.8.patch
+# allow higher cpu temps
+patch -p1 < /compile/doc/stable/misc.av8/patches/gxl-higher-temps.patch
+# add new dtbs to Makefile
+patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v5.9.patch
+# copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
+cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
 
 cp /compile/doc/stable/config.av8 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
@@ -51,6 +61,8 @@ mkdir -p /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/rockchip/rk33*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-g*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-sm1*.dtb /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/allwinner/sun50i-h5*.dtb /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/allwinner/sun50i-h6*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/broadcom/bcm*-rpi-*.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 cd /boot

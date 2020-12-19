@@ -1,0 +1,20 @@
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gx.dtsi b/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
+index ba63c36b22e0..5a0563134c36 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gx.dtsi
+@@ -131,13 +131,13 @@
+ 
+ 			trips {
+ 				cpu_passive: cpu-passive {
+-					temperature = <80000>; /* millicelsius */
++					temperature = <90000>; /* millicelsius */
+ 					hysteresis = <2000>; /* millicelsius */
+ 					type = "passive";
+ 				};
+ 
+ 				cpu_hot: cpu-hot {
+-					temperature = <90000>; /* millicelsius */
++					temperature = <95000>; /* millicelsius */
+ 					hysteresis = <2000>; /* millicelsius */
+ 					type = "hot";
+ 				};

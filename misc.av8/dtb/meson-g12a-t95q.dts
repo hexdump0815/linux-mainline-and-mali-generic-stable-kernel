@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2018 BayLibre SAS. All rights reserved.
+ */
+
+/dts-v1/;
+
+#include "meson-g12a-x96-max.dts"
+
+/ {
+	compatible = "t95q,t95q", "amlogic,sm1";
+	model = "T95Q";
+
+};
+
+&ext_mdio {
+        external_phy: ethernet-phy@0 {
+                /* Realtek RTL8211F (0x001cc916) */
+                // reg = <0>;
+                // max-speed = <1000>;
+                max-speed = <100>;
+
+                interrupt-parent = <&gpio_intc>;
+                /* MAC_INTR on GPIOZ_14 */
+                interrupts = <26 IRQ_TYPE_LEVEL_LOW>;
+        };
+};
+
+&ethmac {
+        pinctrl-0 = <&eth_pins>, <&eth_rgmii_pins>;
+        pinctrl-names = "default";
+        status = "okay";
+        phy-mode = "rgmii";
+        phy-handle = <&external_phy>;
+	amlogic,tx-delay-ns = <2>;
+};
+
+&cpu_opp_table {
+	opp-1908000000 {
+		status = "okay";
+	};
+
+	opp-2016000000 {
+		status = "okay";
+	};
+
+	opp-2108000000 {
+		status = "disabled";
+	};
+
+	opp-2208000000 {
+		status = "disabled";
+	};
+};

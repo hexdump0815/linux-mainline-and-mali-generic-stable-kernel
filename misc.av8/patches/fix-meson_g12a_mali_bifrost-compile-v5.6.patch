@@ -397,3 +397,16 @@ index 5013a9d..33ec0dc 100644
  		start_time = SEC_TO_NANO(tval.tv_sec) + (tval.tv_nsec);
  
  		/* Trigger fake IRQ */
+diff --git a/driver/product/kernel/drivers/gpu/arm/midgard/platform/meson/mali_kbase_runtime_pm.c b/driver/product/kernel/drivers/gpu/arm/midgard/platform/meson/mali_kbase_runtime_pm.c
+index df09649..de72764 100644
+--- a/driver/product/kernel/drivers/gpu/arm/midgard/platform/meson/mali_kbase_runtime_pm.c
++++ b/driver/product/kernel/drivers/gpu/arm/midgard/platform/meson/mali_kbase_runtime_pm.c
+@@ -64,7 +64,7 @@ static int pm_soft_reset(struct kbase_device *kbdev)
+ 	struct reset_control *rstc;
+ 
+ #if LINUX_VERSION_CODE > KERNEL_VERSION(5, 1, 0)
+-	rstc = of_reset_control_array_get(kbdev->dev->of_node, false, false, false);
++	rstc = of_reset_control_array_get(kbdev->dev->of_node, false, false, true);
+ #else
+ 	rstc = of_reset_control_array_get(kbdev->dev->of_node, false, false);
+ #endif

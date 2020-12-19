@@ -1,0 +1,18 @@
+from: https://pastebin.com/raw/MauF040X
+see also: https://freenode.irclog.whitequark.org/linux-amlogic/2020-12-03#28518141
+and from: https://freenode.irclog.whitequark.org/linux-amlogic/2020-12-05#28531128
+
+diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac-meson8b.c b/drivers/net/ethernet/stmicro/stmmac/dwmac-meson8b.c
+index 2184b6c2c784..2e090717d6be 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/dwmac-meson8b.c
++++ b/drivers/net/ethernet/stmicro/stmmac/dwmac-meson8b.c
+@@ -146,7 +146,7 @@ static int meson8b_init_rgmii_tx_clk(struct meson8b_dwmac *dwmac)
+ 	struct device *dev = dwmac->dev;
+ 	static const struct clk_parent_data mux_parents[] = {
+ 		{ .fw_name = "clkin0", },
+-		{ .fw_name = "clkin1", },
++		{ .fw_name = NULL, },
+ 	};
+ 	static const struct clk_div_table div_table[] = {
+ 		{ .div = 2, .val = 2, },
+

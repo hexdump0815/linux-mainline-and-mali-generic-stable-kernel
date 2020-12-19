@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2018 BayLibre SAS. All rights reserved.
+ */
+
+/dts-v1/;
+
+#include "meson-sm1-sei610.dts"
+
+/ {
+	compatible = "h96max-x3,h96max-x3", "amlogic,sm1";
+	model = "H96Max-X3";
+
+};
+
+&ext_mdio {
+        external_phy: ethernet-phy@0 {
+                /* Realtek RTL8211F (0x001cc916) */
+                // reg = <0>;
+                // max-speed = <1000>;
+                max-speed = <100>;
+
+                interrupt-parent = <&gpio_intc>;
+                /* MAC_INTR on GPIOZ_14 */
+                interrupts = <26 IRQ_TYPE_LEVEL_LOW>;
+        };
+};
+
+&ethmac {
+        pinctrl-0 = <&eth_pins>, <&eth_rgmii_pins>;
+        pinctrl-names = "default";
+        status = "okay";
+        phy-mode = "rgmii";
+        phy-handle = <&external_phy>;
+	amlogic,tx-delay-ns = <2>;
+};
+
+&cpu_opp_table {
+	opp-2016000000 {
+		status = "okay";
+	};
+
+	opp-2100000000 {
+		status = "disabled";
+	};
+
+	opp-2200000000 {
+		status = "disabled";
+	};
+};

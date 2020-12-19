@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2018 BayLibre SAS. All rights reserved.
+ */
+
+/dts-v1/;
+
+#include "meson-sm1-sei610.dts"
+
+/ {
+	compatible = "amediatech,x96-max-plus", "amlogic,sm1";
+	model = "Shenzhen Amediatech Technology Co., Ltd X96 Max Plus";
+
+};
+
+&cpu_opp_table {
+	opp-2016000000 {
+		status = "okay";
+	};
+
+	opp-2100000000 {
+		status = "disabled";
+	};
+
+	opp-2200000000 {
+		status = "disabled";
+	};
+};

@@ -1,0 +1,65 @@
+see: https://vt-tech.eu/articles/linux/289-error-struct-file-operations-has-no-member-named-ioctl.html
+and: https://lkml.org/lkml/2020/6/20/28
+
+--- driver/src/devicedrv/mali/linux/mali_kernel_linux.c.org	2020-10-13 19:09:57.301588471 +0200
++++ driver/src/devicedrv/mali/linux/mali_kernel_linux.c	2020-10-13 19:10:41.256408195 +0200
+@@ -172,11 +172,11 @@
+ 
+ static int mali_open(struct inode *inode, struct file *filp);
+ static int mali_release(struct inode *inode, struct file *filp);
+-#ifdef HAVE_UNLOCKED_IOCTL
++// #ifdef HAVE_UNLOCKED_IOCTL
+ static long mali_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+-#else
+-static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
+-#endif
++// #else
++// static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
++// #endif
+ 
+ static int mali_probe(struct platform_device *pdev);
+ static int mali_remove(struct platform_device *pdev);
+@@ -264,11 +264,11 @@
+ 	.owner = THIS_MODULE,
+ 	.open = mali_open,
+ 	.release = mali_release,
+-#ifdef HAVE_UNLOCKED_IOCTL
++// #ifdef HAVE_UNLOCKED_IOCTL
+ 	.unlocked_ioctl = mali_ioctl,
+-#else
+-	.ioctl = mali_ioctl,
+-#endif
++// #else
++// 	.ioctl = mali_ioctl,
++// #endif
+ 	.compat_ioctl = mali_ioctl,
+ 	.mmap = mali_mmap
+ };
+@@ -890,19 +890,19 @@
+ 	}
+ }
+ 
+-#ifdef HAVE_UNLOCKED_IOCTL
++// #ifdef HAVE_UNLOCKED_IOCTL
+ static long mali_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+-#else
+-static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
+-#endif
++// #else
++// static int mali_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
++// #endif
+ {
+ 	int err;
+ 	struct mali_session_data *session_data;
+ 
+-#ifndef HAVE_UNLOCKED_IOCTL
+-	/* inode not used */
+-	(void)inode;
+-#endif
++// #ifndef HAVE_UNLOCKED_IOCTL
++// 	/* inode not used */
++// 	(void)inode;
++// #endif
+ 
+ 	MALI_DEBUG_PRINT(7, ("Ioctl received 0x%08X 0x%08lX\n", cmd, arg));
+ 

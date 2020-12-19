@@ -1,0 +1,146 @@
+see: https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2184661.html
+and: https://www.virtualbox.org/ticket/19845?cversion=4&cnum_hist=5
+
+--- driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem_linux.c.org	2020-10-13 18:53:12.445911049 +0200
++++ driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem_linux.c	2020-10-13 18:53:38.541183572 +0200
+@@ -587,7 +587,7 @@
+ 		real_flags |= KBASE_REG_SHARE_IN;
+ 
+ 	/* now we can lock down the context, and find the region */
+-	down_write(&current->mm->mmap_sem);
++	down_write(&current->mm->mmap_lock);
+ 	kbase_gpu_vm_lock(kctx);
+ 
+ 	/* Validate the region */
+@@ -649,7 +649,7 @@
+ 
+ out_unlock:
+ 	kbase_gpu_vm_unlock(kctx);
+-	up_write(&current->mm->mmap_sem);
++	up_write(&current->mm->mmap_lock);
+ out:
+ 	return ret;
+ }
+@@ -872,7 +872,7 @@
+ 		*flags |= KBASE_MEM_IMPORT_HAVE_PAGES;
+ 	}
+ 
+-	down_read(&current->mm->mmap_sem);
++	down_read(&current->mm->mmap_lock);
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+ 	faulted_pages = get_user_pages(current, current->mm, address, *va_pages,
+@@ -886,7 +886,7 @@
+ 			pages, NULL);
+ #endif
+ 
+-	up_read(&current->mm->mmap_sem);
++	up_read(&current->mm->mmap_lock);
+ 
+ 	if (faulted_pages != *va_pages)
+ 		goto fault_mismatch;
+@@ -1336,7 +1336,7 @@
+ 		return -EINVAL;
+ 	}
+ 
+-	down_write(&current->mm->mmap_sem);
++	down_write(&current->mm->mmap_lock);
+ 	kbase_gpu_vm_lock(kctx);
+ 
+ 	/* Validate the region */
+@@ -1378,7 +1378,7 @@
+ 		 * No update to the mm so downgrade the writer lock to a read
+ 		 * lock so other readers aren't blocked after this point.
+ 		 */
+-		downgrade_write(&current->mm->mmap_sem);
++		downgrade_write(&current->mm->mmap_lock);
+ 		read_locked = true;
+ 
+ 		/* Allocate some more pages */
+@@ -1434,9 +1434,9 @@
+ out_unlock:
+ 	kbase_gpu_vm_unlock(kctx);
+ 	if (read_locked)
+-		up_read(&current->mm->mmap_sem);
++		up_read(&current->mm->mmap_lock);
+ 	else
+-		up_write(&current->mm->mmap_sem);
++		up_write(&current->mm->mmap_lock);
+ 
+ 	return res;
+ }
+@@ -1795,14 +1795,14 @@
+ {
+ 	struct mm_struct *mm = current->mm;
+ 	(void)kctx;
+-	down_read(&mm->mmap_sem);
++	down_read(&mm->mmap_lock);
+ }
+ 
+ void kbase_os_mem_map_unlock(struct kbase_context *kctx)
+ {
+ 	struct mm_struct *mm = current->mm;
+ 	(void)kctx;
+-	up_read(&mm->mmap_sem);
++	up_read(&mm->mmap_lock);
+ }
+ 
+ static int kbasep_reg_mmap(struct kbase_context *kctx,
+--- driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_jd.c.org	2020-10-13 18:51:26.548879163 +0200
++++ driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_jd.c	2020-10-13 18:51:40.492486767 +0200
+@@ -264,7 +264,7 @@
+ #endif /* CONFIG_MALI_DMA_FENCE */
+ 
+ 	/* Take the processes mmap lock */
+-	down_read(&current->mm->mmap_sem);
++	down_read(&current->mm->mmap_lock);
+ 
+ 	/* need to keep the GPU VM locked while we set up UMM buffers */
+ 	kbase_gpu_vm_lock(katom->kctx);
+@@ -324,7 +324,7 @@
+ 	kbase_gpu_vm_unlock(katom->kctx);
+ 
+ 	/* Release the processes mmap lock */
+-	up_read(&current->mm->mmap_sem);
++	up_read(&current->mm->mmap_lock);
+ 
+ #ifdef CONFIG_MALI_DMA_FENCE
+ 	if (implicit_sync) {
+@@ -349,7 +349,7 @@
+ #ifdef CONFIG_MALI_DMA_FENCE
+ failed_dma_fence_setup:
+ 	/* Lock the processes mmap lock */
+-	down_read(&current->mm->mmap_sem);
++	down_read(&current->mm->mmap_lock);
+ 
+ 	/* lock before we unmap */
+ 	kbase_gpu_vm_lock(katom->kctx);
+@@ -365,7 +365,7 @@
+ 	kbase_gpu_vm_unlock(katom->kctx);
+ 
+ 	/* Release the processes mmap lock */
+-	up_read(&current->mm->mmap_sem);
++	up_read(&current->mm->mmap_lock);
+ 
+  early_err_out:
+ 	kfree(katom->extres);
+--- driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem.c.org	2020-10-13 18:06:40.727800562 +0200
++++ driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase_mem.c	2020-10-13 18:50:36.006305956 +0200
+@@ -1078,7 +1078,7 @@
+ 	unsigned long map_start;
+ 	size_t map_size;
+ 
+-	lockdep_assert_held(&current->mm->mmap_sem);
++	lockdep_assert_held(&current->mm->mmap_lock);
+ 
+ 	if ((uintptr_t) uaddr + size < (uintptr_t) uaddr) /* overflow check */
+ 		return NULL;
+@@ -3112,7 +3112,7 @@
+ 			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,
+ 			pages, NULL);
+ #else
+-	pinned_pages = get_user_pages_remote(NULL, mm,
++	pinned_pages = get_user_pages_remote(mm,
+ 			address,
+ 			alloc->imported.user_buf.nr_pages,
+ 			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,

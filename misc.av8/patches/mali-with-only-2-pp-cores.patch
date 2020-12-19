@@ -1,0 +1,59 @@
+see: https://freenode.irclog.whitequark.org/linux-amlogic/2020-10-12#28121873
+
+this is the mali driver adjusted for the mali 450 found in the S905L2/S905C (?)
+which only has two pp cores instead of the 3 of the S905W/X
+
+diff --git a/driver/src/devicedrv/mali/platform/meson/meson.c b/driver/src/devicedrv/mali/platform/meson/meson.c
+index 26c42cd..3048d54 100644
+--- a/driver/src/devicedrv/mali/platform/meson/meson.c
++++ b/driver/src/devicedrv/mali/platform/meson/meson.c
+@@ -72,7 +72,7 @@
+ 
+ #include <linux/mali/mali_utgard.h>
+ 
+-#define MESON_MALI_MAX_PP	3
++#define MESON_MALI_MAX_PP	2
+ 
+ struct clk *clk_core;
+ 
+@@ -83,17 +83,16 @@ static const struct of_device_id meson_mali_matches[] = {
+ };
+ MODULE_DEVICE_TABLE(of, meson_mali_matches);
+ 
+-struct resource *mali450_create_mp3_resources(unsigned long address,
++struct resource *mali450_create_mp2_resources(unsigned long address,
+ 					int irq_gp, int irq_gpmmu,
+ 					int irq_pp_bcast, int irq_pmu,
+ 					int *irq_pp, int *irq_ppmmu,
+ 					int *len)
+ {
+ 	struct resource target[] = {
+-		MALI_GPU_RESOURCES_MALI450_MP3_PMU(address, irq_gp, irq_gpmmu,
++		MALI_GPU_RESOURCES_MALI450_MP2_PMU(address, irq_gp, irq_gpmmu,
+ 						   irq_pp[0], irq_ppmmu[0],
+ 						   irq_pp[1], irq_ppmmu[1],
+-						   irq_pp[2], irq_ppmmu[2],
+ 						   irq_pp_bcast)
+ 	};
+ 	struct resource *res;
+@@ -211,19 +210,7 @@ int mali_platform_device_register(void)
+ 		goto err_put_clk;
+ 	}
+ 
+-	irq_pp[2] = of_irq_get_byname(np, "pp2");
+-	if (irq_pp[2] < 0) {
+-		pr_err("Couldn't get 'pp2' interrupt\n");
+-		goto err_put_clk;
+-	}
+-
+-	irq_ppmmu[2] = of_irq_get_byname(np, "ppmmu2");
+-	if (irq_ppmmu[2] < 0) {
+-		pr_err("Couldn't get 'ppmmu2' interrupt\n");
+-		goto err_put_clk;
+-	}
+-
+-	mali_res = mali450_create_mp3_resources(res.start,
++	mali_res = mali450_create_mp2_resources(res.start,
+ 						irq_gp, irq_gpmmu,
+ 						irq_pp_bcast, irq_pmu,
+ 						irq_pp, irq_ppmmu,

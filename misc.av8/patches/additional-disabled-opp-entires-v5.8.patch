@@ -1,0 +1,83 @@
+diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi
+index fb0ab27d1f64..d1a0d2604928 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-g12a.dtsi
+@@ -111,6 +111,31 @@
+ 			opp-hz = /bits/ 64 <1800000000>;
+ 			opp-microvolt = <981000>;
+ 		};
++
++// extra opp entries inspired by values from g12b-s922x and g12b-a311d dtsi
++		opp-1908000000 {
++			opp-hz = /bits/ 64 <1908000000>;
++			opp-microvolt = <1001000>;
++			status = "disabled";
++		};
++
++		opp-2016000000 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <1011000>;
++			status = "disabled";
++		};
++
++		opp-2108000000 {
++			opp-hz = /bits/ 64 <2108000000>;
++			opp-microvolt = <1022000>;
++			status = "disabled";
++		};
++
++		opp-2208000000 {
++			opp-hz = /bits/ 64 <2208000000>;
++			opp-microvolt = <1022000>;
++			status = "disabled";
++		};
+ 	};
+ };
+ 
+diff --git a/arch/arm64/boot/dts/amlogic/meson-g12b-s922x.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12b-s922x.dtsi
+index 1e5d0ee5d541..4aa2f0a1f712 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-g12b-s922x.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-g12b-s922x.dtsi
+@@ -135,5 +135,12 @@
+ 			opp-hz = /bits/ 64 <1908000000>;
+ 			opp-microvolt = <1022000>;
+ 		};
++
++// extra opp from: https://github.com/tobetter/linux/commit/c76cac8ac9e72670bd1bee76b7edf8920694b20c
++		opp-2016000000 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <1022000>;
++			status = "disabled";
++		};
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
+index 71317f5aada1..c972bac124ea 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
+@@ -154,6 +154,25 @@
+ 			opp-hz = /bits/ 64 <1908000000>;
+ 			opp-microvolt = <950000>;
+ 		};
++
++// extra opps from: https://forum.odroid.com/viewtopic.php?f=202&t=38557&sid=98e00df339e1ec497b602cd769915483&start=50#p292362
++		opp-2016000000 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <1000000>;
++			status = "disabled";
++		};
++
++		opp-2100000000 {
++			opp-hz = /bits/ 64 <2100000000>;
++			opp-microvolt = <1022000>;
++			status = "disabled";
++		};
++
++		opp-2200000000 {
++			opp-hz = /bits/ 64 <2200000000>;
++			opp-microvolt = <1022000>;
++			status = "disabled";
++		};
+ 	};
+ };
+ 
