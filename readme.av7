@@ -35,6 +35,18 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/meson8m2-dtb.patch
 cp -i /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
 # v5.4 - fix v3d power setup for rpi3
 patch -p1 < /compile/doc/stable/misc.av7/patches/rpi3-v3d-power-fix-armv7l.patch
+# improve rk3288 hdmi timing - based on https://github.com/armbian/build/pull/1887
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4004-drm-rockchip-vop-filter-modes-outside-0.5-pixel-cloc.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4005-drm-rockchip-dw_hdmi-Set-cur_ctr-to-0-always.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4006-drm-rockchip-dw_hdmi-adjust-cklvl-txlvl-for-RF-EMI.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4007-drm-rockchip-dw_hdmi-Use-auto-generated-tables.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4008-drm-rockchip-dw_hdmi-add-default-594Mhz-clk-for-4K-6.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4009-drm-rockchip-dw-hdmi-limit-tmds-to-340mhz.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4010-HACK-drm-rockchip-vop-limit-resolution-to-3840x2160.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4011-MINIARM-set-npll-be-used-for-hdmi-only.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4012-clk-rockchip-rk3288-use-npll-table-to-to-improve-HDM.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4013-clk-rockchip-rk3288-add-more-npll-clocks.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4015-FIXME-Don-t-use-vop_crtc_mode_valid.patch
 
 cp /compile/doc/stable/config.av7 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
