@@ -14,8 +14,6 @@ patch -p1 < /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete.patch
 cp -r /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9
 patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.9.patch
-# v5.4 - disable panfrost gpu node
-patch -p1 < /compile/doc/stable/misc.cbe/patches/disable-panfrost-gpu-node-v5.4.patch
 
 cp /compile/doc/stable/config.cbe /compile/source/linux-stable/.config
 cd /compile/source/linux-stable

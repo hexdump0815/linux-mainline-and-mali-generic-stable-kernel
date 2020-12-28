@@ -3890,7 +3890,7 @@ static int power_control_init(struct platform_device *pdev)
 	}
 #endif /* LINUX_VERSION_CODE >= 3, 12, 0 */
 
-	kbdev->clock = clk_get(kbdev->dev, "g3d");
+	kbdev->clock = clk_get(kbdev->dev, "core");
 	if (IS_ERR_OR_NULL(kbdev->clock)) {
 		err = PTR_ERR(kbdev->clock);
 		kbdev->clock = NULL;
@@ -4823,8 +4823,8 @@ static const struct dev_pm_ops kbase_pm_ops = {
 
 #ifdef CONFIG_OF
 static const struct of_device_id kbase_dt_ids[] = {
-	{ .compatible = "arm,malit6xx" },
-	{ .compatible = "arm,mali-midgard" },
+	{ .compatible = "samsung,exynos5250-mali" },
+	{ .compatible = "arm,mali-t604" },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, kbase_dt_ids);
