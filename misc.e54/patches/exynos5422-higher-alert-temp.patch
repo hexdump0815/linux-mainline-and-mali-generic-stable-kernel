@@ -1,0 +1,184 @@
+diff --git a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
+index 5da2d81e3be2..ea7807f9492f 100644
+--- a/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
++++ b/arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi
+@@ -55,17 +55,17 @@
+ 			polling-delay = <0>;
+ 			trips {
+ 				cpu0_alert0: cpu-alert-0 {
+-					temperature = <50000>; /* millicelsius */
++					temperature = <60000>; /* millicelsius */
+ 					hysteresis = <5000>; /* millicelsius */
+ 					type = "active";
+ 				};
+ 				cpu0_alert1: cpu-alert-1 {
+-					temperature = <60000>; /* millicelsius */
++					temperature = <70000>; /* millicelsius */
+ 					hysteresis = <5000>; /* millicelsius */
+ 					type = "active";
+ 				};
+ 				cpu0_alert2: cpu-alert-2 {
+-					temperature = <70000>; /* millicelsius */
++					temperature = <80000>; /* millicelsius */
+ 					hysteresis = <5000>; /* millicelsius */
+ 					type = "active";
+ 				};
+@@ -81,12 +81,12 @@
+ 				 * interrupt-driven trip: cpu0_alert2
+ 				 */
+ 				cpu0_alert3: cpu-alert-3 {
+-					temperature = <70000>; /* millicelsius */
++					temperature = <80000>; /* millicelsius */
+ 					hysteresis = <10000>; /* millicelsius */
+ 					type = "passive";
+ 				};
+ 				cpu0_alert4: cpu-alert-4 {
+-					temperature = <85000>; /* millicelsius */
++					temperature = <90000>; /* millicelsius */
+ 					hysteresis = <10000>; /* millicelsius */
+ 					type = "passive";
+ 				};
+@@ -144,17 +144,17 @@
+ 			polling-delay = <0>;
+ 			trips {
+ 				cpu1_alert0: cpu-alert-0 {
+-					temperature = <50000>;
++					temperature = <60000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				cpu1_alert1: cpu-alert-1 {
+-					temperature = <60000>;
++					temperature = <70000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				cpu1_alert2: cpu-alert-2 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+@@ -164,12 +164,12 @@
+ 					type = "critical";
+ 				};
+ 				cpu1_alert3: cpu-alert-3 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+ 				cpu1_alert4: cpu-alert-4 {
+-					temperature = <85000>;
++					temperature = <90000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+@@ -217,17 +217,17 @@
+ 			polling-delay = <0>;
+ 			trips {
+ 				cpu2_alert0: cpu-alert-0 {
+-					temperature = <50000>;
++					temperature = <60000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				cpu2_alert1: cpu-alert-1 {
+-					temperature = <60000>;
++					temperature = <70000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				cpu2_alert2: cpu-alert-2 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+@@ -237,12 +237,12 @@
+ 					type = "critical";
+ 				};
+ 				cpu2_alert3: cpu-alert-3 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+ 				cpu2_alert4: cpu-alert-4 {
+-					temperature = <85000>;
++					temperature = <90000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+@@ -290,17 +290,17 @@
+ 			polling-delay = <0>;
+ 			trips {
+ 				cpu3_alert0: cpu-alert-0 {
+-					temperature = <50000>;
++					temperature = <60000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				cpu3_alert1: cpu-alert-1 {
+-					temperature = <60000>;
++					temperature = <70000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				cpu3_alert2: cpu-alert-2 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+@@ -310,12 +310,12 @@
+ 					type = "critical";
+ 				};
+ 				cpu3_alert3: cpu-alert-3 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+ 				cpu3_alert4: cpu-alert-4 {
+-					temperature = <85000>;
++					temperature = <90000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+@@ -363,17 +363,17 @@
+ 			polling-delay = <0>;
+ 			trips {
+ 				gpu_alert0: gpu-alert-0 {
+-					temperature = <50000>;
++					temperature = <60000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				gpu_alert1: gpu-alert-1 {
+-					temperature = <60000>;
++					temperature = <70000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+ 				gpu_alert2: gpu-alert-2 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <5000>;
+ 					type = "active";
+ 				};
+@@ -383,12 +383,12 @@
+ 					type = "critical";
+ 				};
+ 				gpu_alert3: gpu-alert-3 {
+-					temperature = <70000>;
++					temperature = <80000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};
+ 				gpu_alert4: gpu-alert-4 {
+-					temperature = <85000>;
++					temperature = <90000>;
+ 					hysteresis = <10000>;
+ 					type = "passive";
+ 				};

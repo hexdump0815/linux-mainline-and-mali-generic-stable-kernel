@@ -8,6 +8,8 @@
 # add mali gpu support
 patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete.patch
 cp -r /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete/drivers/gpu/arm drivers/gpu
+# raise the temp limits where thermal throttling starts
+patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-higher-alert-temp.patch
 
 # create and enable mc1 dtb - it is basically an xu4 one with hc1 cooling config (i.e. no fan)
 # it should also work for a fanless xu4 most probably although with quite a bit of thermal throttling
@@ -16,6 +18,7 @@ sed -i 's,exynos5422-odroidxu3-common.dtsi,exynos5422-odroidmc1-common.dtsi,g' a
 cp arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi arch/arm/boot/dts/exynos5422-odroidmc1-common.dtsi
 sed -i 's,exynos5422-odroidxu3-trip-points.dtsi,exynos5422-odroidmc1-trip-points.dtsi,g' arch/arm/boot/dts/exynos5422-odroidmc1-common.dtsi
 patch -p0 < /compile/doc/stable/misc.e54/patches/mc1-reduce-cpu-clocks.patch
+git checkout -- arch/arm/boot/dts/Makefile
 patch -p1 < /compile/doc/stable/misc.e54/patches/mc1-enable-dtb.patch
 
 cp /compile/doc/stable/config.e54 /compile/source/linux-stable/.config
@@ -45,7 +48,7 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 mkdir -p /lib/modules/${kver}/extra
 mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable/${kver}-mali-exyno5422.tar.gz /lib/modules/${kver}/extra
+tar cvzf /compile/source/linux-stable/${kver}-mali-exynos5422.tar.gz /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/extra
 # redo the depmod without the mali module
 depmod ${kver}
