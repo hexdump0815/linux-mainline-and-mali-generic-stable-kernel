@@ -9,7 +9,7 @@
 #include "meson-gxl-s905x-p212.dtsi"
 
 / {
-	compatible = "amlogic,p212", "amlogic,s905x", "amlogic,meson-gxl";
+	compatible = "amlogic,mi-box", "amlogic,s905x", "amlogic,meson-gxl";
 	model = "Amlogic Meson GXL (S905X) Xiaomi Mi Box MDZ-16-AB";
 
 	hdmi-connector {
