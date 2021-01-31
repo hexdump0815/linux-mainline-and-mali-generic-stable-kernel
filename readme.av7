@@ -93,9 +93,8 @@ cp -v arch/arm/boot/dts/sun8i-h3-libretech-all-h3-cc.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/rk3288-r89.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/rk3288-tinker.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/rk3288-tinker-s.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rk3288-veyron-jaq.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rk3288-veyron-speedy.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/tegra124-nyan-big.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/rk3288-veyron*.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/tegra124*.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/bcm2836-rpi-2-b.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/bcm2837-rpi-3-b.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dtb /boot/dtb-${kver}
