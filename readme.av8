@@ -9,6 +9,8 @@
 patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
 # add picoseconds delay for eth to work properly on some g12a and sm1 boxes
 patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-fix.patch
+# fix some amlogic eth resets
+patch -p1 < /compile/doc/stable/misc.av8/patches/amlogic-fix-eth-reset.patch
 # some dwmac-meson8b clock fixes - no longer needed as they are in 5.10.14 at least
 #patch -p1 < /compile/doc/stable/misc.av8/patches/dwmac-meson8b-clk-fix.patch
 # v5.4 - fix v3d power setup for rpi3
