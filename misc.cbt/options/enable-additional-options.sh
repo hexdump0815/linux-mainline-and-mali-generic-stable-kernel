@@ -24,26 +24,6 @@ cd /compile/source/linux-stable
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
 ./scripts/config --set-str CONFIG_LOCALVERSION "-stb-cbt"
 
-# unclear if they strictly required to go
-#./scripts/config -d CONFIG_I2C_ARB_GPIO_CHALLENGE
-#./scripts/config -d CONFIG_I2C_DEMUX_PINCTRL
-#./scripts/config -d CONFIG_I2C_CROS_EC
-#./scripts/config -d CONFIG_TOUCHSCREEN_ELAN
-#./scripts/config -d CONFIG_PINCTRL_TEGRA20
-#./scripts/config -d CONFIG_PINCTRL_TEGRA30
-#./scripts/config -d CONFIG_PINCTRL_TEGRA114
-#./scripts/config -d CONFIG_TEGRA_IOMMU_GART
-#./scripts/config -d CONFIG_ARCH_TEGRA_2x_SOC
-#./scripts/config -d CONFIG_ARCH_TEGRA_3x_SOC
-#./scripts/config -d CONFIG_ARCH_TEGRA_114_SOC
-#./scripts/config -d CONFIG_SOC_TEGRA20_VOLTAGE_COUPLER
-#./scripts/config -d CONFIG_SOC_TEGRA30_VOLTAGE_COUPLER
-#./scripts/config -d CONFIG_ARM_TEGRA20_DEVFREQ
-#./scripts/config -d CONFIG_TEGRA20_EMC
-#./scripts/config -d CONFIG_TEGRA30_EMC
-#./scripts/config --set-val CONFIG_ZBOOT_ROM_BSS=0x0
-#./scripts/config --set-val CONFIG_ZBOOT_ROM_TEXT=0x0
-
 for i in `cat /compile/doc/stable/misc.cbt/options/additional-options-*-yes.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -e $i
