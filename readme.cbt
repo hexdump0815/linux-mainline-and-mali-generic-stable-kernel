@@ -9,15 +9,16 @@
 # (not required: and mrvl firmware needs to go into the initramfs via hook)
 
 # patches:
-# none yet
+# fix xusb
+patch -p1 < /compile/doc/stable/misc.cbt/patches/xusb-usb-role-switch.patch
 
 cp /compile/doc/stable/config.cbt /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm
-make tegra_defconfig
-# still experimenting with both
-#make defconfig
+make multi_v7_defconfig
+# kernel-ci uses multi_v7_defconfig so tegra_defconfig should not be required
+#make tegra_defconfig
 /compile/doc/stable/misc.cbt/options/enable-docker-options.sh
 /compile/doc/stable/misc.cbt/options/enable-additional-options.sh
 make oldconfig
