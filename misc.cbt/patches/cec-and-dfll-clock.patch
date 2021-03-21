@@ -1,0 +1,27 @@
+from: https://github.com/reey/PKGBUILDs/blob/master/core/linux-nyan/enable-cec-for-nyan.patch
+and: from: https://github.com/reey/PKGBUILDs/blob/master/core/linux-nyan/enable-CPU-freq.patch
+
+diff --git a/arch/arm/boot/dts/tegra124-nyan.dtsi b/arch/arm/boot/dts/tegra124-nyan.dtsi
+index 3b10f475037f..2a7403fac55a 100644
+--- a/arch/arm/boot/dts/tegra124-nyan.dtsi
++++ b/arch/arm/boot/dts/tegra124-nyan.dtsi
+@@ -58,6 +58,10 @@
+ 		};
+ 	};
+ 
++	cec@70015000 {
++		status = "okay";
++	};
++
+ 	gpu@0,57000000 {
+ 		status = "okay";
+ 
+@@ -524,7 +528,7 @@
+ 
+ 	/* CPU DFLL clock */
+ 	clock@70110000 {
+-		status = "disabled";
++		status = "okay";
+ 		vdd-cpu-supply = <&vdd_cpu>;
+ 		nvidia,i2c-fs-rate = <400000>;
+ 	};

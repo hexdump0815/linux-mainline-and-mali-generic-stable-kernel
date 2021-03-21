@@ -11,6 +11,8 @@
 # patches:
 # fix xusb
 patch -p1 < /compile/doc/stable/misc.cbt/patches/xusb-usb-role-switch.patch
+# the dfll part is required for cpu freq scaling to work
+patch -p1 < /compile/doc/stable/misc.cbt/patches/cec-and-dfll-clock.patch
 
 cp /compile/doc/stable/config.cbt /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
