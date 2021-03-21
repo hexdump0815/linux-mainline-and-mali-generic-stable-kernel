@@ -8,9 +8,9 @@
 # set mac addr on kernel cmdline - otherwise a random one is generated
 patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
 # add picoseconds delay for eth to work properly on some g12a and sm1 boxes
-patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-fix.patch
-# fix some amlogic eth resets
-patch -p1 < /compile/doc/stable/misc.av8/patches/amlogic-fix-eth-reset.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-fix-v5.10.25.patch
+# fix some amlogic eth resets - this already made it into v5.10.25
+#patch -p1 < /compile/doc/stable/misc.av8/patches/amlogic-fix-eth-reset.patch
 # some dwmac-meson8b clock fixes - no longer needed as they are in 5.10.14 at least
 #patch -p1 < /compile/doc/stable/misc.av8/patches/dwmac-meson8b-clk-fix.patch
 # v5.4 - fix v3d power setup for rpi3
@@ -36,9 +36,9 @@ cp /compile/doc/stable/config.av8 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm64
-# make defconfig
-# /compile/doc/stable/misc.av8/options/enable-docker-options.sh
-# /compile/doc/stable/misc.av8/options/enable-additional-options.sh
+make defconfig
+/compile/doc/stable/misc.av8/options/enable-docker-options.sh
+/compile/doc/stable/misc.av8/options/enable-additional-options.sh
 make oldconfig
 make -j 4 Image dtbs modules
 cd tools/perf
