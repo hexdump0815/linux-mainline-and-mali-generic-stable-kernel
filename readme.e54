@@ -25,9 +25,9 @@ cp /compile/doc/stable/config.e54 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm
-# make exynos_defconfig
-# /compile/doc/stable/misc.e54/options/enable-docker-options.sh
-# /compile/doc/stable/misc.e54/options/enable-additional-options.sh
+make exynos_defconfig
+/compile/doc/stable/misc.e54/options/enable-docker-options.sh
+/compile/doc/stable/misc.e54/options/enable-additional-options.sh
 make oldconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
