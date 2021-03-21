@@ -52,9 +52,9 @@ cp /compile/doc/stable/config.av7 /compile/source/linux-stable/.config
 cd /compile/source/linux-stable
 
 export ARCH=arm
-# make multi_v7_defconfig
-# /compile/doc/stable/misc.av7/options/enable-docker-options.sh
-# /compile/doc/stable/misc.av7/options/enable-additional-options.sh
+make multi_v7_defconfig
+/compile/doc/stable/misc.av7/options/enable-docker-options.sh
+/compile/doc/stable/misc.av7/options/enable-additional-options.sh
 make oldconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
