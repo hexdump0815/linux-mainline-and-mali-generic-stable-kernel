@@ -1,0 +1,32 @@
+diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+index 2bcbdf8a39bf..59c3eb638776 100644
+--- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
++++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+@@ -188,6 +188,11 @@
+ 	samsung,invert-vclk;
+ };
+ 
++&gpu {
++	mali-supply = <&buck4_reg>;
++	status = "okay";
++};
++
+ &hdmi {
+ 	status = "okay";
+ 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
+diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+index 60ab0effe474..f75d6036490a 100644
+--- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
++++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+@@ -197,6 +197,11 @@
+ 	samsung,invert-vclk;
+ };
+ 
++&gpu {
++	mali-supply = <&buck4_reg>;
++	status = "okay";
++};
++
+ &hdmi {
+ 	status = "okay";
+ 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;

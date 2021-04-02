@@ -1,0 +1,78 @@
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# name: stb-cbp
+
+# patches:
+# this one is needed to make suspend work with v5.4+
+patch -p1 < /compile/doc/stable/misc.cbe/patches/snow-v5-4-suspend-fix.patch
+# add mali gpu support
+patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete.patch
+cp -r /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete/drivers/gpu/arm drivers/gpu
+# enable the gpu for peach pit and peach pi
+patch -p1 < /compile/doc/stable/misc.cbp/patches/enable-gpu.patch
+
+cp /compile/doc/stable/config.cbp /compile/source/linux-stable/.config
+cd /compile/source/linux-stable
+
+export ARCH=arm
+# no defconfig as it is based on a handcrafted config
+/compile/doc/stable/misc.cbp/options/enable-docker-options.sh
+/compile/doc/stable/misc.cbp/options/enable-additional-options.sh
+make oldconfig
+make -j 4 zImage dtbs modules
+cd tools/perf
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+# find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# move away the exynos5420 mali module and tar it separately beforehand
+mkdir -p /lib/modules/${kver}/extra
+mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
+tar cvzf /compile/source/linux-stable/${kver}-mali-exynos5420.tar.gz /lib/modules/${kver}/extra
+rm -rf /lib/modules/${kver}/extra
+# redo the depmod without the mali module
+depmod ${kver}
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-snow.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-snow-rev5.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-spring.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5420-peach-pit.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5800-peach-pi.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+#mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.cbp /compile/doc/stable/config.cbp.old
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbp
+cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbp-${kver}
+cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+
+
+/etc/extlinux/extlinux.conf
+TIMEOUT 30
+DEFAULT v51027
+
+MENU TITLE peach pit sd boot options
+
+LABEL v51027
+      MENU LABEL v5.10.27 kernel mmcblk2
+      LINUX ../zImage-5.10.27-stb-cbp+
+      INITRD ../initrd.img-5.10.27-stb-cbp+
+      FDT ../dtb-5.10.27-stb-cbp+/exynos5420-peach-pit.dtb
+      APPEND console=tty1 root=/dev/mmcblk2p4 ro rootwait noinitrd net.ifnames=0 ipv6.disable=1 fsck.repair=yes
