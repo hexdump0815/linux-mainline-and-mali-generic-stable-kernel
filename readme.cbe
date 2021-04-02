@@ -52,6 +52,9 @@ cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/exynos5250-snow.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/exynos5250-snow-rev5.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5250-spring.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5420-peach-pit.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/exynos5800-peach-pi.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
