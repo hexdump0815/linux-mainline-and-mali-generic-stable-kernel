@@ -30,12 +30,12 @@ cd /compile/source/linux-stable
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
 ./scripts/config --set-str CONFIG_LOCALVERSION "-stb-cbe"
 
-for i in `cat /compile/doc/stable/misc.cbe/options/additional-options-*-yes.txt`; do
+for i in `cat /compile/doc/stable/misc.cbe/options/additional-options-*-yes.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -e $i
 done
 
-for i in `cat /compile/doc/stable/misc.cbe/options/additional-options-*-mod.txt`; do
+for i in `cat /compile/doc/stable/misc.cbe/options/additional-options-*-mod.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -m $i
 done

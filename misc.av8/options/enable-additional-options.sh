@@ -20,12 +20,12 @@ cd /compile/source/linux-stable
 ./scripts/config -d CONFIG_LOCALVERSION_AUTO
 ./scripts/config --set-str CONFIG_LOCALVERSION "-stb-av8"
 
-for i in `cat /compile/doc/stable/misc.av8/options/additional-options-*-yes.txt`; do
+for i in `cat /compile/doc/stable/misc.av8/options/additional-options-*-yes.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -e $i
 done
 
-for i in `cat /compile/doc/stable/misc.av8/options/additional-options-*-mod.txt`; do
+for i in `cat /compile/doc/stable/misc.av8/options/additional-options-*-mod.txt | grep -v ^#`; do
   echo $i
   ./scripts/config -m $i
 done
