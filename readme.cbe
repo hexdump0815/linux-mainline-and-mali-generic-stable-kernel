@@ -56,6 +56,15 @@ cp -v arch/arm/boot/dts/exynos5250-spring.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/exynos5420-peach-pit.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/exynos5800-peach-pi.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
+# start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
+cp arch/arm/boot/zImage zImage
+dd if=/dev/zero of=bootloader.bin bs=512 count=1
+cp /compile/doc/stable/misc.cbe/misc/cmdline cmdline
+mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b arch/arm/boot/dts/exynos5250-snow.dtb -b arch/arm/boot/dts/exynos5250-snow-rev5.dtb kernel.itb
+vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
+cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
+rm -f zImage cmdline bootloader.bin kernel.itb vmlinux.kpart
+# end chromebook special
 cd /boot
 update-initramfs -c -k ${kver}
 #mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
