@@ -21,6 +21,7 @@
 # use the files from misc.av7 as we need exactly the same ones here
 
 # patches:
+# legacy mali kernel driver
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
 cp -r /compile/doc/stable/misc.av7/patches/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9
