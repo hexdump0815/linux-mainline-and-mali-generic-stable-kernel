@@ -21,7 +21,7 @@ export ARCH=arm
 /compile/doc/stable/misc.cbp/options/enable-docker-options.sh
 /compile/doc/stable/misc.cbp/options/enable-additional-options.sh
 make oldconfig
-make -j 4 zImage dtbs modules
+make -j 8 zImage dtbs modules
 cd tools/perf
 make
 cd ../power/cpupower
