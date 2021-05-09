@@ -2,6 +2,20 @@ diff --git a/arch/arm/boot/dts/rk3288-r89.dts b/arch/arm/boot/dts/rk3288-r89.dts
 index 55467bc30fa6..560f2f2e56a2 100644
 --- a/arch/arm/boot/dts/rk3288-r89.dts
 +++ b/arch/arm/boot/dts/rk3288-r89.dts
+@@ -12,6 +12,13 @@
+ 	model = "Netxeon R89";
+ 	compatible = "netxeon,r89", "rockchip,rk3288";
+ 
++ 
++	aliases {
++		mmc0 = &sdmmc;
++		mmc1 = &sdio0;
++		mmc2 = &emmc;
++	};
++
+ 	memory@0 {
+ 		device_type = "memory";
+ 		reg = <0x0 0x0 0x0 0x80000000>;
 @@ -48,6 +48,18 @@
  		pinctrl-0 = <&ir_int>;
  	};
