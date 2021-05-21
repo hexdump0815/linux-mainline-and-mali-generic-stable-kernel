@@ -1,0 +1,104 @@
+from: https://forum.odroid.com/viewtopic.php?p=328443#p328443
+
+diff --git a/drivers/gpu/drm/exynos/exynos_hdmi.c b/drivers/gpu/drm/exynos/exynos_hdmi.c
+index dc01c188c..855c491c2 100644
+--- a/drivers/gpu/drm/exynos/exynos_hdmi.c
++++ b/drivers/gpu/drm/exynos/exynos_hdmi.c
+@@ -109,7 +115,6 @@ struct hdmi_driver_data {
+ 
+ struct hdmi_audio {
+ 	struct platform_device		*pdev;
+-	struct hdmi_audio_infoframe	infoframe;
+ 	struct hdmi_codec_params	params;
+ 	bool				mute;
+ };
+@@ -785,15 +790,19 @@ static int hdmi_clk_set_parents(struct hdmi_context *hdata, bool to_phy)
+ 
+ static int hdmi_audio_infoframe_apply(struct hdmi_context *hdata)
+ {
+-	struct hdmi_audio_infoframe *infoframe = &hdata->audio.infoframe;
+ 	u8 buf[HDMI_INFOFRAME_SIZE(AUDIO)];
+ 	int len;
+ 
+-	len = hdmi_audio_infoframe_pack(infoframe, buf, sizeof(buf));
++	if (hdata->dvi_mode || hdata->drv_data->type != HDMI_TYPE14)
++		return 0;
++
++	len = hdmi_audio_infoframe_pack(&hdata->audio.params.cea, buf, sizeof(buf));
+ 	if (len < 0)
+ 		return len;
+ 
+-	hdmi_reg_writeb(hdata, HDMI_AUI_CON, HDMI_AUI_CON_EVERY_VSYNC);
++	// disable before re-configuration to prevent transmission of partial packets.
++	// it will be conditionally re-activated in hdmi_audio_control()
++	hdmi_reg_writeb(hdata, HDMI_AUI_CON, HDMI_AUI_CON_NO_TRAN);
+ 	hdmi_reg_write_buf(hdata, HDMI_AUI_HEADER0, buf, len);
+ 
+ 	return 0;
+@@ -1117,8 +1126,10 @@ static void hdmi_audio_control(struct hdmi_context *hdata)
+ 	if (hdata->dvi_mode)
+ 		return;
+ 
+-	hdmi_reg_writeb(hdata, HDMI_AUI_CON, enable ?
+-			HDMI_AVI_CON_EVERY_VSYNC : HDMI_AUI_CON_NO_TRAN);
++	if (hdata->drv_data->type == HDMI_TYPE14) {
++		hdmi_reg_writeb(hdata, HDMI_AUI_CON, enable ?
++			HDMI_AUI_CON_EVERY_VSYNC : HDMI_AUI_CON_NO_TRAN);
++	}
+ 	hdmi_reg_writemask(hdata, HDMI_CON_0, enable ?
+ 			HDMI_ASP_EN : HDMI_ASP_DIS, HDMI_ASP_MASK);
+ }
+@@ -1567,10 +1578,15 @@ static void hdmi_audio_shutdown(struct device *dev, void *data)
+ 
+ 	mutex_lock(&hdata->mutex);
+ 
++	memset(&hdata->audio.params, 0, sizeof(struct hdmi_codec_params));
++	hdmi_audio_infoframe_init(&hdata->audio.params.cea);
+ 	hdata->audio.mute = true;
+ 
+-	if (hdata->powered)
++	if (hdata->powered) {
++		hdmi_audio_config(hdata);
++		hdmi_audio_infoframe_apply(hdata);
+ 		hdmi_audio_control(hdata);
++	}
+ 
+ 	mutex_unlock(&hdata->mutex);
+ }
+@@ -1594,10 +1610,12 @@ static int hdmi_audio_hw_params(struct device *dev, void *data,
+ 	mutex_lock(&hdata->mutex);
+ 
+ 	hdata->audio.params = *params;
++	hdata->audio.mute = false;
+ 
+ 	if (hdata->powered) {
+ 		hdmi_audio_config(hdata);
+ 		hdmi_audio_infoframe_apply(hdata);
++		hdmi_audio_control(hdata);
+ 	}
+ 
+ 	mutex_unlock(&hdata->mutex);
+@@ -1942,7 +1960,6 @@ static int hdmi_get_phy_io(struct hdmi_context *hdata)
+ 
+ static int hdmi_probe(struct platform_device *pdev)
+ {
+-	struct hdmi_audio_infoframe *audio_infoframe;
+ 	struct device *dev = &pdev->dev;
+ 	struct hdmi_context *hdata;
+ 	struct resource *res;
+@@ -2022,12 +2039,9 @@ static int hdmi_probe(struct platform_device *pdev)
+ 
+ 	pm_runtime_enable(dev);
+ 
+-	audio_infoframe = &hdata->audio.infoframe;
+-	hdmi_audio_infoframe_init(audio_infoframe);
+-	audio_infoframe->coding_type = HDMI_AUDIO_CODING_TYPE_STREAM;
+-	audio_infoframe->sample_size = HDMI_AUDIO_SAMPLE_SIZE_STREAM;
+-	audio_infoframe->sample_frequency = HDMI_AUDIO_SAMPLE_FREQUENCY_STREAM;
+-	audio_infoframe->channels = 2;
++	hdmi_audio_infoframe_init(&hdata->audio.params.cea);
++	// start muted. audio driver first needs to call hdmi_audio_hw_params()
++	hdata->audio.mute = true;
+ 
+ 	ret = hdmi_register_audio_device(hdata);
+ 	if (ret)

@@ -12,6 +12,8 @@ patch -p1 < /compile/doc/stable/misc.exy/patches/eth-hw-addr-v5.10.patch
 # see: https://lore.kernel.org/lkml/26ff3deb-4b8d-7dd2-2418-d56f6dcea313@samsung.com/
 # via: https://forum.odroid.com/viewtopic.php?p=296896#p296896
 patch -p1 < /compile/doc/stable/misc.exy/patches/fix-odroid-x2-usb.patch
+# via: https://forum.odroid.com/viewtopic.php?p=328443#p328443
+patch -p1 < /compile/doc/stable/misc.exy/patches/exynos-hdmi-infoframes-patch.txt
 # add some extra cpu clocks for odroid x (disabled by default) and raise temp limits for x/x2 like u3
 patch -p1 < /compile/doc/stable/misc.exy/patches/add-disabled-extra-cpu-clocks-odroid-x.patch
 # add mali support
