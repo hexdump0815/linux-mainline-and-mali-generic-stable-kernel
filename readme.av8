@@ -2,6 +2,7 @@
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# - /compile/doc/kernel-config-options - /compile/doc/kernel-config-options
 # name: stb-av8
 
 # patches:
@@ -37,7 +38,11 @@ cd /compile/source/linux-stable
 
 export ARCH=arm64
 make defconfig
-/compile/doc/stable/misc.av8/options/enable-docker-options.sh
+/compile/doc/kernel-config-options/enable-docker-options.sh
+/compile/doc/kernel-config-options/remove-unused-options.sh
+/compile/doc/kernel-config-options/enable-generic-options.sh
+( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/stable/options.av8
+/compile/doc/stable/misc.av8/options/remove-unused-options.sh
 /compile/doc/stable/misc.av8/options/enable-additional-options.sh
 make oldconfig
 make -j 4 Image dtbs modules
