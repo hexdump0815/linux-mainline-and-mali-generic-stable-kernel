@@ -1,2 +1,0 @@
-# moved over from yes
-CONFIG_MOUSE_ELAN_I2C

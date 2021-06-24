@@ -2,6 +2,7 @@
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-cbt
 
 # IMPORTANT: this is work in progress and not yet ready to use!
@@ -14,16 +15,10 @@ patch -p1 < /compile/doc/stable/misc.cbt/patches/xusb-usb-role-switch.patch
 # the dfll part is required for cpu freq scaling to work
 patch -p1 < /compile/doc/stable/misc.cbt/patches/cec-and-dfll-clock.patch
 
-cp /compile/doc/stable/config.cbt /compile/source/linux-stable/.config
-cd /compile/source/linux-stable
-
 export ARCH=arm
-make multi_v7_defconfig
-# kernel-ci uses multi_v7_defconfig so tegra_defconfig should not be required
-#make tegra_defconfig
-/compile/doc/stable/misc.cbt/options/enable-docker-options.sh
-/compile/doc/stable/misc.cbt/options/enable-additional-options.sh
-make oldconfig
+scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbt/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbt/options/additional-options-special.cfg
+( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/stable/options.cbt
+make olddefconfig
 make -j 4 bzImage dtbs modules
 cd tools/perf
 make
