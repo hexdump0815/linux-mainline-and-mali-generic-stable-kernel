@@ -1,0 +1,24 @@
+/*
+ * Google Peach Pit board device tree source
+ *
+ * Copyright (c) 2013 Google, Inc
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include "exynos542x.dtsi"
+
+/ {
+
+	compatible = "samsung,exynos5420";
+
+	clock: clock-controller@0x10010000 {
+		compatible = "samsung,exynos5420-clock";
+	};
+
+	mfc: codec@11000000 {
+		compatible = "samsung,mfc-v7";
+	};
+};

@@ -1,0 +1,40 @@
+/*
+ * Google Peach Pit Rev 3/5 board device tree source
+ *
+ * Copyright (c) 2013 Google, Inc
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+#include "exynos5420.dtsi"
+#include "exynos542x-peach.dtsi"
+#include "exynos5420-peach-pit.dtsi"
+#include "cros-ec-keyboard.dtsi"
+
+/ {
+	model = "Google Peach Pit Rev 3/5";
+
+	compatible = "google,pit-rev5", "google,pit-rev3", "google,pit",
+		"google,peach", "samsung,exynos5420";
+
+	/* Avoid suspend/resume problems on non-screened silicon */
+	hsi2c@12CA0000 {
+		max77802-pmic@9 {
+			voltage-regulators {
+				buck3_reg: BUCK3 {
+					regulator-op-mode = <2>;
+				};
+			};
+		};
+	};
+
+	/* Override HDMI-en-supply back to FET2 */
+	hdmi {
+		max77802-pmic@9 {
+			hdmi-en-supply = <&tps65090_fet2>;
+		};
+	};
+};

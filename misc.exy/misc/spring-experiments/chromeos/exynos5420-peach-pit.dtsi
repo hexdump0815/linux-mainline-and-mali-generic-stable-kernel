@@ -1,0 +1,112 @@
+/*
+ * Common device tree include for all Peach Pit board revisions
+ *
+ * Copyright (c) 2013 Google, Inc
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/ {
+	pinctrl@13400000 {
+		ps8625_reset: ps8625-reset {
+			samsung,pins = "gpy7-7";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		ps8625_sleep: ps8625-sleep {
+			samsung,pins = "gpx3-5";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+	};
+
+	lcd_display_timings: display-timings {
+		native-mode = <&timing0>;
+		timing0: 1366x768 {
+			clock-frequency = <70589280>;
+			hactive = <1366>;
+			vactive = <768>;
+			hfront-porch = <40>;
+			hback-porch = <40>;
+			hsync-len = <32>;
+			vback-porch = <10>;
+			vfront-porch = <12>;
+			vsync-len = <6>;
+		};
+	};
+
+	/* hsi2c7 */
+	hsi2c@12CD0000 {
+		ps8625-bridge@48 {
+			compatible = "parade,ps8625";
+			reg = <0x48>;
+			sleep-gpio = <&gpx3 5 0>;
+			reset-gpio = <&gpy7 7 0>;
+			lane-count = <2>;
+			use-external-pwm;
+			pinctrl-names = "default";
+			pinctrl-0 = <&ps8625_sleep &ps8625_reset>;
+			display-timings = <&lcd_display_timings>;
+		};
+
+		max98090: codec@10 {
+			compatible = "maxim,max98090";
+		};
+	};
+
+	fimd {
+		samsung,fimd-src-clk-rate = <70500000>;
+		samsung,use-fimd-dithering;
+		samsung-rgb-dithpos = <6 6 6>;
+	};
+
+	lcd_dp0: lcd_panel0 {
+		lcd-htiming = <40 40 32 1366>;
+		lcd-vtiming = <10 12 6 768>;
+		lcd-dimensions = <256 144>;
+	};
+
+	display-port-controller {
+		samsung,link-rate = <0x06>;
+	};
+
+	usb3_phy0: usbphy@12100000 {
+		samsung,txpreempamptune = <0x1>;
+	};
+
+	usb3_phy1: usbphy@12500000 {
+		samsung,txpreempamptune = <0x1>;
+	};
+
+	sound {
+		compatible = "google,daisy-audio-max98090";
+	};
+
+	int-voltage-locker {
+		compatible = "regulator-locker";
+		vin1-supply = <&buck2_reg>; /* vdd_arm_real */
+		vin2-supply = <&buck3_reg>; /* vdd_int_real */
+		maximum-spread = <350000>;
+		locker-regulators {
+			vout1 {
+				regulator-name = "vdd_arm";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <1500000>;
+				regulator-always-on;
+				regulator-boot-on;
+			};
+			vout2 {
+				regulator-name = "vdd_int";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <1400000>;
+				regulator-always-on;
+				regulator-boot-on;
+			};
+		};
+	};
+};

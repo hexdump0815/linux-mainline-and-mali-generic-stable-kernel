@@ -1,0 +1,29 @@
+/*
+ * Google Peach Pi board device tree source
+ *
+ * Copyright (c) 2013 Google, Inc
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include "exynos542x.dtsi"
+
+/ {
+
+	compatible = "samsung,exynos5422";
+
+	clock: clock-controller@0x10010000 {
+		compatible = "samsung,exynos5422-clock";
+	};
+
+	cam_pd: pd@10045100 {
+		compatible = "samsung,exynos4210-pd";
+		reg = <0x10045100 0x20>;
+	};
+
+	mfc: codec@11000000 {
+		compatible = "samsung,mfc-v8";
+	};
+};

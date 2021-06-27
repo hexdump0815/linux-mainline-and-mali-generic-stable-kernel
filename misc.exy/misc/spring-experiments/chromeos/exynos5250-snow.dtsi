@@ -1,0 +1,518 @@
+/*
+ * Google Snow board device tree source
+ *
+ * Copyright (c) 2012 Google, Inc
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+*/
+
+/ {
+	aliases {
+		i2c104 = &i2c_104;
+	};
+
+	pinctrl@11400000 {
+		sd3_clk: sd3-clk {
+			samsung,pin-drv = <0>;
+		};
+
+		sd3_cmd: sd3-cmd {
+			samsung,pin-pud = <3>;
+			samsung,pin-drv = <0>;
+		};
+
+		sd3_bus4: sd3-bus-width4 {
+			samsung,pin-drv = <0>;
+		};
+
+		ec_irq: ec-irq {
+			samsung,pins = "gpx1-6";
+			samsung,pin-function = <0>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		lid_irq: lid-irq {
+			samsung,pins = "gpx3-5";
+			samsung,pin-function = <0>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		ptn3460_gpios: ptn3460-gpios {
+			samsung,pins = "gpy2-5", "gpx1-5";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		tps65090_irq: tps65090-irq {
+			samsung,pins = "gpx2-6";
+			samsung,pin-function = <0>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		usb2_vbus_en: usb2-vbus-en {
+			samsung,pins = "gpx1-1";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		usb3_phyclk_en: usb3-phyclk-en {
+			samsung,pins = "gpy1-1";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		usb3_vbus_en: usb3-vbus-en {
+			samsung,pins = "gpx2-7";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		backlight_pwm: backlight-pwm {
+			samsung,pins = "gpb2-0";
+			samsung,pin-function = <2>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		backlight_en: backlight-en {
+			samsung,pins = "gpx3-0";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+	};
+
+	pinctrl@13400000 {
+		arb_their_claim: arb-their-claim {
+			samsung,pins = "gpe0-4";
+			samsung,pin-function = <0>;
+			samsung,pin-pud = <3>;
+			samsung,pin-drv = <0>;
+		};
+
+		arb_our_claim: arb-our-claim {
+			samsung,pins = "gpf0-3";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		wwan_en: wwan-en {
+			samsung,pins = "gpe0-0";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&power_key_irq &lid_irq>;
+
+		lid-switch {
+			label = "Lid";
+			gpios = <&gpx3 5 1>;
+			linux,input-type = <5>; /* EV_SW */
+			linux,code = <0>; /* SW_LID */
+			debounce-interval = <1>;
+			gpio-key,wakeup;
+		};
+	};
+
+	dwmmc2@12220000 {
+		disable-mmc;
+	};
+
+	i2c-arbitrator {
+		compatible = "i2c-arb-gpio-challenge";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		i2c-parent = <&{/i2c@12CA0000}>;
+
+		our-claim-gpio = <&gpf0 3 1>;
+		their-claim-gpios = <&gpe0 4 1>;
+		slew-delay-us = <10>;
+		wait-retry-us = <3000>;
+		wait-free-us = <50000>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&arb_our_claim &arb_their_claim>;
+
+		/* Use ID 104 as a hint that we're on physical bus 4 */
+		i2c_104: i2c@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			ec: cros-ec@1e {
+				compatible = "google,cros-ec-i2c";
+				reg = <0x1e>;
+				interrupts = <6 0>;
+				interrupt-parent = <&gpx1>;
+				pinctrl-names = "default";
+				pinctrl-0 = <&ec_irq>;
+				wakeup-source;
+
+				nv-storage {
+					compatible = "google,cros-ec-vbc";
+				};
+			};
+
+			power-regulator {
+				compatible = "ti,tps65090";
+				reg = <0x48>;
+
+				/*
+				 * Config irq to disable internal pulls
+				 * even though we run in polling mode.
+				 */
+				pinctrl-names = "default";
+				pinctrl-0 = <&tps65090_irq>;
+
+				vsys1-supply = <&vbat>;
+				vsys2-supply = <&vbat>;
+				vsys3-supply = <&vbat>;
+				infet1-supply = <&vbat>;
+				infet2-supply = <&vbat>;
+				infet3-supply = <&vbat>;
+				infet4-supply = <&vbat>;
+				infet5-supply = <&vbat>;
+				infet6-supply = <&vbat>;
+				infet7-supply = <&vbat>;
+				vsys-l1-supply = <&vbat>;
+				vsys-l2-supply = <&vbat>;
+
+				regulators {
+					dcdc1 {
+						ti,enable-ext-control;
+					};
+					dcdc2 {
+						ti,enable-ext-control;
+					};
+					dcdc3 {
+						ti,enable-ext-control;
+					};
+					fet1 {
+						regulator-name = "vcd_led";
+						ti,overcurrent-wait = <3>;
+					};
+					tps65090_fet2: fet2 {
+						regulator-name = "video_mid";
+						regulator-always-on;
+						ti,overcurrent-wait = <3>;
+					};
+					fet3 {
+						regulator-name = "wwan_r";
+						regulator-always-on;
+						ti,overcurrent-wait = <3>;
+					};
+					fet4 {
+						regulator-name = "sdcard";
+						ti,overcurrent-wait = <3>;
+					};
+					fet5 {
+						regulator-name = "camout";
+						regulator-always-on;
+						ti,overcurrent-wait = <3>;
+					};
+					fet6 {
+						regulator-name = "lcd_vdd";
+						ti,overcurrent-wait = <3>;
+					};
+					tps65090_fet7: fet7 {
+						regulator-name = "video_mid_1a";
+						regulator-always-on;
+						ti,overcurrent-wait = <3>;
+					};
+					ldo1 {
+					};
+					ldo2 {
+					};
+				};
+
+				charger {
+					compatible = "ti,tps65090-charger";
+				};
+			};
+
+			battery: sbs-battery@b {
+				compatible = "sbs,sbs-battery";
+				reg = <0xb>;
+				sbs,poll-retry-count = <1>;
+				sbs,i2c-retry-count = <2>;
+			};
+		};
+	};
+
+	/*
+	 * On Snow we've got SIP WiFi and so can keep drive strengths low to
+	 * reduce EMI.
+	 */
+	dwmmc3@12230000 {
+		/*
+		 * The current best way to ensure that reset/enable and clocks
+		 * are available before we try to probe the WiFi card is through
+		 * a chain of regulators.
+		 */
+		vmmc-supply = <&wifi_en_regulator>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
+		edge-triggered-interrupts;
+	};
+
+	wwan-en {
+		compatible = "regulator-fixed";
+		regulator-name = "wwan-en";
+		gpio = <&gpe0 0 0>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+		pinctrl-names = "default";
+		pinctrl-0 = <&wwan_en>;
+	};
+
+	usb@12000000 {
+		samsung,vbus-gpio = <&gpx2 7 0>;
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&usb3_vbus_en>;
+	};
+
+	usbphy@12100000 {
+		samsung,phyclk-gpio = <&gpy1 1 0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&usb3_phyclk_en>;
+	};
+
+	usb@12110000 {
+		samsung,vbus-gpio = <&gpx1 1 0>;
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&usb2_vbus_en>;
+	};
+
+	usb@12120000 {
+		status = "okay";
+	};
+
+	fimd {
+		samsung,fimd-vidout-rgb;
+		samsung,fimd-inv-vclk;
+		samsung,default-window = <0>;
+		samsung,cursor-window = <4>;
+		samsung,fimd-win-bpp = <32>;
+		samsung,fimd-src-clk-rate = <70500000>;
+		samsung,use-mie-dithering;
+	};
+
+	lcd_dp0: lcd_panel0 {
+		lcd-htiming = <40 40 32 1366>;
+		lcd-vtiming = <10 12 6 768>;
+		lcd-dimensions = <256 144>;
+	};
+
+	display-port-controller {
+		samsung,dp-display = <&lcd_dp0>;
+		samsung,dp-frame-rate = <60>;
+		samsung,color-space = <0>;
+		samsung,dynamic-range = <0>;
+		samsung,ycbcr-coeff = <0>;
+		samsung,color-depth = <1>;
+		samsung,link-rate = <0x0a>;
+		samsung,lane-count = <2>;
+	};
+
+	hdmi {
+		hdmi-en-supply = <&tps65090_fet7>;
+		vdd-supply = <&ldo8_reg>;
+		vdd_osc-supply = <&ldo10_reg>;
+		vdd_pll-supply = <&ldo8_reg>;
+	};
+
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm 0 1000000 0>;
+		max-brightness = <2800>;
+		default-brightness-level = <2800>;
+		enable-gpio = <&gpx3 0 0>;
+		pinctrl-0 = <&backlight_pwm &backlight_en>;
+		pinctrl-names = "default";
+	};
+
+	i2c@12C90000 {
+		tpm {
+			compatible = "infineon,slb9635tt";
+			reg = <0x20>;
+		};
+	};
+
+	lcd_display_timings: display-timings {
+		native-mode = <&timing0>;
+		timing0: 1366x768 {
+			clock-frequency = <70589280>;
+			hactive = <1366>;
+			vactive = <768>;
+			hfront-porch = <40>;
+			hback-porch = <40>;
+			hsync-len = <32>;
+			vback-porch = <10>;
+			vfront-porch = <12>;
+			vsync-len = <6>;
+		};
+	};
+
+	i2c@12CD0000 {
+		ptn3460-bridge@20 {
+			compatible = "nxp,ptn3460";
+			reg = <0x20>;
+			powerdown-gpio = <&gpy2 5 0>;
+			reset-gpio = <&gpx1 5 0>;
+			edid-emulation = <5>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&ptn3460_gpios>;
+			display-timings = <&lcd_display_timings>;
+		};
+	};
+
+	fixed-rate-clocks {
+		xxti {
+			compatible = "samsung,clock-xxti";
+			clock-frequency = <24000000>;
+		};
+	};
+
+	pinctrl@11400000 {
+		gpa0: gpa0 {
+			powerdown-settings = <6 6 6 6 3 3 2 2>;
+		};
+		gpa1: gpa1 {
+			powerdown-settings = <3 3 2 2 3 3>;
+		};
+		gpa2: gpa2 {
+			powerdown-settings = <2 2 2 2 3 2 2 2>;
+		};
+		gpb0: gpb0 {
+			powerdown-settings = <3 3 3 3 3>;
+		};
+		gpb1: gpb1 {
+			powerdown-settings = <3 3 3 3 3>;
+		};
+		gpb2: gpb2 {
+			powerdown-settings = <3 3 2 2>;
+		};
+		gpb3: gpb3 {
+			powerdown-settings = <2 2 2 2>;
+		};
+		gpc0: gpc0 {
+			powerdown-settings = <6 2 2 2 2 2 2>;
+		};
+		gpc1: gpc1 {
+			powerdown-settings = <2 2 2 2>;
+		};
+		gpc2: gpc2 {
+			powerdown-settings = <3 1 3 3 3 3 3>;
+		};
+		gpc3: gpc3 {
+			powerdown-settings = <6 2 1 2 2 2 2>;
+		};
+		gpc4: gpc4 {
+			powerdown-settings = <6 2 3 2 2 2 2>;
+		};
+		gpd0: gpd0 {
+			powerdown-settings = <6 6 3 3>;
+		};
+		gpd1: gpd1 {
+			powerdown-settings = <6 6 6 3 3 6 1 1>;
+		};
+		gpy0: gpy0 {
+			powerdown-settings = <3 3 6 3 3 3>;
+		};
+		gpy1: gpy1 {
+			powerdown-settings = <5 3 3 3>;
+		};
+		gpy2: gpy2 {
+			powerdown-settings = <3 3 3 3 3 2>;
+		};
+		gpy3: gpy3 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpy4: gpy4 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpy5: gpy5 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpy6: gpy6 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+	};
+	pinctrl@13400000 {
+		gpe0: gpe0 {
+			powerdown-settings = <5 3 3 3 2 2 3 3>;
+		};
+		gpe1: gpe1 {
+			powerdown-settings = <5 3>;
+		};
+		gpf0: gpf0 {
+			powerdown-settings = <3 3 1 2>;
+		};
+		gpf1: gpf1 {
+			powerdown-settings = <3 3 3 3>;
+		};
+		gpg0: gpg0 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpg1: gpg1 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpg2: gpg2 {
+			powerdown-settings = <3 3>;
+		};
+		gph0: gph0 {
+			powerdown-settings = <3 3 3 3>;
+		};
+		gph1: gph1 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+	};
+	pinctrl@10d10000 {
+		gpv0: gpv0 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpv1: gpv1 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpv2: gpv2 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpv3: gpv3 {
+			powerdown-settings = <3 3 3 3 3 3 3 3>;
+		};
+		gpv4: gpv4 {
+			powerdown-settings = <3 3>;
+		};
+	};
+	pinctrl@03860000 {
+		gpz: gpz {
+			powerdown-settings = <6 3 6 6 6 3 3>;
+		};
+	};
+
+};
+
+&pwm {
+	status = "okay";
+};

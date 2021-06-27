@@ -1,0 +1,59 @@
+/*
+ * Google Snow Rev 5+ board device tree source
+ *
+ * Copyright (c) 2013 Google, Inc
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+#include "exynos5250.dtsi"
+#include "cros5250-common.dtsi"
+#include "exynos5250-snow.dtsi"
+#include "cros-ec-keyboard.dtsi"
+
+/ {
+	model = "Google Snow Rev 5+";
+
+	/*
+	 * Define with revisions this tree is compatible with.
+	 * - Purposely don't add "google,snow" so old firmware (which didn't
+	 *   include a -revN suffix) won't pick this one.  We put an ugly
+	 *   "google,snow-any" here to provide the kernel a way to test for
+	 *   any snow device.
+	 * - Note that revision here is logical revision (monotonically
+	 *   increasing) which means it's not exactly what's read from board
+	 *   strappings.
+	 */
+	compatible = "google,snow-rev5", "google,snow-any",
+		"samsung,exynos5250";
+
+	pinctrl@11400000 {
+		max98090_irq: max98090-irq {
+			samsung,pins = "gpx0-4";
+			samsung,pin-function = <0>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+	};
+
+	i2c@12CD0000 {
+		max98090: codec@10 {
+			compatible = "maxim,max98090";
+			reg = <0x10>;
+			interrupts = <4 0>;
+			interrupt-parent = <&gpx0>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&max98090_irq>;
+		};
+	};
+
+	sound {
+		compatible = "google,daisy-audio-max98090";
+		card-name = "DAISY-I2S-98090";
+		samsung,audio-codec = <&max98090>;
+		/* pins and clocks are defined in cros5250-common.dtsi */
+	};
+};
