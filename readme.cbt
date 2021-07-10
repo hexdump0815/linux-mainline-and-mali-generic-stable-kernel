@@ -9,6 +9,8 @@
 # see misc.cbt: pulse default.pa required
 # (not required: and mrvl firmware needs to go into the initramfs via hook)
 
+cd /compile/source/linux-stable
+
 # patches:
 # fix xusb
 patch -p1 < /compile/doc/stable/misc.cbt/patches/xusb-usb-role-switch.patch
