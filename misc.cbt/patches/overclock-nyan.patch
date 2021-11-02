@@ -1,0 +1,12 @@
+from: https://github.com/reey/PKGBUILDs/blob/master/core/linux-nyan/overclock-nyan.patch
+
+--- drivers/clk/tegra/clk-tegra124-dfll-fcpu.c	2019-01-09 16:46:05.000000000 +0000
+@@ -32,7 +32,7 @@
+ static const unsigned long cpu_max_freq_table[] = {
+ 	[0] = 2014500000UL,
+ 	[1] = 2320500000UL,
+-	[2] = 2116500000UL,
++	[2] = 2320500000UL,
+ 	[3] = 2524500000UL,
+ };
+ 
