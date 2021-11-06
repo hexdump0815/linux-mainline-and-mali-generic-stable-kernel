@@ -6,9 +6,6 @@
 # name: stb-cbr
 
 # this sepearate config from av7 exists, as with av7 the system hangs on boot
-#
-# see misc.cbr: pulse default.pa required
-# (not required: and mrvl firmware needs to go into the initramfs via hook)
 # rk3288 mainline only has a light suspend mode without powering down everything
 # https://irclog.whitequark.org/linux-rockchip/2018-04-03#21712549
 # "for suspend/resume but at least between ChromeOS 3.14 and mainline there is a huge
@@ -16,23 +13,10 @@
 # only get a light suspend)"
 # "rk3288 does have a light suspend mode, without putting the ddr in self-refresh - so
 # that doesn't save to much" - would need uboot or lower level support for more
-# patches:
-# add rk3288 mali support for the rockchip chromebook (veyron)
-# TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
-# use the files from misc.av7 as we need exactly the same ones here
 
 cd /compile/source/linux-stable
 
 # patches:
-# legacy mali kernel driver
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
-cp -r /compile/doc/stable/misc.av7/patches/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
-# fix mali compile for v5.9
-patch -p0 < /compile/doc/stable/misc.cbr/patches/fix-mali-compile-v5.9.patch
-# v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-v5.0.patch
-# v5.4 - fix mali compile
-patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.4.patch
 # raise the temp limits where thermal throttling starts
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-higher-alert-temp.patch
 # improve rk3288 hdmi timing - based on https://github.com/armbian/build/pull/1887
@@ -69,14 +53,6 @@ mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
-# move away the rk3288 mali module and tar it separately beforehand
-mkdir -p /lib/modules/${kver}/extra
-mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable/${kver}-mali-rk3288.tar.gz /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/extra
-# redo the depmod without the mali module
-depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
@@ -105,9 +81,9 @@ cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
 #
 # extlinux.conf entry
 #
-LABEL v5414
-      MENU LABEL v5.4.14 kernel via zImage mmcblk0
-      LINUX ../boot/zImage-5.4.14-stb-cbr+
-      INITRD ../boot/initrd.img-5.4.14-stb-cbr+
-      FDT ../boot/dtb-5.4.14-stb-cbr+/rk3288-veyron-jaq.dtb
-      APPEND console=tty1 init=/sbin/init gpt root=/dev/mmcblk2p3 ro rootwait net.ifnames=0 fsck.repair=yes
+LABEL v5150
+      MENU LABEL v5.15.0 kernel via zImage mmcblk0
+      LINUX ../boot/zImage-5.15.0-stb-cbr+
+      INITRD ../boot/initrd.img-5.15.0-stb-cbr+
+      FDT ../boot/dtb-5.15.0-stb-cbr+/rk3288-veyron-mighty.dtb
+      APPEND console=tty1 gpt root=/dev/mmcblk1p4 ro rootwait net.ifnames=0 ipv6.disable=1 fsck.repair=yes
