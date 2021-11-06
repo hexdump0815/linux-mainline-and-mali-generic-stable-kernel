@@ -19,15 +19,6 @@ patch -p1 < /compile/doc/stable/misc.exy/patches/fix-odroid-x2-usb.patch
 patch -p1 < /compile/doc/stable/misc.exy/patches/exynos-hdmi-infoframes-patch.txt
 # add some extra cpu clocks for odroid x (disabled by default) and raise temp limits for x/x2 like u3
 patch -p1 < /compile/doc/stable/misc.exy/patches/add-disabled-extra-cpu-clocks-odroid-x.patch
-# add mali support
-patch -p1 < /compile/doc/stable/misc.exy/patches/exynos4412-mali-complete.patch
-cp -r /compile/doc/stable/misc.exy/patches/exynos4412-mali-complete/drivers/gpu/arm drivers/gpu
-# some things required for legacy mali to work
-patch -p1 < /compile/doc/stable/misc.exy/patches/devfreq-turbo-for-mali-gpu-driver-v5.9.patch
-patch -p1 < /compile/doc/stable/misc.exy/patches/export-cma-symbols.patch
-
-# if the legacy mali should be used the following patch is required to adjust the dts
-#patch -p1 < /compile/doc/stable/misc.exy/patches/dts-switch-to-legacy-mali.patch
 
 # add u3noplus dtb for the non plus version to fix reboot for it - has to be redone for each new kernel version
 git checkout -- arch/arm/boot/dts/Makefile
@@ -54,14 +45,6 @@ mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
-# move away the exynos4412 mali module and tar it separately beforehand
-mkdir -p /lib/modules/${kver}/extra
-mv /lib/modules/${kver}/kernel/drivers/gpu/arm/mali/maligpu.ko /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable/${kver}-mali-exynos4412.tar.gz /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/extra
-# redo the depmod without the mali module
-depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
