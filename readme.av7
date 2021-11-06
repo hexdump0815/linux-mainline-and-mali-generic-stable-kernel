@@ -2,7 +2,10 @@
 # - /compile/doc/stable - the files in this dir
 # - /compile/source/linux-stable - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-av7
+
+cd /compile/source/linux-stable
 
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
@@ -17,19 +20,6 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/r89-dtb-more-and-higher-cpu-clo
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-higher-alert-temp.patch
 # add higher cpu clocks for h3
 patch -p1 < /compile/doc/stable/misc.av7/patches/sun8i-h3-higher-cpu-clocks.patch
-# prepare for sunxi mali support for the bpi - from https://github.com/mripard/sunxi-mali/issues/63
-patch -p1 < /compile/doc/stable/misc.av7/patches/sunxi-drm-gem-cma-Export-with-handle-allocator.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/sunxi-drm-sun4i-Add-GEM-allocator.patch
-# add rk3288 mali support for the r89
-# TODO: maybe try to compile https://github.com/LibreELEC/mali-midgard out of tree instead
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-complete.patch
-cp -r /compile/doc/stable/misc.av7/patches/rk3288-mali-complete/drivers/gpu/arm drivers/gpu
-# fix mali compile for v5.9
-patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.9.patch
-# v5.0+ - from https://github.com/Miouyouyou/RockMyy/blob/master/patches/Midgard/r19p0-01rel0/0011-mali-kbase-v4.20-to-v5.0-rc2-changes.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-mali-v5.0.patch
-# v5.4 - fix mali compile
-patch -p0 < /compile/doc/stable/misc.av7/patches/fix-mali-compile-v5.4.patch
 # v5.1 - add more meson8m2 dtbs
 patch -p1 < /compile/doc/stable/misc.av7/patches/meson8m2-dtb.patch
 cp -i /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
@@ -48,14 +38,10 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/401
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4013-clk-rockchip-rk3288-add-more-npll-clocks.patch
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4015-FIXME-Don-t-use-vop_crtc_mode_valid.patch
 
-cp /compile/doc/stable/config.av7 /compile/source/linux-stable/.config
-cd /compile/source/linux-stable
-
 export ARCH=arm
-make multi_v7_defconfig
-/compile/doc/stable/misc.av7/options/enable-docker-options.sh
-/compile/doc/stable/misc.av7/options/enable-additional-options.sh
-make oldconfig
+scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.av7/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.av7/options/additional-options-special.cfg
+( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/stable/misc.av7/options/kernel-config-options.version
+make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
 make
@@ -71,14 +57,6 @@ mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
-# move away the rk3288 mali module and tar it separately beforehand
-mkdir -p /lib/modules/${kver}/extra
-mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable/${kver}-mali-rk3288.tar.gz /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/extra
-# redo the depmod without the mali module
-depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 # for all except amlogic 32bit socs
