@@ -10,8 +10,8 @@ cd /compile/source/linux-stable
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
 patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
-# add picoseconds delay for eth to work properly on some g12a and sm1 boxes
-patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-fix-v5.10.25.patch
+# add picoseconds delay for eth to work properly on some g12a and sm1 boxes - no longer needed with v5.15
+#patch -p1 < /compile/doc/stable/misc.av8/patches/g12a-sm1-eth-picoseconds-delay-fix-v5.10.25.patch
 # fix some amlogic eth resets - this already made it into v5.10.25
 #patch -p1 < /compile/doc/stable/misc.av8/patches/amlogic-fix-eth-reset.patch
 # some dwmac-meson8b clock fixes - no longer needed as they are in 5.10.14 at least
@@ -31,7 +31,7 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/additional-disabled-opp-entires
 # allow higher cpu temps
 patch -p1 < /compile/doc/stable/misc.av8/patches/gxl-higher-temps.patch
 # add new dtbs to Makefile
-patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v5.9.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v5.15.patch
 # copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
 cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
 
