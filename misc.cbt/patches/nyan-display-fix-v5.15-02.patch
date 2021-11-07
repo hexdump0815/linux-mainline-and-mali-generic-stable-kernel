@@ -1,0 +1,66 @@
+from: https://github.com/grate-driver/linux/commit/3562df1e53a65e95480396af5713c5140bab6874
+
+From 3562df1e53a65e95480396af5713c5140bab6874 Mon Sep 17 00:00:00 2001
+From: Dmitry Osipenko <digetx@gmail.com>
+Date: Sun, 7 Nov 2021 17:58:02 +0300
+Subject: [PATCH] drm/tegra: Use drm_dp_aux_register_ddc/chardev() helpers
+
+Use drm_dp_aux_register_ddc/chardev() helpers that allow to register I2C
+adapter separately from the character device. This fixes broken display
+panel of Acer Chromebook CB5-311 that was never probed starting with
+v5.13 kernel when the change of DP AUX registration order was introduced.
+SOR was never registered because tegra-output can't probe until panel is
+registered and panel require DDC to be registered first. The offending
+commit made DDC to be registered after SOR's tegra-output, which can't
+happen. Use new helpers that restore the registration order and revive
+display panel.
+
+Cc: <stable@vger.kernel.org> # 5.13+
+Fixes: 39c17ae60ea9 ("drm/tegra: Don't register DP AUX channels before connectors")
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ drivers/gpu/drm/tegra/dpaux.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/tegra/dpaux.c b/drivers/gpu/drm/tegra/dpaux.c
+index 1f96e416fa082..e0d675c7c2e5a 100644
+--- a/drivers/gpu/drm/tegra/dpaux.c
++++ b/drivers/gpu/drm/tegra/dpaux.c
+@@ -532,7 +532,9 @@ static int tegra_dpaux_probe(struct platform_device *pdev)
+ 	dpaux->aux.transfer = tegra_dpaux_transfer;
+ 	dpaux->aux.dev = &pdev->dev;
+ 
+-	drm_dp_aux_init(&dpaux->aux);
++	err = drm_dp_aux_register_ddc(&dpaux->aux);
++	if (err < 0)
++		return err;
+ 
+ 	/*
+ 	 * Assume that by default the DPAUX/I2C pads will be used for HDMI,
+@@ -585,6 +587,8 @@ static int tegra_dpaux_remove(struct platform_device *pdev)
+ 	pm_runtime_put_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
+ 
++	drm_dp_aux_unregister_ddc(&dpaux->aux);
++
+ 	mutex_lock(&dpaux_lock);
+ 	list_del(&dpaux->list);
+ 	mutex_unlock(&dpaux_lock);
+@@ -718,7 +722,7 @@ int drm_dp_aux_attach(struct drm_dp_aux *aux, struct tegra_output *output)
+ 	int err;
+ 
+ 	aux->drm_dev = output->connector.dev;
+-	err = drm_dp_aux_register(aux);
++	err = drm_dp_aux_register_chardev(aux);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -759,7 +763,7 @@ int drm_dp_aux_detach(struct drm_dp_aux *aux)
+ 	unsigned long timeout;
+ 	int err;
+ 
+-	drm_dp_aux_unregister(aux);
++	drm_dp_aux_unregister_chardev(aux);
+ 	disable_irq(dpaux->irq);
+ 
+ 	if (dpaux->output->panel) {

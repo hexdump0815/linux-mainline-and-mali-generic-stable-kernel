@@ -20,6 +20,9 @@ patch -p1 < /compile/doc/stable/misc.cbt/patches/cec-and-dfll-clock.patch
 patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-thermal-workaround.patch
 # slightly overclock the cpu - not used yet to avoid overheating
 #patch -p0 < /compile/doc/stable/misc.cbt/patches/overclock-nyan.patch
+# fix black display with v5.15.0
+patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-01.patch
+patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-02.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbt/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbt/options/additional-options-special.cfg
