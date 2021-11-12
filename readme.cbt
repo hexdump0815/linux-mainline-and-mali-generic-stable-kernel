@@ -25,6 +25,8 @@ patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-01.patch
 patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-02.patch
 # fix xusb probing error -22 with v5.15.0
 patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-xusb-fix-v5.15.patch
+# add extra dtb for the full hd nyan big model to get a reliable console on boot
+patch -p1 < /compile/doc/stable/misc.cbt/patches/add-nyan-big-fhd-model-dts.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbt/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbt/options/additional-options-special.cfg
