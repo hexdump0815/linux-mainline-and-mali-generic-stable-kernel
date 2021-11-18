@@ -18,7 +18,7 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/fix-meson-gx-mali450-compile-v5
 patch -p0 < /compile/doc/stable/misc.av8/patches/fix-meson-gx-mali450-compile-v5.7.patch
 patch -p0 < /compile/doc/stable/misc.av8/patches/fix-meson-gx-mali450-compile-v5.9.patch
 patch -p0 < /compile/doc/stable/misc.av8/patches/mali-with-only-2-pp-cores.patch
-KDIR=/compile/source/linux-stable ARCH=arm64 CROSS_COMPILE= ./build.sh
+KDIR=/compile/source/linux-stable-av8 ARCH=arm64 CROSS_COMPILE= ./build.sh
 export kver=5.9.3-stb-aml+
 mkdir /lib/modules/${kver}/extra
 cp mali.ko /lib/modules/${kver}/extra

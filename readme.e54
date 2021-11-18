@@ -1,6 +1,6 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-e54 - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # name: stb-e54
 
@@ -21,8 +21,8 @@ patch -p0 < /compile/doc/stable/misc.e54/patches/mc1-reduce-cpu-clocks.patch
 git checkout -- arch/arm/boot/dts/Makefile
 patch -p1 < /compile/doc/stable/misc.e54/patches/mc1-enable-dtb.patch
 
-cp /compile/doc/stable/config.e54 /compile/source/linux-stable/.config
-cd /compile/source/linux-stable
+cp /compile/doc/stable/config.e54 /compile/source/linux-stable-e54/.config
+cd /compile/source/linux-stable-e54
 
 export ARCH=arm
 make exynos_defconfig
@@ -48,7 +48,7 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 mkdir -p /lib/modules/${kver}/extra
 mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable/${kver}-mali-exynos5422.tar.gz /lib/modules/${kver}/extra
+tar cvzf /compile/source/linux-stable-e54/${kver}-mali-exynos5422.tar.gz /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/extra
 # redo the depmod without the mali module
 depmod ${kver}
@@ -62,11 +62,11 @@ cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
 mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-e54/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.e54 /compile/doc/stable/config.e54.old
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.e54
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.e54-${kver}
-cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-e54/.config /compile/doc/stable/config.e54
+cp -v /compile/source/linux-stable-e54/.config /compile/doc/stable/config.e54-${kver}
+cp -v /compile/source/linux-stable-e54/*.tar.gz /compile/result/stable
 
 
 # boot.ini when using the legacy armbian u-boot 2017.05

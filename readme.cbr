@@ -1,6 +1,6 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-cbr - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-cbr
@@ -14,7 +14,7 @@
 # "rk3288 does have a light suspend mode, without putting the ddr in self-refresh - so
 # that doesn't save to much" - would need uboot or lower level support for more
 
-cd /compile/source/linux-stable
+cd /compile/source/linux-stable-cbr
 
 # patches:
 # raise the temp limits where thermal throttling starts
@@ -71,11 +71,11 @@ rm -f zImage cmdline bootloader.bin kernel.itb vmlinux.kpart
 cd /boot
 update-initramfs -c -k ${kver}
 #mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-cbr/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.cbr /compile/doc/stable/config.cbr.old
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbr
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbr-${kver}
-cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-cbr/.config /compile/doc/stable/config.cbr
+cp -v /compile/source/linux-stable-cbr/.config /compile/doc/stable/config.cbr-${kver}
+cp -v /compile/source/linux-stable-cbr/*.tar.gz /compile/result/stable
 
 
 #

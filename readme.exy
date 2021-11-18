@@ -1,11 +1,11 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-exy - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-exy
 
-cd /compile/source/linux-stable
+cd /compile/source/linux-stable-exy
 
 # patches:
 # add cmdline option to set a fixed ethernet mac address on the kernel
@@ -57,11 +57,11 @@ cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
 #mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-exy/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.exy /compile/doc/stable/config.exy.old
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.exy
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.exy-${kver}
-cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-exy/.config /compile/doc/stable/config.exy
+cp -v /compile/source/linux-stable-exy/.config /compile/doc/stable/config.exy-${kver}
+cp -v /compile/source/linux-stable-exy/*.tar.gz /compile/result/stable
 
 
 # options below:

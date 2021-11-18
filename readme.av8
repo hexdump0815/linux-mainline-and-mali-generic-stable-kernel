@@ -1,11 +1,11 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-av8 - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-av8
 
-cd /compile/source/linux-stable
+cd /compile/source/linux-stable-av8
 
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
@@ -71,11 +71,11 @@ cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
 mkimage -A arm64 -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-av8/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.av8 /compile/doc/stable/config.av8.old
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av8
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.av8-${kver}
-cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-av8/.config /compile/doc/stable/config.av8
+cp -v /compile/source/linux-stable-av8/.config /compile/doc/stable/config.av8-${kver}
+cp -v /compile/source/linux-stable-av8/*.tar.gz /compile/result/stable
 
 
 # s905w tv box - /boot/s905_autoscript.txt:

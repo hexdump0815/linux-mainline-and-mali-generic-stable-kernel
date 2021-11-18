@@ -15,7 +15,7 @@ git clone https://github.com/mripard/sunxi-mali.git
 apt-get install quilt
 cd /compile/source/sunxi-mali
 export CROSS_COMPILE=""
-export KDIR=/compile/source/linux-stable
+export KDIR=/compile/source/linux-stable-av7
 export INSTALL_MOD_PATH=/
 cp /compile/doc/stable/misc.av7/patches/0024-mali-support-building-against-5.9.patch patches
 cp /compile/doc/stable/misc.av7/patches/0025-mali-support-building-against-5.10.patch patches

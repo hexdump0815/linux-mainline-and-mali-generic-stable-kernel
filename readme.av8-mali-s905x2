@@ -17,7 +17,7 @@ git checkout BX301A01B-SW-99002-r12p0-01rel0_meson-g12a
 patch -p1 < /compile/doc/stable/misc.av8/patches/fix-meson_g12a_mali_bifrost-compile-v5.6.patch
 patch -p1 < /compile/doc/stable/misc.av8/patches/meson_g12a_mali-magic-string-v5.6.patch
 patch -p0 < /compile/doc/stable/misc.av8/patches/meson_g12a_mali-fix-compile-v5.9.patch
-make KDIR=/compile/source/linux-stable ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_NAME=config.meson-g12a
+make KDIR=/compile/source/linux-stable-av8 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CONFIG_NAME=config.meson-g12a
 export kver=5.4.3-stb-av8+
 mkdir /lib/modules/${kver}/extra
 cp driver/product/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra

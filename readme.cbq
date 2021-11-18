@@ -1,11 +1,11 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable-qc - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-cbq - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-cbq
 
-cd /compile/source/linux-stable-qc
+cd /compile/source/linux-stable-cbq
 
 export ARCH=arm64
 # defconfig + kernel-config-options based config will follow later
@@ -48,8 +48,8 @@ rm -f Image Image.lz4 cmdline bootloader.bin kernel.itb vmlinux.kpart
 cd /boot
 update-initramfs -c -k ${kver}
 #mkimage -A arm64 -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linux-stable-qc/${kver}.tar.gz /boot/Image-${kver} /boot/System.map-${kver} /boot/config-${kver} /boot/dtb-${kver} /boot/initrd.img-${kver} /boot/vmlinux.kpart-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-cbq/${kver}.tar.gz /boot/Image-${kver} /boot/System.map-${kver} /boot/config-${kver} /boot/dtb-${kver} /boot/initrd.img-${kver} /boot/vmlinux.kpart-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.cbq /compile/doc/stable/config.cbq.old
-cp -v /compile/source/linux-stable-qc/.config /compile/doc/stable/config.cbq
-cp -v /compile/source/linux-stable-qc/.config /compile/doc/stable/config.cbq-${kver}
-cp -v /compile/source/linux-stable-qc/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-cbq/.config /compile/doc/stable/config.cbq
+cp -v /compile/source/linux-stable-cbq/.config /compile/doc/stable/config.cbq-${kver}
+cp -v /compile/source/linux-stable-cbq/*.tar.gz /compile/result/stable

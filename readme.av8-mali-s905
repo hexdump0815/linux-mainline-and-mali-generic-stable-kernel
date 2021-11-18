@@ -17,7 +17,7 @@ git checkout DX910-SW-99002-r9p0-01rel0_meson_gx
 patch -p1 < /compile/doc/stable/misc.av8/patches/fix-meson-gx-mali450-compile-v5.6.patch
 patch -p0 < /compile/doc/stable/misc.av8/patches/fix-meson-gx-mali450-compile-v5.7.patch
 patch -p0 < /compile/doc/stable/misc.av8/patches/fix-meson-gx-mali450-compile-v5.9.patch
-KDIR=/compile/source/linux-stable ARCH=arm64 CROSS_COMPILE= ./build.sh
+KDIR=/compile/source/linux-stable-av8 ARCH=arm64 CROSS_COMPILE= ./build.sh
 export kver=5.4.3-stb-av8+
 mkdir /lib/modules/${kver}/extra
 cp mali.ko /lib/modules/${kver}/extra

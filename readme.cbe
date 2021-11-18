@@ -1,6 +1,6 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linux-stable - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-cbe - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # name: stb-cbe
 
@@ -15,8 +15,8 @@ cp -r /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete/drivers/gpu/
 # fix mali compile for v5.9
 patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.9.patch
 
-cp /compile/doc/stable/config.cbe /compile/source/linux-stable/.config
-cd /compile/source/linux-stable
+cp /compile/doc/stable/config.cbe /compile/source/linux-stable-cbe/.config
+cd /compile/source/linux-stable-cbe
 
 export ARCH=arm
 # no defconfig as it is based on a handcrafted config
@@ -42,7 +42,7 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 mkdir -p /lib/modules/${kver}/extra
 mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable/${kver}-mali-exynos5250.tar.gz /lib/modules/${kver}/extra
+tar cvzf /compile/source/linux-stable-cbe/${kver}-mali-exynos5250.tar.gz /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/extra
 # redo the depmod without the mali module
 depmod ${kver}
@@ -69,11 +69,11 @@ rm -f zImage cmdline bootloader.bin kernel.its kernel.itb vmlinux.kpart
 cd /boot
 update-initramfs -c -k ${kver}
 #mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linux-stable/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-cbe/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.cbe /compile/doc/stable/config.cbe.old
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbe
-cp -v /compile/source/linux-stable/.config /compile/doc/stable/config.cbe-${kver}
-cp -v /compile/source/linux-stable/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-cbe/.config /compile/doc/stable/config.cbe
+cp -v /compile/source/linux-stable-cbe/.config /compile/doc/stable/config.cbe-${kver}
+cp -v /compile/source/linux-stable-cbe/*.tar.gz /compile/result/stable
 
 
 /etc/extlinux/extlinux.conf
