@@ -5,10 +5,11 @@
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-cbg
 
-# patches
-# add an option to get rid of
-# "[drm:analogix_dp_bridge_atomic_enable [analogix_dp]] *ERROR* Failed to disable psr -110"
-patch -p1 < /compile/doc/stable/misc.cbg/patches/analogix_dp-enable_psr-param.patch
+# patches - taken from https://github.com/Maccraft123/Cadmium/tree/master/kernel/patches
+patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0001-drm-bridge-analogix_dp-Don-t-return-EBUSY-when-msg-s.patch
+patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0002-drm-rockchip-Only-wait-for-panel-ACK-on-PSR-entry.patch
+patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.add-dfi-dmc-nodes.patch
+patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.enable-dmc-dfi.patch
 
 export ARCH=arm64
 scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig /compile/doc/kernel-config-options/chromebooks-aarch64.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbg/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.cbg/options/additional-options-special.cfg
