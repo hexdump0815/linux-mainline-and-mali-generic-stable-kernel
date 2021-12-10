@@ -23,8 +23,8 @@ patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-thermal-workaround.patch
 # fix black display with v5.15.0
 patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-01.patch
 patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-02.patch
-# fix xusb probing error -22 with v5.15.0
-patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-xusb-fix-v5.15.patch
+# fix xusb probing error -22 with v5.15.0 - no longer needed with v5.15.7
+#patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-xusb-fix-v5.15.patch
 # add extra dtb for the full hd nyan big model to get a reliable console on boot
 patch -p1 < /compile/doc/stable/misc.cbt/patches/add-nyan-big-fhd-model-dts.patch
 
