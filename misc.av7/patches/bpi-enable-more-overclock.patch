@@ -1,8 +1,8 @@
 diff --git a/arch/arm/boot/dts/sun7i-a20-bananapi.dts b/arch/arm/boot/dts/sun7i-a20-bananapi.dts
-index 67c8a76..7d05b25 100644
+index 9d792d7a0f92..027a5727c997 100644
 --- a/arch/arm/boot/dts/sun7i-a20-bananapi.dts
 +++ b/arch/arm/boot/dts/sun7i-a20-bananapi.dts
-@@ -100,6 +100,11 @@
+@@ -106,6 +106,29 @@
  	cpu-supply = <&reg_dcdc2>;
  	operating-points = <
  		/* kHz	  uV */
@@ -11,10 +11,28 @@ index 67c8a76..7d05b25 100644
 +               1104000  1450000
 +               1056000  1450000
 +               1008000  1450000
++		960000	1400000
++		912000	1400000
++		864000	1350000
++		720000	1250000
++		528000	1150000
++		312000	1100000
++		144000	1050000
++		>;
++};
++
++&cpu1 {
++	operating-points = <
++		/* kHz	  uV */
++               1200000  1500000
++               1152000  1500000
++               1104000  1450000
++               1056000  1450000
++               1008000  1450000
  		960000	1400000
  		912000	1400000
  		864000	1350000
-@@ -212,7 +217,7 @@
+@@ -255,7 +278,7 @@
  &reg_dcdc2 {
  	regulator-always-on;
  	regulator-min-microvolt = <1000000>;
