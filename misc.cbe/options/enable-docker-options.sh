@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /compile/source/linux-stable
+cd /compile/source/linux-stable-cbe
 
 for i in `cat /compile/doc/stable/misc.cbe/options/docker-options-mod.txt | grep -v ^#`; do
   echo $i

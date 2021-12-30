@@ -14,6 +14,8 @@ patch -p1 < /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete.patch
 cp -r /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
 # fix mali compile for v5.9
 patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.9.patch
+# fix mali compile for v5.15
+patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.15.patch
 
 cp /compile/doc/stable/config.cbe /compile/source/linux-stable-cbe/.config
 cd /compile/source/linux-stable-cbe
@@ -22,7 +24,7 @@ export ARCH=arm
 # no defconfig as it is based on a handcrafted config
 /compile/doc/stable/misc.cbe/options/enable-docker-options.sh
 /compile/doc/stable/misc.cbe/options/enable-additional-options.sh
-make oldconfig
+make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
 make
