@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /compile/source/linux-stable
+cd /compile/source/linux-stable-e54
 
 ./scripts/config -d CONFIG_DEBUG_INFO
 ./scripts/config -d CONFIG_RUNTIME_TESTING_MENU

@@ -1,0 +1,62 @@
+--- drivers/gpu/arm/midgard/mali_kbase_sync.h.org	2021-12-30 12:45:54.903275645 +0100
++++ drivers/gpu/arm/midgard/mali_kbase_sync.h	2021-12-30 12:46:55.853688278 +0100
+@@ -37,6 +37,8 @@
+ 
+ #include "mali_kbase.h"
+ 
++#include <linux/fdtable.h>
++
+ /**
+  * struct kbase_sync_fence_info - Information about a fence
+  * @fence: Pointer to fence (type is void*, as underlaying struct can differ)
+@@ -156,7 +158,7 @@
+  */
+ static inline void kbase_sync_fence_close_fd(int fd)
+ {
+-	ksys_close(fd);
++	close_fd(fd);
+ }
+ 
+ /**
+--- drivers/gpu/arm/midgard/mali_kbase_dma_fence.c.org	2021-12-30 13:05:27.159017059 +0100
++++ drivers/gpu/arm/midgard/mali_kbase_dma_fence.c	2021-12-30 13:06:18.189215614 +0100
+@@ -233,7 +233,7 @@
+ 	unsigned int shared_count = 0;
+ 	int err, i;
+ 
+-	err = dma_resv_get_fences_rcu(resv,
++	err = dma_resv_get_fences(resv,
+ 						&excl_fence,
+ 						&shared_count,
+ 						&shared_fences);
+@@ -245,7 +245,7 @@
+ 						excl_fence,
+ 						kbase_dma_fence_cb);
+ 
+-		/* Release our reference, taken by reservation_object_get_fences_rcu(),
++		/* Release our reference, taken by reservation_object_get_fences(),
+ 		 * to the fence. We have set up our callback (if that was possible),
+ 		 * and it's the fence's owner is responsible for singling the fence
+ 		 * before allowing it to disappear.
+@@ -267,7 +267,7 @@
+ 	}
+ 
+ 	/* Release all our references to the shared fences, taken by
+-	 * reservation_object_get_fences_rcu(). We have set up our callback (if
++	 * reservation_object_get_fences(). We have set up our callback (if
+ 	 * that was possible), and it's the fence's owner is responsible for
+ 	 * signaling the fence before allowing it to disappear.
+ 	 */
+--- drivers/gpu/arm/midgard/ipa/mali_kbase_ipa.c.org	2021-12-30 13:18:57.238869833 +0100
++++ drivers/gpu/arm/midgard/ipa/mali_kbase_ipa.c	2021-12-30 13:18:06.578997968 +0100
+@@ -580,8 +580,8 @@
+ #else
+ struct devfreq_cooling_power kbase_ipa_power_model_ops = {
+ #endif
+-	.get_static_power = &kbase_get_static_power,
+-	.get_dynamic_power = &kbase_get_dynamic_power,
++//	.get_static_power = &kbase_get_static_power,
++//	.get_dynamic_power = &kbase_get_dynamic_power,
+ #if defined(CONFIG_MALI_PWRSOFT_765) || \
+ 	LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
+ 	.get_real_power = &kbase_get_real_power,

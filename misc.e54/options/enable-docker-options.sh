@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /compile/source/linux-stable
+cd /compile/source/linux-stable-e54
 
 for i in `cat /compile/doc/stable/misc.e54/options/docker-options-mod.txt | grep -v ^#`; do
   echo $i

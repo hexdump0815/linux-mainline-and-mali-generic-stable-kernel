@@ -8,6 +8,8 @@
 # add mali gpu support
 patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete.patch
 cp -r /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete/drivers/gpu/arm drivers/gpu
+# fix mali compile for v5.15
+patch -p0 < /compile/doc/stable/misc.e54/patches/fix-mali-compile-v5.15.patch
 # raise the temp limits where thermal throttling starts
 patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-higher-alert-temp.patch
 
@@ -28,7 +30,7 @@ export ARCH=arm
 make exynos_defconfig
 /compile/doc/stable/misc.e54/options/enable-docker-options.sh
 /compile/doc/stable/misc.e54/options/enable-additional-options.sh
-make oldconfig
+make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
 make
