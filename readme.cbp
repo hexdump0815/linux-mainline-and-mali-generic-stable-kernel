@@ -1,6 +1,6 @@
 # directories:
 # - /compile/doc/stable - the files in this dir
-# - /compile/source/linus-stable-cbp - the kernel sources checked out from gitrepo
+# - /compile/source/linux-stable-cbp - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # name: stb-cbp
 
@@ -10,17 +10,19 @@ patch -p1 < /compile/doc/stable/misc.cbe/patches/snow-v5-4-suspend-fix.patch
 # add mali gpu support
 patch -p1 < /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete.patch
 cp -r /compile/doc/stable/misc.e54/patches/exynos5422-mali-complete/drivers/gpu/arm drivers/gpu
+# fix mali compile for v5.15
+patch -p0 < /compile/doc/stable/misc.cbp/patches/fix-mali-compile-v5.15.patch
 # enable the gpu for peach pit and peach pi
 patch -p1 < /compile/doc/stable/misc.cbp/patches/enable-gpu.patch
 
-cp /compile/doc/stable/config.cbp /compile/source/linus-stable-cbp/.config
-cd /compile/source/linus-stable-cbp
+cp /compile/doc/stable/config.cbp /compile/source/linux-stable-cbp/.config
+cd /compile/source/linux-stable-cbp
 
 export ARCH=arm
 # no defconfig as it is based on a handcrafted config
 /compile/doc/stable/misc.cbp/options/enable-docker-options.sh
 /compile/doc/stable/misc.cbp/options/enable-additional-options.sh
-make oldconfig
+make olddefconfig
 make -j 8 zImage dtbs modules
 cd tools/perf
 make
@@ -40,7 +42,7 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 mkdir -p /lib/modules/${kver}/extra
 mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linus-stable-cbp/${kver}-mali-exynos5420.tar.gz /lib/modules/${kver}/extra
+tar cvzf /compile/source/linux-stable-cbp/${kver}-mali-exynos5420.tar.gz /lib/modules/${kver}/extra
 rm -rf /lib/modules/${kver}/extra
 # redo the depmod without the mali module
 depmod ${kver}
@@ -66,11 +68,11 @@ rm -f zImage cmdline bootloader.bin kernel.itb kernel.itb vmlinux.kpart
 cd /boot
 update-initramfs -c -k ${kver}
 #mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
-tar cvzf /compile/source/linus-stable-cbp/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-cbp/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable/config.cbp /compile/doc/stable/config.cbp.old
-cp -v /compile/source/linus-stable-cbp/.config /compile/doc/stable/config.cbp
-cp -v /compile/source/linus-stable-cbp/.config /compile/doc/stable/config.cbp-${kver}
-cp -v /compile/source/linus-stable-cbp/*.tar.gz /compile/result/stable
+cp -v /compile/source/linux-stable-cbp/.config /compile/doc/stable/config.cbp
+cp -v /compile/source/linux-stable-cbp/.config /compile/doc/stable/config.cbp-${kver}
+cp -v /compile/source/linux-stable-cbp/*.tar.gz /compile/result/stable
 
 
 /etc/extlinux/extlinux.conf
