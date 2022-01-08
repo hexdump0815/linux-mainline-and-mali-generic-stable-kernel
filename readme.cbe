@@ -16,6 +16,9 @@ cp -r /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete/drivers/gpu/
 patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.9.patch
 # fix mali compile for v5.15
 patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.15.patch
+# fix atmel touchpad on some snow models (rev5 most problably) - disabled for now until tested
+# see: https://github.com/hexdump0815/linux-mainline-and-mali-generic-stable-kernel/issues/6
+#patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-atmel-touchpad.patch
 
 cp /compile/doc/stable/config.cbe /compile/source/linux-stable-cbe/.config
 cd /compile/source/linux-stable-cbe
