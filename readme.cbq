@@ -3,9 +3,16 @@
 # - /compile/source/linux-stable-cbq - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
+# - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
 # name: stb-cbq
 
 cd /compile/source/linux-stable-cbq
+
+# apply the multi gen lru kernel extra patches
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v11/*.diff
+  echo === $i
+  patch -p1 < $i
+done
 
 export ARCH=arm64
 # the kernel config is not yet arch/arm64/configs/defconfig based - instead an
