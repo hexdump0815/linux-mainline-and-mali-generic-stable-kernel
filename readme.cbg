@@ -3,6 +3,7 @@
 # - /compile/source/linux-stable-cbg - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
+# - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
 # name: stb-cbg
 
 cd /compile/source/linux-stable-cbg
@@ -14,6 +15,12 @@ patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.add-dfi-dmc-nodes.p
 patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.enable-dmc-dfi.patch
 # add gamma drm support for rk3399
 patch -p1 < /compile/doc/stable/misc.cbg/patches/rk3399-add-drm-gamma-support.patch
+
+# apply the multi gen lru kernel extra patches
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v11/*.diff; do
+  echo === $i
+  patch -p1 < $i
+done
 
 export ARCH=arm64
 scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig /compile/doc/kernel-config-options/chromebooks-aarch64.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbg/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.cbg/options/additional-options-special.cfg
