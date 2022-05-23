@@ -10,7 +10,7 @@ cd /compile/source/linux-stable-exy
 # patches:
 # add cmdline option to set a fixed ethernet mac address on the kernel
 # cmdline to avoid getting a randomone on each boot
-patch -p1 < /compile/doc/stable/misc.exy/patches/eth-hw-addr-v5.10.patch 
+patch -p1 < /compile/doc/stable/misc.exy/patches/eth-hw-addr-v5.18.patch
 # fix odroid x/x2 usb
 # see: https://lore.kernel.org/lkml/26ff3deb-4b8d-7dd2-2418-d56f6dcea313@samsung.com/
 # via: https://forum.odroid.com/viewtopic.php?p=296896#p296896
