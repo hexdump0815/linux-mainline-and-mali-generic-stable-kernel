@@ -9,7 +9,7 @@ cd /compile/source/linux-stable-av7
 
 # patches:
 # set mac addr on kernel cmdline - otherwise a random one is generated
-patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.3.patch
+patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.18.patch
 # clock the bpi at 1.2ghz - better forget about this as at least my bpi got unstable with it meanwhile
 #patch -p1 < /compile/doc/stable/misc.av7/patches/bpi-enable-more-overclock.patch
 # set bpi otg usb to host mode
