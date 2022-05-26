@@ -1,0 +1,15 @@
+diff --git a/arch/arm/mm/proc-v7-bugs.c b/arch/arm/mm/proc-v7-bugs.c
+index fb9f3eb6bf48..03f793b22ccf 100644
+--- a/arch/arm/mm/proc-v7-bugs.c
++++ b/arch/arm/mm/proc-v7-bugs.c
+@@ -211,8 +211,8 @@ static int spectre_bhb_install_workaround(int method)
+ 		spectre_bhb_method = method;
+ 	}
+ 
+-	pr_info("CPU%u: Spectre BHB: using %s workaround\n",
+-		smp_processor_id(), spectre_bhb_method_name(method));
++/*	pr_info("CPU%u: Spectre BHB: using %s workaround\n",
++		smp_processor_id(), spectre_bhb_method_name(method)); */
+ 
+ 	return SPECTRE_MITIGATED;
+ }
