@@ -4,7 +4,7 @@
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
-# name: stb-cbq
+# name: stb-cbq - chromebook qualcom
 
 cd /compile/source/linux-stable-cbq
 

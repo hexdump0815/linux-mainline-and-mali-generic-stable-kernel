@@ -3,7 +3,7 @@
 # - /compile/source/linux-stable-e54 - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
-# name: stb-e54
+# name: stb-e54 - exynos 54xx
 
 cd /compile/source/linux-stable-e54
 

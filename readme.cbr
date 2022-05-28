@@ -4,7 +4,7 @@
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
-# name: stb-cbr
+# name: stb-cbr - chromebook rockchip
 
 # this sepearate config from av7 exists, as with av7 the system hangs on boot
 # rk3288 mainline only has a light suspend mode without powering down everything
