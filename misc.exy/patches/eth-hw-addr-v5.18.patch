@@ -1,5 +1,5 @@
 diff --git a/drivers/net/usb/smsc95xx.c b/drivers/net/usb/smsc95xx.c
-index 4ef61f6b85df..2058fad0fc2f 100644
+index 4ef61f6b85df..ca0370f165c1 100644
 --- a/drivers/net/usb/smsc95xx.c
 +++ b/drivers/net/usb/smsc95xx.c
 @@ -52,6 +52,7 @@
@@ -21,7 +21,7 @@ index 4ef61f6b85df..2058fad0fc2f 100644
  static int __must_check __smsc95xx_read_reg(struct usbnet *dev, u32 index,
  					    u32 *data, int in_pm)
  {
-@@ -790,10 +795,61 @@ static int smsc95xx_ioctl(struct net_device *netdev, struct ifreq *rq, int cmd)
+@@ -790,10 +795,60 @@ static int smsc95xx_ioctl(struct net_device *netdev, struct ifreq *rq, int cmd)
  	return phy_mii_ioctl(netdev->phydev, rq, cmd);
  }
  
@@ -64,8 +64,7 @@ index 4ef61f6b85df..2058fad0fc2f 100644
 +                netif_dbg(dev, ifup, dev->net, "Overriding MAC address with: "
 +                "%02x:%02x:%02x:%02x:%02x:%02x\n", mtbl[0], mtbl[1], mtbl[2],
 +                                                mtbl[3], mtbl[4], mtbl[5]);
-+                for (i = 0; i < MAC_ADDR_LEN; i++)
-+                        dev_mac[i] = mtbl[i];
++                eth_hw_addr_set(dev->net, mtbl);
 +                return 1;
 +        } else {
 +                return 0;
