@@ -1,5 +1,5 @@
 diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
-index 2525a80353b7..b92a27b6cf9a 100644
+index 2525a80353b7..e2a1d8f444ef 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
 @@ -60,6 +60,12 @@
@@ -15,12 +15,12 @@ index 2525a80353b7..b92a27b6cf9a 100644
  /* Module parameters */
  #define TX_TIMEO	5000
  static int watchdog = TX_TIMEO;
-@@ -2803,6 +2809,50 @@ static int stmmac_get_hw_features(struct stmmac_priv *priv)
+@@ -2803,6 +2809,49 @@ static int stmmac_get_hw_features(struct stmmac_priv *priv)
  	return stmmac_get_hw_feature(priv, priv->ioaddr, &priv->dma_cap) == 0;
  }
  
 +/* Check the macaddr module parameter for a MAC address */
-+static int stmmac_is_macaddr_param(u8 *dev_mac)
++static int stmmac_is_macaddr_param(struct stmmac_priv *priv)
 +{
 +       int i, j, got_num, num;
 +       u8 mtbl[MAC_ADDR_LEN];
@@ -55,8 +55,7 @@ index 2525a80353b7..b92a27b6cf9a 100644
 +       }
 +
 +       if (j == MAC_ADDR_LEN) {
-+               for (i = 0; i < MAC_ADDR_LEN; i++)
-+                       dev_mac[i] = mtbl[i];
++               eth_hw_addr_set(priv->dev, mtbl);
 +               return 1;
 +       } else {
 +               return 0;
@@ -66,11 +65,12 @@ index 2525a80353b7..b92a27b6cf9a 100644
  /**
   * stmmac_check_ether_addr - check if the MAC addr is valid
   * @priv: driver private structure
-@@ -2820,6 +2870,8 @@ static void stmmac_check_ether_addr(struct stmmac_priv *priv)
+@@ -2819,7 +2868,8 @@ static void stmmac_check_ether_addr(struct stmmac_priv *priv)
+ 		if (is_valid_ether_addr(addr))
  			eth_hw_addr_set(priv->dev, addr);
  		else
- 			eth_hw_addr_random(priv->dev);
-+			if (!stmmac_is_macaddr_param(priv->dev->dev_addr))
+-			eth_hw_addr_random(priv->dev);
++			if (!stmmac_is_macaddr_param(priv))
 +				eth_hw_addr_random(priv->dev);
  		dev_info(priv->device, "device MAC address %pM\n",
  			 priv->dev->dev_addr);
