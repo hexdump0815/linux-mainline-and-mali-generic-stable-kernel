@@ -26,7 +26,7 @@ index 4ef61f6b85df..ca0370f165c1 100644
  }
  
 +/* Check the macaddr module parameter for a MAC address */
-+static int smsc95xx_is_macaddr_param(struct usbnet *dev, u8 *dev_mac)
++static int smsc95xx_is_macaddr_param(struct usbnet *dev)
 +{
 +        int i, j, got_num, num;
 +        u8 mtbl[MAC_ADDR_LEN];
@@ -76,7 +76,7 @@ index 4ef61f6b85df..ca0370f165c1 100644
  	u8 addr[ETH_ALEN];
  
 +	/* Check module parameters */
-+	if (smsc95xx_is_macaddr_param(dev, dev->net->dev_addr))
++	if (smsc95xx_is_macaddr_param(dev))
 +		return;
 +
  	/* maybe the boot loader passed the MAC address in devicetree */
