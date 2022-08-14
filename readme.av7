@@ -40,7 +40,7 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/401
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4015-FIXME-Don-t-use-vop_crtc_mode_valid.patch
 
 # apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v11/*.diff; do
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v13/*.diff; do
   echo === $i
   patch -p1 < $i
 done
