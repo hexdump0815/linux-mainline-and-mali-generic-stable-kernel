@@ -32,12 +32,12 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/additional-disabled-opp-entires
 # allow higher cpu temps
 patch -p1 < /compile/doc/stable/misc.av8/patches/gxl-higher-temps.patch
 # add new dtbs to Makefile
-patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v5.18.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v5.19.patch
 # copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
 cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
 
 # apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v11/*.diff; do
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v13/*.diff; do
   echo === $i
   patch -p1 < $i
 done
