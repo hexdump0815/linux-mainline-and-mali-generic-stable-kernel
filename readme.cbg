@@ -11,13 +11,11 @@ cd /compile/source/linux-stable-cbg
 # patches - taken from https://github.com/Maccraft123/Cadmium/tree/master/kernel/patches
 patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0001-drm-bridge-analogix_dp-Don-t-return-EBUSY-when-msg-s.patch
 patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0002-drm-rockchip-Only-wait-for-panel-ACK-on-PSR-entry.patch
-patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.add-dfi-dmc-nodes.patch
-patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.enable-dmc-dfi.patch
 # add gamma drm support for rk3399
 patch -p1 < /compile/doc/stable/misc.cbg/patches/rk3399-add-drm-gamma-support.patch
 
 # apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v11/*.diff; do
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v13/*.diff; do
   echo === $i
   patch -p1 < $i
 done
