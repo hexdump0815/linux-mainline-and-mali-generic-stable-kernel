@@ -1,6 +1,8 @@
 this patch reverts https://lore.kernel.org/linux-tegra/20220425132244.48688-1-u.kleine-koenig@pengutronix.de/
 as it breaks the backlight control of the nyan chromebooks in at least v5.19.1
 
+see also: https://libera.irclog.whitequark.org/tegra/2022-08-15#32742134
+
 diff --git a/drivers/pwm/pwm-tegra.c b/drivers/pwm/pwm-tegra.c
 index dad9978c9186..30d331bbe718 100644
 --- a/drivers/pwm/pwm-tegra.c
