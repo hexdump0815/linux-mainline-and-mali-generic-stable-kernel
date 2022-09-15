@@ -72,7 +72,7 @@ cp -v System.map /boot/System.map-${kver}
 cp arch/arm/boot/zImage zImage
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 cp /compile/doc/stable/misc.cbr/misc/cmdline cmdline
-mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b  arch/arm/boot/dts/rk3288-veyron-jaq.dtb -b arch/arm/boot/dts/rk3288-veyron-jerry.dtb -b arch/arm/boot/dts/rk3288-veyron-mickey.dtb -b arch/arm/boot/dts/rk3288-veyron-mighty.dtb -b arch/arm/boot/dts/rk3288-veyron-minnie.dtb -b arch/arm/boot/dts/rk3288-veyron-speedy.dtb kernel.itb
+ls arch/arm/boot/dts/rk3288-veyron-*.dtb | xargs printf " -b %s" | xargs mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage kernel.itb
 vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
 cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
 rm -f zImage cmdline bootloader.bin kernel.itb vmlinux.kpart
