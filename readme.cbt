@@ -25,13 +25,13 @@ cd /compile/source/linux-stable-cbt
 # add extra dtb for the full hd nyan big model to get a reliable console on boot - no longer needed with v5.18, already in there
 #patch -p1 < /compile/doc/stable/misc.cbt/patches/add-nyan-big-fhd-model-dts.patch
 # disable spectre mitigation log spam until a better solution has been found
-# see: https://www.spinics.net/lists/arm-kernel/msg983037.html
-patch -p1 < /compile/doc/stable/misc.cbt/patches/disable-spectre-log-spam.patch
+# see: https://www.spinics.net/lists/arm-kernel/msg983037.html - maybe no longer needed at least in v6.0
+#patch -p1 < /compile/doc/stable/misc.cbt/patches/disable-spectre-log-spam.patch
 # fix a pwm issue which breaks the backligh control on nyan chromebooks
 patch -p1 < /compile/doc/stable/misc.cbt/patches/revert-tegra-pwm-changes.patch
 
 # apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v13/*.diff; do
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v15/*.diff; do
   echo === $i
   patch -p1 < $i
 done
