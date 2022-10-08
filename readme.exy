@@ -11,7 +11,7 @@ cd /compile/source/linux-stable-exy
 # patches:
 # add cmdline option to set a fixed ethernet mac address on the kernel
 # cmdline to avoid getting a randomone on each boot
-patch -p1 < /compile/doc/stable/misc.exy/patches/eth-hw-addr-v5.18.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/eth-hw-addr-v6.0.patch
 # fix odroid x/x2 usb
 # see: https://lore.kernel.org/lkml/26ff3deb-4b8d-7dd2-2418-d56f6dcea313@samsung.com/
 # via: https://forum.odroid.com/viewtopic.php?p=296896#p296896
@@ -25,10 +25,10 @@ patch -p1 < /compile/doc/stable/misc.exy/patches/add-disabled-extra-cpu-clocks-o
 git checkout -- arch/arm/boot/dts/Makefile
 cp arch/arm/boot/dts/exynos4412-odroidu3.dts arch/arm/boot/dts/exynos4412-odroidu3noplus.dts
 cp arch/arm/boot/dts/exynos4412-odroid-common.dtsi arch/arm/boot/dts/exynos4412-odroid-common-u3noplus.dtsi
-patch -p1 < /compile/doc/stable/misc.exy/patches/reboot-fix-u3noplus-v5.8.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/reboot-fix-u3noplus-v6.0.patch
 
 # apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v13/*.diff; do
+for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v15/*.diff; do
   echo === $i
   patch -p1 < $i
 done
