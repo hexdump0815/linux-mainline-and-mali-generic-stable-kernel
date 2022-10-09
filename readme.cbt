@@ -28,7 +28,7 @@ cd /compile/source/linux-stable-cbt
 # see: https://www.spinics.net/lists/arm-kernel/msg983037.html - maybe no longer needed at least in v6.0
 #patch -p1 < /compile/doc/stable/misc.cbt/patches/disable-spectre-log-spam.patch
 # fix a pwm issue which breaks the backligh control on nyan chromebooks
-patch -p1 < /compile/doc/stable/misc.cbt/patches/revert-tegra-pwm-changes.patch
+patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-tegra-pwm-parent-clock.patch
 
 # apply the multi gen lru kernel extra patches
 for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v15/*.diff; do
