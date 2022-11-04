@@ -27,8 +27,8 @@ cd /compile/source/linux-stable-cbt
 # disable spectre mitigation log spam until a better solution has been found
 # see: https://www.spinics.net/lists/arm-kernel/msg983037.html - maybe no longer needed at least in v6.0
 #patch -p1 < /compile/doc/stable/misc.cbt/patches/disable-spectre-log-spam.patch
-# fix a pwm issue which breaks the backligh control on nyan chromebooks
-patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-tegra-pwm-parent-clock.patch
+# fix a pwm issue which breaks the backligh control on nyan chromebooks - no longer required with v6.0.6
+#patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-tegra-pwm-parent-clock.patch
 
 # apply the multi gen lru kernel extra patches
 for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v15/*.diff; do
@@ -42,6 +42,8 @@ scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/
 make olddefconfig
 make -j 4 bzImage dtbs modules
 cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
 make
 cd ../power/cpupower
 make
