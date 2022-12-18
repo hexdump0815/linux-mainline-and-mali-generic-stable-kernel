@@ -87,17 +87,3 @@ cp -v /compile/doc/stable/config.cbe /compile/doc/stable/config.cbe.old
 cp -v /compile/source/linux-stable-cbe/.config /compile/doc/stable/config.cbe
 cp -v /compile/source/linux-stable-cbe/.config /compile/doc/stable/config.cbe-${kver}
 cp -v /compile/source/linux-stable-cbe/*.tar.gz /compile/result/stable
-
-
-/etc/extlinux/extlinux.conf
-TIMEOUT 30
-DEFAULT v51025
-
-MENU TITLE snow sd boot options
-
-LABEL v51025
-      MENU LABEL v5.10.25 kernel mmcblk1
-      LINUX ../zImage-5.10.25-stb-cbe+
-      INITRD ../initrd.img-5.10.25-stb-cbe+
-      FDT ../dtb-5.4.3-stb-cbe+/exynos5250-snow.dtb
-      APPEND console=tty1 root=/dev/mmcblk1p4 ro rootwait noinitrd net.ifnames=0 ipv6.disable=1 fsck.repair=yes

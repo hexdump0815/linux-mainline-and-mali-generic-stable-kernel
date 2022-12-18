@@ -73,30 +73,3 @@ cp -v /compile/doc/stable/config.cbt /compile/doc/stable/config.cbt.old
 cp -v /compile/source/linux-stable-cbt/.config /compile/doc/stable/config.cbt
 cp -v /compile/source/linux-stable-cbt/.config /compile/doc/stable/config.cbt-${kver}
 cp -v /compile/source/linux-stable-cbt/*.tar.gz /compile/result/stable
-
-
-# extlinux.conf
-TIMEOUT 30
-DEFAULT v5152
-
-MENU TITLE nyan chromebook boot options
-
-LABEL v5152
-      MENU LABEL v5.15.2 kernel
-      LINUX ../zImage-5.15.2-stb-cbt+
-      INITRD ../initrd.img-5.15.2-stb-cbt+
-#      FDT ../dtb-5.15.2-stb-cbt+/tegra124-nyan-big.dtb
-      FDT ../dtb-5.15.2-stb-cbt+/tegra124-nyan-big-fhd.dtb
-#      FDT ../dtb-5.15.2-stb-cbt+/tegra124-nyan-blaze.dtb
-      APPEND console=tty1 root=LABEL=root ro rootwait net.ifnames=0 ipv6.disable=1 fsck.repair=yes
-
-# some notes about getting the open source nouveau gpu driver working:
-# see also: https://gitlab.freedesktop.org/mesa/mesa/-/issues/3505
-# - a xorg server built from the latest sources is required (tested with sources from 04/2021)
-# - a recent mesa might be required (not sure about this, tested with 21.0.1)
-# - kernel cmdline nouveau.modeset=1 is required
-# - performance is quite low due to low default gpu clock frequency
-# - gpu clock frequency can be changed via /sys/kernel/debug/dri/128/pstate
-# - glmark2 crashes in the terrain module with some memory allocation error
-# - a wayfire/wayland session does not seem to work
-#   - black screen and "tegra-sor 54540000.sor: failed to power down link: -110"

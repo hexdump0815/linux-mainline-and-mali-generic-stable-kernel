@@ -68,25 +68,3 @@ cp -v /compile/doc/stable/config.e54 /compile/doc/stable/config.e54.old
 cp -v /compile/source/linux-stable-e54/.config /compile/doc/stable/config.e54
 cp -v /compile/source/linux-stable-e54/.config /compile/doc/stable/config.e54-${kver}
 cp -v /compile/source/linux-stable-e54/*.tar.gz /compile/result/stable
-
-
-# boot.ini when using the legacy armbian u-boot 2017.05
-cat /boot/boot.ini
-ODROIDXU-UBOOT-CONFIG
-
-setenv kver "5.4.35-stb-e54+"
-
-setenv initrd_high "0xffffffff"
-setenv fdt_high "0xffffffff"
-
-fdt addr 0x44000000
-fdt rm /cec@101B0000
-
-ext4load mmc 0:1 0x40008000 zImage-${kver}
-ext4load mmc 0:1 0x42000000 uInitrd-${kver}
-#ext4load mmc 0:1 0x44000000 dtb-${kver}/exynos5422-odroidxu4.dtb
-ext4load mmc 0:1 0x44000000 dtb-${kver}/exynos5422-odroidmc1.dtb
-
-setenv bootargs "console=ttySAC2,115200n8 root=/dev/mmcblk1p3 ro loglevel=8 rootwait net.ifnames=0 ipv6.disable=1 fsck.repair=yes"
-
-bootz 0x40008000 0x42000000 0x44000000

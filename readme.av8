@@ -76,29 +76,3 @@ cp -v /compile/doc/stable/config.av8 /compile/doc/stable/config.av8.old
 cp -v /compile/source/linux-stable-av8/.config /compile/doc/stable/config.av8
 cp -v /compile/source/linux-stable-av8/.config /compile/doc/stable/config.av8-${kver}
 cp -v /compile/source/linux-stable-av8/*.tar.gz /compile/result/stable
-
-
-# s905w tv box - /boot/s905_autoscript.txt:
-setenv kver 5.4.3-stb-av8+
-# hardcode the eth mac addr in uboot as otherwise we will get a new one each time
-setenv ethaddr 11:22:33:44:55:66
-setenv mac 11:22:33:44:55:66
-setenv bootargs "console=ttyAML0,115200n8 console=tty0 no_console_suspend consoleblank=0 root=/dev/sda3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 zswap.enabled=0 threadirqs noresume"
-#fatload usb 0 0x11000000 Image-${kver}
-fatload usb 0 0x01080000 uImage-${kver}
-fatload usb 0 0x13000000 uInitrd-${kver}
-fatload usb 0 ${dtb_mem_addr} dtb-${kver}/meson-gxl-s905w-p281.dtb
-# booti only works out of the box with blb kernels due some patches - otherwise mkimage is required
-#booti 0x11000000 0x13000000 ${dtb_mem_addr}
-# as describe at linux-meson.com
-bootm 0x1080000 0x13000000 $dtb_mem_addr
-# use: mkimage -A arm64 -T script -O linux -d s905_autoscript.txt s905_autoscript.scr
-
-# rpi 3 aarch64 - /boot/boot.txt:
-setenv kver 5.4.3-stb-av8+
-setenv bootargs "console=ttyS1,115200n8 console=tty0 root=/dev/mmcblk0p3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 smsc95xx.macaddr=${usbethaddr} threadirqs noresume"
-fatload mmc 0 ${kernel_addr_r} Image-${kver}
-fatload mmc 0 ${ramdisk_addr_r} uInitrd-${kver}
-fatload mmc 0 ${fdt_addr_r} dtb-${kver}/bcm2837-rpi-3-b.dtb
-booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
-# use: mkimage -A arm -T script -O linux -d boot.txt boot.scr

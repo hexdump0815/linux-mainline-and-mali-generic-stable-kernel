@@ -78,14 +78,3 @@ cp -v /compile/doc/stable/config.cbr /compile/doc/stable/config.cbr.old
 cp -v /compile/source/linux-stable-cbr/.config /compile/doc/stable/config.cbr
 cp -v /compile/source/linux-stable-cbr/.config /compile/doc/stable/config.cbr-${kver}
 cp -v /compile/source/linux-stable-cbr/*.tar.gz /compile/result/stable
-
-
-#
-# extlinux.conf entry
-#
-LABEL v5150
-      MENU LABEL v5.15.0 kernel via zImage mmcblk0
-      LINUX ../boot/zImage-5.15.0-stb-cbr+
-      INITRD ../boot/initrd.img-5.15.0-stb-cbr+
-      FDT ../boot/dtb-5.15.0-stb-cbr+/rk3288-veyron-mighty.dtb
-      APPEND console=tty1 gpt root=/dev/mmcblk1p4 ro rootwait net.ifnames=0 ipv6.disable=1 fsck.repair=yes
