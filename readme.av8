@@ -3,7 +3,6 @@
 # - /compile/source/linux-stable-av8 - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
-# - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
 # name: stb-av8 - arm v8
 
 cd /compile/source/linux-stable-av8
@@ -32,15 +31,9 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/additional-disabled-opp-entires
 # allow higher cpu temps
 patch -p1 < /compile/doc/stable/misc.av8/patches/gxl-higher-temps.patch
 # add new dtbs to Makefile
-patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v5.19.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v6.1.patch
 # copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
 cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
-
-# apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v15/*.diff; do
-  echo === $i
-  patch -p1 < $i
-done
 
 export ARCH=arm64
 scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.av8/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.av8/options/additional-options-special.cfg
