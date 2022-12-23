@@ -8,12 +8,8 @@
 cd /compile/source/linux-stable-cbq
 
 export ARCH=arm64
-# the kernel config is not yet arch/arm64/configs/defconfig based - instead an
-# adjusted version of the chromeos kernel config is used as starting point for now
-scripts/kconfig/merge_config.sh -m /compile/doc/stable/misc.cbq/misc/config-lazor-cros-olddefconfig-adjusted /compile/doc/kernel-config-options/chromebooks-aarch64.cfg /compile/doc/kernel-config-options/mediatek.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbq/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.cbq/options/additional-options-special.cfg
+scripts/kconfig/merge_config.sh -m  arch/arm64/configs/defconfig /compile/doc/kernel-config-options/chromebooks-aarch64.cfg /compile/doc/kernel-config-options/mediatek.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbq/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.cbq/options/additional-options-special.cfg
 ( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/stable/misc.cbq/options/kernel-config-options.version
-# old approach: using a cros config based with some required adjustments as a starting point
-# cp /compile/doc/stable/misc.cbq/misc/config-lazor-cros-olddefconfig-adjusted .config
 make olddefconfig
 make -j 8 Image dtbs modules
 cd tools/perf
