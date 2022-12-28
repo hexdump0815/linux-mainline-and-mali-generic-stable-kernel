@@ -3,34 +3,13 @@
 # - /compile/source/linux-stable-cbe - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
-# - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
 # name: stb-cbe - chromebook exynos
 
 cd /compile/source/linux-stable-cbe
 
 # patches:
-# this one is needed to make suspend work with v5.4+
-patch -p1 < /compile/doc/stable/misc.cbe/patches/snow-v5-4-suspend-fix.patch
-# disable the usb3 port on snow - it makes trouble with suspend etc.
-patch -p1 < /compile/doc/stable/misc.cbe/patches/disable-usb3-v5.18.patch
-# add mali support
-patch -p1 < /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete.patch
-cp -r /compile/doc/stable/misc.cbe/patches/exynos5250-mali-complete/drivers/gpu/arm drivers/gpu
-# fix mali compile for v5.9
-patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.9.patch
-# fix mali compile for v5.15
-patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.15.patch
-# fix mali compile for v5.18
-patch -p0 < /compile/doc/stable/misc.cbe/patches/fix-mali-compile-v5.18.patch
-# fix atmel touchpad on some snow models (rev5 most problably) - disabled for now until tested
-# see: https://github.com/hexdump0815/linux-mainline-and-mali-generic-stable-kernel/issues/6
-patch -p1 < /compile/doc/stable/misc.cbe/patches/fix-atmel-touchpad.patch
-
-# apply the multi gen lru kernel extra patches
-for i in /compile/doc/kernel-extra-patches/multi-gen-lru/v11/*.diff; do
-  echo === $i
-  patch -p1 < $i
-done
+# bring in patches from v6.1 of pmos exynos5 mainline tree
+patch -p1 < /compile/doc/stable/misc.cbe/patches/pmos-exynos-v6.1.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m /compile/doc/stable/misc.cbe/misc/config.cbe-base /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbe/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbe/options/additional-options-special.cfg
@@ -51,14 +30,6 @@ mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
-# move away the exynos5250 mali module and tar it separately beforehand
-mkdir -p /lib/modules/${kver}/extra
-mv /lib/modules/${kver}/kernel/drivers/gpu/arm/midgard/mali_kbase.ko /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/kernel/drivers/gpu/arm
-tar cvzf /compile/source/linux-stable-cbe/${kver}-mali-exynos5250.tar.gz /lib/modules/${kver}/extra
-rm -rf /lib/modules/${kver}/extra
-# redo the depmod without the mali module
-depmod ${kver}
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
