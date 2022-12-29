@@ -8,26 +8,10 @@
 cd /compile/source/linux-stable-cbt
 
 # patches:
-# fix xusb - no longer needed with v5.18, already in there
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/xusb-usb-role-switch.patch
-# the dfll part is required for cpu freq scaling to work - no longer needed with v5.18, already in there
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/cec-and-dfll-clock.patch
-# a workaround for the broken soctherm hw thermal driver for now - no longer needed with v5.18, already in there
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-thermal-workaround.patch
-# slightly overclock the cpu - not used yet to avoid overheating
-#patch -p0 < /compile/doc/stable/misc.cbt/patches/overclock-nyan.patch
-# fix black display with v5.15.0 - no longer needed with v5.18, another fix is in place now
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-01.patch
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-display-fix-v5.15-02.patch
-# fix xusb probing error -22 with v5.15.0 - no longer needed with v5.15.7
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/nyan-xusb-fix-v5.15.patch
-# add extra dtb for the full hd nyan big model to get a reliable console on boot - no longer needed with v5.18, already in there
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/add-nyan-big-fhd-model-dts.patch
-# disable spectre mitigation log spam until a better solution has been found
-# see: https://www.spinics.net/lists/arm-kernel/msg983037.html - maybe no longer needed at least in v6.0
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/disable-spectre-log-spam.patch
-# fix a pwm issue which breaks the backligh control on nyan chromebooks - no longer required with v6.0.6
-#patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-tegra-pwm-parent-clock.patch
+# fixed mmc device numbering
+patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0002-ARM-dts-tegra-nyan-add-mmc-aliases.patch
+# fix audio jack detection
+patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0003-ARM-tegra-nyan-fix-mic-jack-detection.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbt/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbt/options/additional-options-special.cfg
