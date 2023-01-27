@@ -1,1 +1,1 @@
-console=tty1 root=PARTUUID=%U/PARTNROFF=3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 noresume fw_devlink=off loglevel=8 drm.debug=0xe
+console=tty1 root=PARTUUID=%U/PARTNROFF=3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 noresume fw_devlink=off loglevel=8 drm.debug=0xe apparmor=0 systemd.unified_cgroup_hierarchy=0

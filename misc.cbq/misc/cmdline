@@ -1,1 +1,1 @@
-console=tty1 console=ttyMSM0,115200 root=PARTUUID=%U/PARTNROFF=3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 deferred_probe_timeout=30 clk_ignore_unused=1 noresume
+console=tty1 console=ttyMSM0,115200 root=PARTUUID=%U/PARTNROFF=3 rootwait ro fsck.fix=yes fsck.repair=yes net.ifnames=0 ipv6.disable=1 deferred_probe_timeout=30 clk_ignore_unused=1 noresume apparmor=0
