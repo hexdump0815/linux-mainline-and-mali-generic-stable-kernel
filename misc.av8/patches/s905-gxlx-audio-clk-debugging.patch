@@ -1,0 +1,106 @@
+see: https://libera.irclog.whitequark.org/linux-amlogic/2023-07-29#34682969
+and: https://libera.irclog.whitequark.org/linux-amlogic/2023-07-29#34684882
+
+diff --git a/drivers/clk/meson/meson-eeclk.c b/drivers/clk/meson/meson-eeclk.c
+index 0e5e6b57eb20..6f48dbc6b493 100644
+--- a/drivers/clk/meson/meson-eeclk.c
++++ b/drivers/clk/meson/meson-eeclk.c
+@@ -20,6 +20,7 @@ int meson_eeclkc_probe(struct platform_device *pdev)
+ 	struct device *dev = &pdev->dev;
+ 	struct device_node *np;
+ 	struct regmap *map;
++	unsigned int val;
+ 	int ret, i;
+ 
+ 	data = of_device_get_match_data(dev);
+@@ -39,6 +40,42 @@ int meson_eeclkc_probe(struct platform_device *pdev)
+ 	if (data->init_count)
+ 		regmap_multi_reg_write(map, data->init_regs, data->init_count);
+ 
++	regmap_read(map, 0x280, &val);
++	dev_err(dev, "HHI_MPLL_CNTL = 0x%08x\n", val);
++
++	regmap_read(map, 0x284, &val);
++	dev_err(dev, "HHI_MPLL_CNTL2 = 0x%08x\n", val);
++
++	regmap_read(map, 0x288, &val);
++	dev_err(dev, "HHI_MPLL_CNTL3 = 0x%08x\n", val);
++
++	regmap_read(map, 0x28c, &val);
++	dev_err(dev, "HHI_MPLL_CNTL4 = 0x%08x\n", val);
++
++	regmap_read(map, 0x290, &val);
++	dev_err(dev, "HHI_MPLL_CNTL5 = 0x%08x\n", val);
++
++	regmap_read(map, 0x294, &val);
++	dev_err(dev, "HHI_MPLL_CNTL6 = 0x%08x\n", val);
++
++	regmap_read(map, 0x298, &val);
++	dev_err(dev, "HHI_MPLL_CNTL7 = 0x%08x\n", val);
++
++	regmap_read(map, 0x29c, &val);
++	dev_err(dev, "HHI_MPLL_CNTL8 = 0x%08x\n", val);
++
++	regmap_read(map, 0x2a0, &val);
++	dev_err(dev, "HHI_MPLL_CNTL9 = 0x%08x\n", val);
++
++	regmap_read(map, 0x2a4, &val);
++	dev_err(dev, "HHI_MPLL_CNTL10 = 0x%08x\n", val);
++
++	regmap_read(map, 0x2e0, &val);
++	dev_err(dev, "HHI_MPLL3_CNTL0 = 0x%08x\n", val);
++
++	regmap_read(map, 0x2ee, &val);
++	dev_err(dev, "HHI_MPLL3_CNTL1 = 0x%08x\n", val);
++
+ 	/* Populate regmap for the regmap backed clocks */
+ 	for (i = 0; i < data->regmap_clk_num; i++)
+ 		data->regmap_clks[i]->map = map;
+diff --git a/drivers/clk/meson/clk-mpll.c b/drivers/clk/meson/clk-mpll.c
+index b843e101d1ba..88466348cce3 100644
+--- a/drivers/clk/meson/clk-mpll.c
++++ b/drivers/clk/meson/clk-mpll.c
+@@ -114,9 +114,12 @@ static int mpll_set_rate(struct clk_hw *hw,
+ {
+ 	struct clk_regmap *clk = to_clk_regmap(hw);
+ 	struct meson_clk_mpll_data *mpll = meson_clk_mpll_data(clk);
+-	unsigned int sdm, n2;
++	unsigned int sdm, n2, val;
+ 	unsigned long flags = 0;
+ 
++	regmap_read(clk->map, mpll->sdm.reg_off, &val);
++	pr_err("%s(%s, %lu, %lu): original register value: 0x%08x\n", __func__, clk_hw_get_name(hw), rate, parent_rate, val);
++
+ 	params_from_rate(rate, parent_rate, &sdm, &n2, mpll->flags);
+ 
+ 	if (mpll->lock)
+@@ -138,6 +141,9 @@ static int mpll_set_rate(struct clk_hw *hw,
+ 	else
+ 		__release(mpll->lock);
+ 
++	regmap_read(clk->map, mpll->sdm.reg_off, &val);
++	pr_err("%s(%s, %lu, %lu): new register value: 0x%08x\n", __func__, clk_hw_get_name(hw), rate, parent_rate, val);
++
+ 	return 0;
+ }
+ 
+@@ -145,6 +151,10 @@ static int mpll_init(struct clk_hw *hw)
+ {
+ 	struct clk_regmap *clk = to_clk_regmap(hw);
+ 	struct meson_clk_mpll_data *mpll = meson_clk_mpll_data(clk);
++	unsigned int val;
++
++	regmap_read(clk->map, mpll->sdm.reg_off, &val);
++	pr_err("%s(%s): original register value: 0x%08x\n", __func__, clk_hw_get_name(hw), val);
+ 
+ 	if (mpll->init_count)
+ 		regmap_multi_reg_write(clk->map, mpll->init_regs,
+@@ -161,6 +171,9 @@ static int mpll_init(struct clk_hw *hw)
+ 	if (MESON_PARM_APPLICABLE(&mpll->misc))
+ 		meson_parm_write(clk->map, &mpll->misc, 1);
+ 
++	regmap_read(clk->map, mpll->sdm.reg_off, &val);
++	pr_err("%s(%s): new register value: 0x%08x\n", __func__, clk_hw_get_name(hw), val);
++
+ 	return 0;
+ }

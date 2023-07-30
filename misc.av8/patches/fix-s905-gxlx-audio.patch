@@ -1,0 +1,15 @@
+see: https://libera.irclog.whitequark.org/linux-amlogic/2023-07-30#34689654
+
+diff --git a/drivers/iio/adc/meson_saradc.c b/drivers/iio/adc/meson_saradc.c
+index af6bfcc19075..e179be58e41c 100644
+--- a/drivers/iio/adc/meson_saradc.c
++++ b/drivers/iio/adc/meson_saradc.c
+@@ -1272,6 +1272,8 @@ static int meson_sar_adc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_hw;
+ 
++	regmap_write(priv->regmap, 0x30, 0x3);
++
+ 	return 0;
+ 
+ err_hw:
