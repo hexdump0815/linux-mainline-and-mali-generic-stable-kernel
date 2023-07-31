@@ -1,0 +1,1 @@
+those patches are taken from armbianthose patches are taken from armbian https://github.com/armbian/build.git at a392a2a38155886f82370e1f1202531d98f6108a (on main branch) path patch/kernel/archive/rockchip-6.4 - only the more generic patches were taken
