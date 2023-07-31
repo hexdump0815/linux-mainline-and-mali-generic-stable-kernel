@@ -17,24 +17,19 @@
 cd /compile/source/linux-stable-cbr
 
 # patches:
+# some selected armbian rk3288 patches
+for i in /compile/doc/stable/misc.cbr/patches/armbian/*.patch; do
+  echo === $i
+  patch -p1 < $i
+done
 # raise the temp limits where thermal throttling starts
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-higher-alert-temp.patch
-# improve rk3288 hdmi timing - based on https://github.com/armbian/build/pull/1887
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4004-drm-rockchip-vop-filter-modes-outside-0.5-pixel-cloc.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4005-drm-rockchip-dw_hdmi-Set-cur_ctr-to-0-always.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4006-drm-rockchip-dw_hdmi-adjust-cklvl-txlvl-for-RF-EMI.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4007-drm-rockchip-dw_hdmi-Use-auto-generated-tables.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4008-drm-rockchip-dw_hdmi-add-default-594Mhz-clk-for-4K-6.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4009-drm-rockchip-dw-hdmi-limit-tmds-to-340mhz.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4010-HACK-drm-rockchip-vop-limit-resolution-to-3840x2160.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4011-MINIARM-set-npll-be-used-for-hdmi-only.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4012-clk-rockchip-rk3288-use-npll-table-to-to-improve-HDM.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4013-clk-rockchip-rk3288-add-more-npll-clocks.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4015-FIXME-Don-t-use-vop_crtc_mode_valid.patch
+patch -p1 < /compile/doc/stable/misc.cbr/patches/rk3288-higher-alert-temp.patch
 # fix jackd audio for veyron
 patch -p1 < /compile/doc/stable/misc.cbr/patches/veyron-fix-audio-v5.4.patch
 # fix some emmc issues
 patch -p1 < /compile/doc/stable/misc.cbr/patches/cadmium-veyron.fixup-emmc-from-urja.patch
+# fix kernel version number: + instead of -dirty at the end
+patch -p1 < /compile/doc/stable/misc.cbr/patches/fix-kernel-version-number.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/chromebooks-armv7l.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbr/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbr/options/additional-options-special.cfg

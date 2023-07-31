@@ -1,22 +1,30 @@
-From 4ade7af42f03522c31bd9450710c41b47b866766 Mon Sep 17 00:00:00 2001
-From: Urja Rannikko <urjaman@gmail.com>
-Date: Mon, 27 Aug 2018 19:00:50 +0000
-Subject: [PATCH] dts: rk3288: support for dedicating npll to a vop
+From 4ab4f88649468dada5d609e1a6f8a71a7d5610c9 Mon Sep 17 00:00:00 2001
+From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
+Date: Sat, 29 Sep 2018 02:48:59 +0200
+Subject: [PATCH 4/6] dts: rk3288: support for dedicating npll to a vop
 
-Add the VOP DCLKs to the assigned clocks list so their
-parents can be set in the dts include files for
-devices that do dedicate npll to a vop.
+This patch is taken from Urja Rannikko ( @urjaman ) patchset here :
+https://github.com/urjaman/arch-c201/blob/master/linux-c201/0020-RK3288-HDMI-clock-hacks-combined.patch
+https://www.spinics.net/lists/arm-kernel/msg673156.html
 
-Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+The original description was :
+
+    Add the VOP DCLKs to the assigned clocks list so their
+    parents can be set in the dts include files for
+    devices that do dedicate npll to a vop.
+
+https://www.spinics.net/lists/arm-kernel/msg673162.html
+
+Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
 ---
  arch/arm/boot/dts/rk3288.dtsi | 6 ++++--
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-index aaaa61875701d..e8cb4dc8c27da 100644
+index d23c7fa55..ff04aab5e 100644
 --- a/arch/arm/boot/dts/rk3288.dtsi
 +++ b/arch/arm/boot/dts/rk3288.dtsi
-@@ -865,12 +865,14 @@
+@@ -867,12 +867,14 @@
  		rockchip,grf = <&grf>;
  		#clock-cells = <1>;
  		#reset-cells = <1>;
@@ -33,3 +41,6 @@ index aaaa61875701d..e8cb4dc8c27da 100644
  				       <500000000>, <300000000>,
  				       <150000000>, <75000000>,
  				       <300000000>, <150000000>,
+-- 
+2.16.4
+
