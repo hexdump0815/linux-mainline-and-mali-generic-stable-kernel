@@ -1,20 +1,7 @@
-this is the diff between mainline v6.1 and https://gitlab.com/exynos5-mainline/linux/
-as of commit 57c720c971830607f7b21cab6dab534a353a3177 and it was created by doing the
-following steps in checked out mainline v6.1 tree:
-
-git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux-stable-cbe
-cd linux-stable-cbe
-git checkout v6.1
-git remote add pmos-exynos https://gitlab.com/exynos5-mainline/linux.git/
-git remote update
-git diff v6.1 remotes/pmos-exynos/master
-git remote rm pmos-exynos
-
-afterwards two meson patches not belonging here were removed (most probably they were for a
-meson s805 based odroid c1)
+created via git diff 92e815cf07ed24ee1c51b122f24ffcf2964b4b13 7832475d877c7a8393e0b8674911b19d180eb2a6 of https://gitlab.com/exynos5-mainline/linux (master branch as of 7832475d877c7a8393e0b8674911b19d180eb2a6)
 
 diff --git a/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml b/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml
-index faea33e4f731..b4113621d1cb 100644
+index deb2cf971871..29d0ad4bac90 100644
 --- a/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml
 +++ b/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml
 @@ -142,6 +142,7 @@ properties:
@@ -39,10 +26,10 @@ index 9f406e9c0ea6..750c8c0d5d9e 100644
  		mcrne   p15, 0, r6, c2, c0, 2   @ load ttb control
  #endif
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 6aa7dc4db2fc..def16a9a7ee2 100644
+index 59829fc90315..646b6e7d62e4 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -239,6 +239,7 @@ dtb-$(CONFIG_ARCH_EXYNOS5) += \
+@@ -242,6 +242,7 @@ dtb-$(CONFIG_ARCH_EXYNOS5) += \
  	exynos5420-peach-pit.dtb \
  	exynos5420-smdk5420.dtb \
  	exynos5420-chagall-wifi.dtb \
@@ -51,21 +38,10 @@ index 6aa7dc4db2fc..def16a9a7ee2 100644
  	exynos5422-odroidhc1.dtb \
  	exynos5422-odroidxu3.dtb \
 diff --git a/arch/arm/boot/dts/exynos5250-snow-common.dtsi b/arch/arm/boot/dts/exynos5250-snow-common.dtsi
-index 3d84b9c6dea3..22632988860b 100644
+index 59b2cc35c37b..93200f6f1413 100644
 --- a/arch/arm/boot/dts/exynos5250-snow-common.dtsi
 +++ b/arch/arm/boot/dts/exynos5250-snow-common.dtsi
-@@ -15,6 +15,10 @@
- / {
- 	aliases {
- 		i2c104 = &i2c_104;
-+
-+		mmc0 = &mmc_0; /* eMMC */
-+		mmc1 = &mmc_2; /* SD */
-+		mmc2 = &mmc_3; /* WiFi */
- 	};
- 
- 	memory@40000000 {
-@@ -77,6 +81,22 @@ i2c_104: i2c@0 {
+@@ -80,6 +80,22 @@ i2c_104: i2c@0 {
  			#address-cells = <1>;
  			#size-cells = <0>;
  
@@ -88,7 +64,7 @@ index 3d84b9c6dea3..22632988860b 100644
  			battery: sbs-battery@b {
  				compatible = "sbs,sbs-battery";
  				reg = <0xb>;
-@@ -174,6 +194,11 @@ charger {
+@@ -177,6 +193,11 @@ charger {
  
  	sound {
  		samsung,i2s-controller = <&i2s0>;
@@ -100,7 +76,7 @@ index 3d84b9c6dea3..22632988860b 100644
  	};
  
  	usb3_vbus_reg: regulator-usb3 {
-@@ -197,8 +222,9 @@ xxti {
+@@ -200,8 +221,9 @@ xxti {
  	backlight: backlight {
  		compatible = "pwm-backlight";
  		pwms = <&pwm 0 1000000 0>;
@@ -112,7 +88,7 @@ index 3d84b9c6dea3..22632988860b 100644
  		enable-gpios = <&gpx3 0 GPIO_ACTIVE_HIGH>;
  		power-supply = <&fet1>;
  		pinctrl-0 = <&pwm0_out>;
-@@ -446,6 +472,21 @@ trackpad@67 {
+@@ -449,6 +471,21 @@ trackpad@67 {
  		interrupt-parent = <&gpx1>;
  		wakeup-source;
  	};
@@ -134,7 +110,7 @@ index 3d84b9c6dea3..22632988860b 100644
  };
  
  /*
-@@ -615,6 +656,20 @@ ec_irq: ec-irq-pins {
+@@ -619,6 +656,20 @@ ec_irq: ec-irq-pins {
  		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
  	};
  
@@ -155,7 +131,7 @@ index 3d84b9c6dea3..22632988860b 100644
  	tps65090_irq: tps65090-irq-pins {
  		samsung,pins = "gpx2-6";
  		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
-@@ -665,6 +720,13 @@ arb_our_claim: arb-our-claim-pins {
+@@ -669,6 +720,13 @@ arb_our_claim: arb-our-claim-pins {
  		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
  		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
  	};
@@ -170,15 +146,15 @@ index 3d84b9c6dea3..22632988860b 100644
  
  &pmu_system_controller {
 diff --git a/arch/arm/boot/dts/exynos5250-snow-rev5.dts b/arch/arm/boot/dts/exynos5250-snow-rev5.dts
-index 0a47597d6f0d..74f6d45885ad 100644
+index 3d32c3476e84..4be66509dbc3 100644
 --- a/arch/arm/boot/dts/exynos5250-snow-rev5.dts
 +++ b/arch/arm/boot/dts/exynos5250-snow-rev5.dts
 @@ -27,7 +27,7 @@ cpu {
  		};
  
  		codec {
--			sound-dai = <&max98090 0>, <&hdmi>;
-+			sound-dai = <&max98090 0>;
+-			sound-dai = <&max98090>, <&hdmi>;
++			sound-dai = <&max98090>;
  		};
  	};
  };
@@ -285,19 +261,10 @@ index 000000000000..2a9af1f18de7
 +	sd-uhs-sdr104;
 +};
 diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-index 9e2123470cad..188c4d482fb9 100644
+index 7a48f2b32819..97c5481e59be 100644
 --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
 +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-@@ -31,13 +31,18 @@ / {
- 	aliases {
- 		/* Assign 20 so we don't get confused w/ builtin ones */
- 		i2c20 = &i2c_tunnel;
-+
-+		mmc0 = &mmc_0; /* eMMC */
-+		mmc1 = &mmc_2; /* uSD */
-+		mmc2 = &mmc_1; /* WiFi */
- 	};
- 
+@@ -39,8 +39,9 @@ aliases {
  	backlight: backlight {
  		compatible = "pwm-backlight";
  		pwms = <&pwm 0 1000000 0>;
@@ -309,7 +276,7 @@ index 9e2123470cad..188c4d482fb9 100644
  		power-supply = <&tps65090_fet1>;
  		pinctrl-0 = <&pwm0_out>;
  		pinctrl-names = "default";
-@@ -88,13 +93,18 @@ sound {
+@@ -91,13 +92,18 @@ sound {
  		samsung,model = "Peach-Pit-I2S-MAX98090";
  		samsung,i2s-controller = <&i2s0>;
  		samsung,audio-codec = <&max98090>;
@@ -329,7 +296,7 @@ index 9e2123470cad..188c4d482fb9 100644
  		};
  	};
  
-@@ -189,6 +199,11 @@ &fimd {
+@@ -192,6 +198,11 @@ &fimd {
  	samsung,invert-vclk;
  };
  
@@ -341,7 +308,7 @@ index 9e2123470cad..188c4d482fb9 100644
  &hdmi {
  	status = "okay";
  	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
-@@ -825,6 +840,20 @@ ec_irq: ec-irq-pins {
+@@ -829,6 +840,20 @@ ec_irq: ec-irq-pins {
  		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
  	};
  
@@ -363,19 +330,10 @@ index 9e2123470cad..188c4d482fb9 100644
  		samsung,pins = "gpx2-5";
  		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
 diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-index 0ebcb66c6319..2c5e879bead3 100644
+index 1f544f12da6c..a5d9c2226afb 100644
 --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
 +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-@@ -29,13 +29,18 @@ / {
- 	aliases {
- 		/* Assign 20 so we don't get confused w/ builtin ones */
- 		i2c20 = &i2c_tunnel;
-+
-+		mmc0 = &mmc_0; /* eMMC */
-+		mmc1 = &mmc_2; /* SD */
-+		mmc2 = &mmc_1; /* WiFi */
- 	};
- 
+@@ -37,8 +37,9 @@ aliases {
  	backlight: backlight {
  		compatible = "pwm-backlight";
  		pwms = <&pwm 0 1000000 0>;
@@ -387,7 +345,7 @@ index 0ebcb66c6319..2c5e879bead3 100644
  		enable-gpios = <&gpx2 2 GPIO_ACTIVE_HIGH>;
  		power-supply = <&tps65090_fet1>;
  		pinctrl-0 = <&pwm0_out>;
-@@ -88,13 +93,18 @@ sound {
+@@ -91,13 +92,18 @@ sound {
  		samsung,model = "Peach-Pi-I2S-MAX98091";
  		samsung,i2s-controller = <&i2s0>;
  		samsung,audio-codec = <&max98091>;
@@ -407,7 +365,7 @@ index 0ebcb66c6319..2c5e879bead3 100644
  		};
  	};
  
-@@ -198,6 +208,11 @@ &fimd {
+@@ -201,6 +207,11 @@ &fimd {
  	samsung,invert-vclk;
  };
  
@@ -419,7 +377,7 @@ index 0ebcb66c6319..2c5e879bead3 100644
  &hdmi {
  	status = "okay";
  	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
-@@ -807,6 +822,20 @@ ec_irq: ec-irq-pins {
+@@ -811,6 +822,20 @@ ec_irq: ec-irq-pins {
  		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
  	};
  
@@ -441,10 +399,10 @@ index 0ebcb66c6319..2c5e879bead3 100644
  		samsung,pins = "gpx2-5";
  		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
 diff --git a/arch/arm/mach-exynos/exynos.c b/arch/arm/mach-exynos/exynos.c
-index 51a247ca4da8..172d418cbfb4 100644
+index 966a0995e047..72c92469070e 100644
 --- a/arch/arm/mach-exynos/exynos.c
 +++ b/arch/arm/mach-exynos/exynos.c
-@@ -221,3 +221,31 @@ DT_MACHINE_START(EXYNOS_DT, "Samsung Exynos (Flattened Device Tree)")
+@@ -223,3 +223,31 @@ DT_MACHINE_START(EXYNOS_DT, "Samsung Exynos (Flattened Device Tree)")
  	.dt_compat	= exynos_dt_compat,
  	.dt_fixup	= exynos_dt_fixup,
  MACHINE_END
@@ -477,10 +435,10 @@ index 51a247ca4da8..172d418cbfb4 100644
 +ODROID_MACHINE_START(XU3, exynos5422_odroidxu3_dt_compat)
 +ODROID_MACHINE_START(XU4, exynos5422_odroidxu4_dt_compat)
 diff --git a/arch/arm/mm/dma-mapping.c b/arch/arm/mm/dma-mapping.c
-index d7909091cf97..88314036a021 100644
+index b4a33358d2e9..31af4a177528 100644
 --- a/arch/arm/mm/dma-mapping.c
 +++ b/arch/arm/mm/dma-mapping.c
-@@ -1326,6 +1326,64 @@ static void arm_iommu_unmap_sg(struct device *dev,
+@@ -1311,6 +1311,64 @@ static void arm_iommu_unmap_sg(struct device *dev,
  	}
  }
  
@@ -545,7 +503,7 @@ index d7909091cf97..88314036a021 100644
  /**
   * arm_iommu_sync_sg_for_cpu
   * @dev: valid struct device pointer
-@@ -1531,6 +1589,8 @@ static const struct dma_map_ops iommu_ops = {
+@@ -1517,6 +1575,8 @@ static const struct dma_map_ops iommu_ops = {
  
  	.map_page		= arm_iommu_map_page,
  	.unmap_page		= arm_iommu_unmap_page,
@@ -555,7 +513,7 @@ index d7909091cf97..88314036a021 100644
  	.sync_single_for_device	= arm_iommu_sync_single_for_device,
  
 diff --git a/drivers/gpu/drm/drm_ioctl.c b/drivers/gpu/drm/drm_ioctl.c
-index ca2a6e6101dc..1f5741318eb8 100644
+index 7c9d66ee917d..f860d6bebcee 100644
 --- a/drivers/gpu/drm/drm_ioctl.c
 +++ b/drivers/gpu/drm/drm_ioctl.c
 @@ -678,9 +678,9 @@ static const struct drm_ioctl_desc drm_ioctls[] = {
@@ -571,10 +529,10 @@ index ca2a6e6101dc..1f5741318eb8 100644
  	DRM_IOCTL_DEF(DRM_IOCTL_MODE_OBJ_SETPROPERTY, drm_mode_obj_set_property_ioctl, DRM_MASTER),
  	DRM_IOCTL_DEF(DRM_IOCTL_MODE_CURSOR2, drm_mode_cursor2_ioctl, DRM_MASTER),
 diff --git a/drivers/gpu/drm/tiny/Kconfig b/drivers/gpu/drm/tiny/Kconfig
-index 565957264875..6ea9ee1e42ef 100644
+index f6889f649bc1..e293eece083d 100644
 --- a/drivers/gpu/drm/tiny/Kconfig
 +++ b/drivers/gpu/drm/tiny/Kconfig
-@@ -148,6 +148,19 @@ config TINYDRM_ILI9486
+@@ -161,6 +161,19 @@ config TINYDRM_ILI9486
  
  	  If M is selected the module will be called ili9486.
  
@@ -595,10 +553,10 @@ index 565957264875..6ea9ee1e42ef 100644
  	tristate "DRM support for MI0283QT"
  	depends on DRM && SPI
 diff --git a/drivers/gpu/drm/tiny/Makefile b/drivers/gpu/drm/tiny/Makefile
-index 1d9d6227e7ab..2d617bb921c7 100644
+index 76dde89a044b..c553556734d6 100644
 --- a/drivers/gpu/drm/tiny/Makefile
 +++ b/drivers/gpu/drm/tiny/Makefile
-@@ -11,6 +11,7 @@ obj-$(CONFIG_TINYDRM_ILI9163)		+= ili9163.o
+@@ -12,6 +12,7 @@ obj-$(CONFIG_TINYDRM_ILI9163)		+= ili9163.o
  obj-$(CONFIG_TINYDRM_ILI9225)		+= ili9225.o
  obj-$(CONFIG_TINYDRM_ILI9341)		+= ili9341.o
  obj-$(CONFIG_TINYDRM_ILI9486)		+= ili9486.o
@@ -606,25 +564,6 @@ index 1d9d6227e7ab..2d617bb921c7 100644
  obj-$(CONFIG_TINYDRM_MI0283QT)		+= mi0283qt.o
  obj-$(CONFIG_TINYDRM_REPAPER)		+= repaper.o
  obj-$(CONFIG_TINYDRM_ST7586)		+= st7586.o
-diff --git a/drivers/gpu/drm/tiny/ili9341.c b/drivers/gpu/drm/tiny/ili9341.c
-index 69b265e78096..f91e849a0a75 100644
---- a/drivers/gpu/drm/tiny/ili9341.c
-+++ b/drivers/gpu/drm/tiny/ili9341.c
-@@ -163,12 +163,14 @@ static const struct drm_driver ili9341_driver = {
- 
- static const struct of_device_id ili9341_of_match[] = {
- 	{ .compatible = "adafruit,yx240qv29" },
-+	{ .compatible = "hardkernel,hktft32" },
- 	{ }
- };
- MODULE_DEVICE_TABLE(of, ili9341_of_match);
- 
- static const struct spi_device_id ili9341_id[] = {
- 	{ "yx240qv29", 0 },
-+	{ "hktft32", 0 },
- 	{ }
- };
- MODULE_DEVICE_TABLE(spi, ili9341_id);
 diff --git a/drivers/gpu/drm/tiny/ili9488_pio.c b/drivers/gpu/drm/tiny/ili9488_pio.c
 new file mode 100644
 index 000000000000..f3a0b1fb885a
@@ -998,7 +937,7 @@ index 000000000000..f3a0b1fb885a
 +MODULE_AUTHOR("Dongjin Kim <tobetter@gmail.com>");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/iommu/io-pgtable-arm.c b/drivers/iommu/io-pgtable-arm.c
-index 0ba817e86346..fbb19a496e42 100644
+index 72dcdd468cf3..244ec6bb1d9f 100644
 --- a/drivers/iommu/io-pgtable-arm.c
 +++ b/drivers/iommu/io-pgtable-arm.c
 @@ -444,9 +444,10 @@ static arm_lpae_iopte arm_lpae_prot_to_pte(struct arm_lpae_io_pgtable *data,
@@ -1015,10 +954,10 @@ index 0ba817e86346..fbb19a496e42 100644
  
  	if (prot & IOMMU_NOEXEC)
 diff --git a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
-index fca5c6405eec..115dff4b6f6f 100644
+index e30e54935d79..678323b7b258 100644
 --- a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
 +++ b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
-@@ -861,6 +861,7 @@ static int s5p_mfc_open(struct file *file)
+@@ -876,6 +876,7 @@ static int s5p_mfc_open(struct file *file)
  	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES;
  	q->mem_ops = &vb2_dma_contig_memops;
  	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
@@ -1026,7 +965,7 @@ index fca5c6405eec..115dff4b6f6f 100644
  	ret = vb2_queue_init(q);
  	if (ret) {
  		mfc_err("Failed to initialize videobuf2 queue(capture)\n");
-@@ -896,6 +897,7 @@ static int s5p_mfc_open(struct file *file)
+@@ -911,6 +912,7 @@ static int s5p_mfc_open(struct file *file)
  	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES;
  	q->mem_ops = &vb2_dma_contig_memops;
  	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
@@ -1035,10 +974,10 @@ index fca5c6405eec..115dff4b6f6f 100644
  	if (ret) {
  		mfc_err("Failed to initialize videobuf2 queue(output)\n");
 diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c
-index f453b0d09366..1a7999d2c2f8 100644
+index 2ae73ab842d4..f8638047ad86 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c
-@@ -771,6 +771,8 @@ static int stmmac_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
+@@ -762,6 +762,8 @@ static int stmmac_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
  	priv->wolopts = wol->wolopts;
  	mutex_unlock(&priv->lock);
  
@@ -1267,10 +1206,10 @@ index d07f3c9d6903..1022d40eb700 100644
  }
  core_initcall(exynos4_pm_init_power_domain);
 diff --git a/include/drm/drm_mipi_dbi.h b/include/drm/drm_mipi_dbi.h
-index 14eaecb1825c..3b46954cd47b 100644
+index 816f196b3d4c..e49bc44c9221 100644
 --- a/include/drm/drm_mipi_dbi.h
 +++ b/include/drm/drm_mipi_dbi.h
-@@ -193,12 +193,7 @@ int mipi_dbi_buf_copy(void *dst, struct drm_framebuffer *fb,
+@@ -209,12 +209,7 @@ int mipi_dbi_buf_copy(void *dst, struct iosys_map *src, struct drm_framebuffer *
  #define mipi_dbi_command(dbi, cmd, seq...) \
  ({ \
  	const u8 d[] = { seq }; \
@@ -1284,21 +1223,8 @@ index 14eaecb1825c..3b46954cd47b 100644
  })
  
  #ifdef CONFIG_DEBUG_FS
-diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 3aa384cec76b..b9f35e9700d4 100644
---- a/scripts/Makefile.lib
-+++ b/scripts/Makefile.lib
-@@ -334,7 +334,7 @@ quiet_cmd_gzip = GZIP    $@
- # DTC
- # ---------------------------------------------------------------------------
- DTC ?= $(objtree)/scripts/dtc/dtc
--DTC_FLAGS += -Wno-interrupt_provider
-+DTC_FLAGS += -Wno-interrupt_provider --symbol
- 
- # Disable noisy checks by default
- ifeq ($(findstring 1,$(KBUILD_EXTRA_WARN)),)
 diff --git a/sound/soc/samsung/snow.c b/sound/soc/samsung/snow.c
-index da342da03880..92d3d299d635 100644
+index 334080e631af..ec351aa0d12d 100644
 --- a/sound/soc/samsung/snow.c
 +++ b/sound/soc/samsung/snow.c
 @@ -3,10 +3,12 @@
