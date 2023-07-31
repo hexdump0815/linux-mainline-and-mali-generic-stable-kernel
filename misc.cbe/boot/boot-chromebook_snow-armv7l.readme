@@ -1,6 +1,0 @@
-this is the chromebook partition table combined with the u-boot binary
-
-it was created with:
-
-dd if=cb.dd-single-part of=boot-chromebook_snow-armv7l.dd
-dd if=uboot.kpart.cbe-v2017.09 of=boot-chromebook_snow-armv7l.dd bs=512 seek=8192
