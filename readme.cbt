@@ -14,6 +14,8 @@ patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0002-ARM-dts-tegra-nyan-ad
 patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0003-ARM-tegra-nyan-fix-mic-jack-detection.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-kernel-version-number.patch
+# revert the changes which break spi and with it the keyboard on nyan in v6.2+
+patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-nyan-spi-kbd-v6.4.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbt/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbt/options/additional-options-special.cfg

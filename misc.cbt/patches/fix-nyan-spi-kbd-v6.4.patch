@@ -1,0 +1,62 @@
+this essentially reverts commit 684a47847ae639689e7b823251975348a8e5434f
+https://github.com/gregkh/linux/commit/684a47847ae639689e7b823251975348a8e5434f
+https://lore.kernel.org/r/20221117105249.115649-4-tudor.ambarus@microchip.com
+as it seems to break the spi setup on nyan and with it the keyboard support
+
+this patch is against v6.4, but the problem was introduced with v6.2
+
+diff --git a/drivers/spi/spi.c b/drivers/spi/spi.c
+index 9291b2a0e887..8f52da21835a 100644
+--- a/drivers/spi/spi.c
++++ b/drivers/spi/spi.c
+@@ -3689,37 +3689,6 @@ static int __spi_validate_bits_per_word(struct spi_controller *ctlr,
+ 	return 0;
+ }
+ 
+-/**
+- * spi_set_cs_timing - configure CS setup, hold, and inactive delays
+- * @spi: the device that requires specific CS timing configuration
+- *
+- * Return: zero on success, else a negative error code.
+- */
+-static int spi_set_cs_timing(struct spi_device *spi)
+-{
+-	struct device *parent = spi->controller->dev.parent;
+-	int status = 0;
+-
+-	if (spi->controller->set_cs_timing && !spi_get_csgpiod(spi, 0)) {
+-		if (spi->controller->auto_runtime_pm) {
+-			status = pm_runtime_get_sync(parent);
+-			if (status < 0) {
+-				pm_runtime_put_noidle(parent);
+-				dev_err(&spi->controller->dev, "Failed to power device: %d\n",
+-					status);
+-				return status;
+-			}
+-
+-			status = spi->controller->set_cs_timing(spi);
+-			pm_runtime_mark_last_busy(parent);
+-			pm_runtime_put_autosuspend(parent);
+-		} else {
+-			status = spi->controller->set_cs_timing(spi);
+-		}
+-	}
+-	return status;
+-}
+-
+ /**
+  * spi_setup - setup SPI mode and clock rate
+  * @spi: the device whose settings are being modified
+@@ -3816,12 +3785,6 @@ int spi_setup(struct spi_device *spi)
+ 		}
+ 	}
+ 
+-	status = spi_set_cs_timing(spi);
+-	if (status) {
+-		mutex_unlock(&spi->controller->io_mutex);
+-		return status;
+-	}
+-
+ 	if (spi->controller->auto_runtime_pm && spi->controller->set_cs) {
+ 		status = pm_runtime_resume_and_get(spi->controller->dev.parent);
+ 		if (status < 0) {
