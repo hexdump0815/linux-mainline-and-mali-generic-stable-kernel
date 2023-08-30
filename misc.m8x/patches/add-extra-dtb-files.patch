@@ -1,0 +1,17 @@
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -399,12 +399,14 @@
+ dtb-$(CONFIG_MACH_MESON8) += \
+ 	meson8-minix-neo-x8.dtb \
+ 	meson8-tronsmart-s82.dtb \
++	meson8-mxiii.dtb \
+ 	meson8b-ec100.dtb \
+ 	meson8b-mxq.dtb \
+ 	meson8b-odroidc1.dtb \
+ 	meson8m2-mxiii.dtb \
+ 	meson8m2-mxiii-plus.dtb \
+ 	meson8m2-m8s.dtb \
++	meson8m2-m8s-dvfs.dtb \
+ 	meson8m2-wetek-core.dtb
+ dtb-$(CONFIG_ARCH_MMP) += \
+ 	pxa168-aspenite.dtb \

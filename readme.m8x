@@ -1,0 +1,57 @@
+# directories:
+# - /compile/doc/stable - the files in this dir
+# - /compile/source/linux-stable-m8x - the kernel sources checked out from gitrepo
+# - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
+# - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
+# name: stb-m8x - amlogic meson8
+
+cd /compile/source/linux-stable-m8x
+
+# patches:
+# add all the meson specific changes from the xdarlight meson8 kernel tree https://github.com/xdarklight/linux
+patch -p1 < /compile/doc/stable/misc.m8x/patches/xdl-vs-mainline-v6.1.49.patch
+# set mac addr on kernel cmdline - otherwise a random one is generated
+patch -p1 < /compile/doc/stable/misc.m8x/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.18.patch
+# some fix around reboot and mmc
+patch -p1 < /compile/doc/stable/misc.m8x/patches/fix-mmc-on-reboot.patch
+# add extra dtb files
+cp -i /compile/doc/stable/misc.m8x/dtb/meson8*.dts* arch/arm/boot/dts
+patch -p1 < /compile/doc/stable/misc.m8x/patches/add-extra-dtb-files.patch
+
+export ARCH=arm
+scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.m8x/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.m8x/options/additional-options-special.cfg
+( cd /compile/doc/kernel-config-options ; git rev-parse --verify HEAD ) > /compile/doc/stable/misc.m8x/options/kernel-config-options.version
+make olddefconfig
+make -j 4 zImage dtbs modules
+cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
+make
+cd ../power/cpupower
+make
+cd ../../..
+export kver=`make kernelrelease`
+echo ${kver}
+# remove debug info if there and not wanted
+# find . -type f -name '*.ko' | sudo xargs -n 1 objcopy --strip-unneeded
+make modules_install
+mkdir -p /lib/modules/${kver}/tools
+cp -v tools/perf/perf /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
+cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+# make headers_install INSTALL_HDR_PATH=/usr
+cp -v .config /boot/config-${kver}
+cp -v arch/arm/boot/zImage /boot/zImage-${kver}
+# for amlogic 32bit socs (legacy u-boot)
+mkimage -A arm -O linux -T kernel -C none -a 0x00208000 -e 0x00208000 -n linux-${kver} -d arch/arm/boot/zImage /boot/uImage-${kver}
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/meson8*.dtb /boot/dtb-${kver}
+cp -v System.map /boot/System.map-${kver}
+cd /boot
+update-initramfs -c -k ${kver}
+mkimage -A arm -O linux -T ramdisk -a 0x0 -e 0x0 -n initrd.img-${kver} -d initrd.img-${kver} uInitrd-${kver}
+tar cvzf /compile/source/linux-stable-m8x/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
+cp -v /compile/doc/stable/config.m8x /compile/doc/stable/config.m8x.old
+cp -v /compile/source/linux-stable-m8x/.config /compile/doc/stable/config.m8x
+cp -v /compile/source/linux-stable-m8x/.config /compile/doc/stable/config.m8x-${kver}
+cp -v /compile/source/linux-stable-m8x/*.tar.gz /compile/result/stable

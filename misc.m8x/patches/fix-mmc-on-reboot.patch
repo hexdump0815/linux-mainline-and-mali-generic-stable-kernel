@@ -1,0 +1,65 @@
+diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+index 53e3f6a4245a..1e1411009d87 100644
+--- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
++++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+@@ -12,6 +12,7 @@
+ #include <linux/iopoll.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
++#include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+ #include <linux/property.h>
+ #include <linux/regmap.h>
+@@ -855,9 +856,21 @@ static int meson_mx_sdhc_probe(struct platform_device *pdev)
+ 	return ret;
+ }
+ 
++static int meson_mx_sdhc_select_sleep_pins(struct device *dev)
++{
++	/*
++	 * Some vendor u-boot versions cannot read the SD card contents when
++	 * Linux used the SDHC pin controller for that card. Whenever requested
++	 * for a board (by specifying pinctrl-names = "sleep") we need to
++	 * switch to the SDIO pins on driver remove/system shutdown.
++	 */
++	return pinctrl_pm_select_sleep_state(dev);
++}
++
+ static int meson_mx_sdhc_remove(struct platform_device *pdev)
+ {
+ 	struct meson_mx_sdhc_host *host = platform_get_drvdata(pdev);
++	int ret;
+ 
+ 	mmc_remove_host(host->mmc);
+ 
+@@ -865,9 +878,18 @@ static int meson_mx_sdhc_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(host->pclk);
+ 
++	ret = meson_mx_sdhc_select_sleep_pins(&pdev->dev);
++	if (ret)
++		return ret;
++
+ 	return 0;
+ }
+ 
++static void meson_mx_sdhc_shutdown(struct platform_device *pdev)
++{
++	meson_mx_sdhc_select_sleep_pins(&pdev->dev);
++}
++
+ static const struct meson_mx_sdhc_data meson_mx_sdhc_data_meson8 = {
+ 	.init_hw			= meson_mx_sdhc_init_hw_meson8,
+ 	.set_pdma			= meson_mx_sdhc_set_pdma_meson8,
+@@ -899,8 +921,9 @@ static const struct of_device_id meson_mx_sdhc_of_match[] = {
+ MODULE_DEVICE_TABLE(of, meson_mx_sdhc_of_match);
+ 
+ static struct platform_driver meson_mx_sdhc_driver = {
+-	.probe   = meson_mx_sdhc_probe,
+-	.remove  = meson_mx_sdhc_remove,
++	.probe		= meson_mx_sdhc_probe,
++	.remove		= meson_mx_sdhc_remove,
++	.shutdown	= meson_mx_sdhc_shutdown,
+ 	.driver  = {
+ 		.name = "meson-mx-sdhc",
+ 		.of_match_table = of_match_ptr(meson_mx_sdhc_of_match),
