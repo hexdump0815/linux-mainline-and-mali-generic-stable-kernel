@@ -40,6 +40,16 @@
 		};
 	};
 
+	cvbs-connector {
+		compatible = "composite-video-connector";
+
+		port {
+			cvbs_connector_in: endpoint {
+				remote-endpoint = <&cvbs_vdac_out>;
+			};
+		};
+	};
+
 	hdmi-connector {
 		compatible = "hdmi-connector";
 		type = "a";
@@ -58,21 +68,15 @@
 		pinctrl-names = "default";
 
 		reset-gpios = <&gpio GPIOX_11 GPIO_ACTIVE_LOW>,
-			      <&gpio_ao GPIOAO_6 GPIO_ACTIVE_LOW>,
-			      <&gpio_ao GPIO_TEST_N GPIO_ACTIVE_LOW>;
+			      <&gpio_ao GPIOAO_6 GPIO_ACTIVE_LOW>;
 
 		clocks = <&xtal_32k_out>;
 		clock-names = "ext_clock";
-
-		post-power-on-delay-ms = <300>;
 	};
 
 	sound {
 		compatible = "amlogic,gx-sound-card";
-		model = "M8M2-MXIII";
-		audio-routing = "I2S Encoder Playback", "I2S FIFO Playback",
-				"SPDIF Encoder Playback", "I2S FIFO Playback",
-				"SPDIF Encoder Playback", "SPDIF FIFO Playback";
+		model = "TRONSMART-MXIII";
 
 		assigned-clocks = <&clkc CLKID_MPLL0>,
 				  <&clkc CLKID_MPLL1>;
@@ -93,11 +97,19 @@
 			mclk-fs = <256>;
 
 			codec-0 {
-				sound-dai = <&stereo_i2s_codec>;
+				sound-dai = <&aiu AIU_HDMI CTRL_I2S>;
 			};
 		};
 
 		dai-link-3 {
+			sound-dai = <&aiu AIU_HDMI CTRL_OUT>;
+
+			codec-0 {
+				sound-dai = <&hdmi_tx 0>;
+			};
+		};
+
+		dai-link-4 {
 			sound-dai = <&aiu AIU_CPU CPU_SPDIF_ENCODER>;
 
 			codec-0 {
@@ -110,23 +122,6 @@
 		compatible = "linux,spdif-dit";
 		#sound-dai-cells = <0>;
 		sound-name-prefix = "DIT";
-	};
-
-	stereo_i2s_codec: i2s-audio-codec {
-		compatible = "mxtronics,mxt8234";
-		#sound-dai-cells = <0>;
-		VDD-supply = <&vcc_va_5v>;
-		sound-name-prefix = "AV";
-	};
-
-	tv-connector {
-		compatible = "composite-video-connector";
-
-		port {
-			cvbs_connector_in: endpoint {
-				remote-endpoint = <&cvbs_vdac_out>;
-			};
-		};
 	};
 
 	usb_vbus: regulator-usb-vbus {
@@ -146,17 +141,6 @@
 		regulator-name = "VCC3V3";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-	};
-
-	vcc_va_5v: regulator-va-5v {
-		compatible = "regulator-fixed";
-
-		regulator-name = "VA_5V";
-		regulator-min-microvolt = <5000000>;
-		regulator-max-microvolt = <5000000>;
-		regulator-always-on;
-		gpio = <&gpio GPIO_BSD_EN (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-		enable-active-high;
 	};
 
 	xtal_32k_out: xtal-32k-out-clk {
@@ -321,9 +305,9 @@
 	usb-role-switch;
 
 	connector {
-		compatible = "extcon-usb-b-connector", "usb-b-connector";
+		compatible = "gpio-usb-b-connector", "usb-b-connector";
 		type = "micro";
-		extcon = <&usb0_phy>;
+		id-gpios = <&usb0_phy 0 GPIO_ACTIVE_HIGH>;
 		vbus-supply = <&usb_vbus>;
 	};
 };

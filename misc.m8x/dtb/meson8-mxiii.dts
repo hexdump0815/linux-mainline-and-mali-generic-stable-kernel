@@ -13,8 +13,6 @@
 
 	gpio-keys-polled {
 		compatible = "gpio-keys-polled";
-		#address-cells = <1>;
-		#size-cells = <0>;
 		poll-interval = <100>;
 
 		button-power {
@@ -54,48 +52,49 @@
 	};
 };
 
+/* SDIO wifi */
 &sdhc {
 	status = "okay";
 
 	pinctrl-0 = <&sdxc_b_pins>;
-	pinctrl-1 = <&sd_b_pins>; /* put in the reference that was
-originally used for the SDIO controller */
+	// put in the reference that was originally used for the sdio controller
+	pinctrl-1 = <&sd_b_pins>;
 	pinctrl-names = "default", "sleep";
 
 	bus-width = <4>;
 	max-frequency = <50000000>;
 
-	no-mmc;
-	no-sdio;
-	cap-sd-highspeed;
 	disable-wp;
+	non-removable;
+	cap-mmc-highspeed;
+	cap-sd-highspeed;
 
-	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
+	mmc-pwrseq = <&sdio_pwrseq>;
 
 	vmmc-supply = <&vcc_3v3>;
 	vqmmc-supply = <&vcc_3v3>;
 };
 
+/* SD card */
 &sdio {
 	status = "okay";
 
-	pinctrl-0 = <&sd_a_pins>;
+	pinctrl-0 = <&sd_b_pins>;
 	pinctrl-names = "default";
 
-	/* wifi */
 	slot@0 {
 		compatible = "mmc-slot";
-		reg = <0>;
+		reg = <1>;
 
 		bus-width = <4>;
 		max-frequency = <50000000>;
 
-		disable-wp;
-		non-removable;
-		cap-mmc-highspeed;
+		no-mmc;
+		no-sdio;
 		cap-sd-highspeed;
+		disable-wp;
 
-		mmc-pwrseq = <&sdio_pwrseq>;
+		cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_LOW>;
 
 		vmmc-supply = <&vcc_3v3>;
 	};
