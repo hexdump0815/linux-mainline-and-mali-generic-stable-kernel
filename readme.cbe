@@ -17,6 +17,8 @@ scripts/kconfig/merge_config.sh -m /compile/doc/stable/misc.cbe/misc/config.cbe-
 make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
 make
 cd ../power/cpupower
 make
