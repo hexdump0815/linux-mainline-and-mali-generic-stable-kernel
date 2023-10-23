@@ -8,8 +8,8 @@
 cd /compile/source/linux-stable-cbe
 
 # patches:
-# bring in patches from v6.1 of pmos exynos5 mainline tree
-patch -p1 < /compile/doc/stable/misc.cbe/patches/pmos-exynos-v6.1.patch
+# bring in patches from v6.1.56 of pmos exynos5 mainline tree
+patch -p1 < /compile/doc/stable/misc.cbe/patches/pmos-exynos-v6.1.56.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m /compile/doc/stable/misc.cbe/misc/config.cbe-base /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbe/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.cbe/options/additional-options-special.cfg
