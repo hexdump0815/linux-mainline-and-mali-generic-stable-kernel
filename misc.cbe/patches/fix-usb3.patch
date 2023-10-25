@@ -1,0 +1,23 @@
+this fixes a broken usb3 port as a result of this pmos patch:
+https://gitlab.com/exynos5-mainline/linux/-/commit/b8b48822a944ce9b701f99516b9a91f00ea71f2c
+
+see: https://oftc.irclog.whitequark.org/linux-cros-arm/2023-10-24
+
+update: most probably this patch does not really fix anything - usb3 on snow seems to
+simply be unreliable to broken (at least on my snow) - i'll leave this hack in here for
+now as it does not harm anything neither - for more info see:
+https://oftc.irclog.whitequark.org/linux-cros-arm/2023-10-25 
+
+--- arch/arm/boot/dts/exynos5250-snow-common.dtsi.org
++++ arch/arm/boot/dts/exynos5250-snow-common.dtsi
+@@ -201,6 +201,10 @@
+ 		pinctrl-0 = <&hp_det_gpio &mic_det_gpio>;
+ 	};
+ 
++	soc {
++		/delete-node/ hsotg@12140000;
++	};
++
+ 	usb3_vbus_reg: regulator-usb3 {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "P5.0V_USB3CON";
