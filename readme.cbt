@@ -5,15 +5,17 @@
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-cbt - chromebook tegra
 
+# INFO - required: apt-get -y install libelf-dev libtraceevent-dev
+
 cd /compile/source/linux-stable-cbt
 
 # patches:
 # fixed mmc device numbering
-patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0002-ARM-dts-tegra-nyan-add-mmc-aliases.patch
+patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0002-ARM-dts-tegra-nyan-add-mmc-aliases-v6.6.patch
 # fix audio jack detection
-patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0003-ARM-tegra-nyan-fix-mic-jack-detection.patch
+patch -p1 < /compile/doc/stable/misc.cbt/patches/pmos-0003-ARM-tegra-nyan-fix-mic-jack-detection-v6.6.patch
 # fix kernel version number: + instead of -dirty at the end
-patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-kernel-version-number.patch
+patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-kernel-version-number-v6.6.patch
 # revert the changes which break spi and with it the keyboard on nyan in v6.2+
 patch -p1 < /compile/doc/stable/misc.cbt/patches/fix-nyan-spi-kbd-v6.4.patch
 
@@ -25,6 +27,8 @@ make -j 4 bzImage dtbs modules
 cd tools/perf
 # without this it would fail on warnings
 export WERROR=0
+# this is to avoid compile errors
+export NO_JEVENT=1
 make
 cd ../power/cpupower
 make
@@ -42,13 +46,13 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/tegra124*.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/nvidia/tegra124*.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 # start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
 cp arch/arm/boot/zImage zImage
 dd if=/dev/zero of=bootloader.bin bs=512 count=1
 cp /compile/doc/stable/misc.cbt/misc/cmdline cmdline
-ls arch/arm/boot/dts/tegra124-nyan-*.dtb | xargs printf " -b %s" | xargs mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage kernel.itb
+ls arch/arm/boot/dts/nvidia/tegra124-nyan-*.dtb | xargs printf " -b %s" | xargs mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage kernel.itb
 vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
 cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
 rm -f zImage cmdline bootloader.bin kernel.itb vmlinux.kpart
