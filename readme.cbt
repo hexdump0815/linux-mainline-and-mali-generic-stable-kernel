@@ -28,7 +28,7 @@ cd tools/perf
 # without this it would fail on warnings
 export WERROR=0
 # this is to avoid compile errors
-export NO_JEVENT=1
+export NO_JEVENTS=1
 make
 cd ../power/cpupower
 make
