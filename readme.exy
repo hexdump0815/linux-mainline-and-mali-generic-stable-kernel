@@ -55,10 +55,10 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos4412-odroidu3.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos4412-odroidu3noplus.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos4412-odroidx2.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos4412-odroidx.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos4412-odroidu3.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos4412-odroidu3noplus.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos4412-odroidx2.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos4412-odroidx.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
