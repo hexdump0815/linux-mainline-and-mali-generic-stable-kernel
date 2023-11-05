@@ -1,0 +1,68 @@
+diff --git a/arch/arm/boot/dts/samsung/exynos4412-odroidx.dts b/arch/arm/boot/dts/samsung/exynos4412-odroidx.dts
+index 3ea2a0101e80..579e158f75fb 100644
+--- a/arch/arm/boot/dts/samsung/exynos4412-odroidx.dts
++++ b/arch/arm/boot/dts/samsung/exynos4412-odroidx.dts
+@@ -10,6 +10,7 @@
+ 
+ /dts-v1/;
+ #include "exynos4412-odroid-common.dtsi"
++#include "exynos4412-prime.dtsi"
+ 
+ / {
+ 	model = "Hardkernel ODROID-X board based on Exynos4412";
+@@ -71,6 +72,30 @@
+ 	regulator-max-microvolt = <2800000>;
+ };
+ 
++&cpu0_opp_table {
++	opp-1600000000 {
++		status = "disabled";
++	};
++	opp-1704000000 {
++		status = "disabled";
++	};
++};
++
++&cpu_thermal {
++	cooling-maps {
++		map0 {
++			trip = <&cpu_alert1>;
++			cooling-device = <&cpu0 10 10>, <&cpu1 10 10>,
++					 <&cpu2 10 10>, <&cpu3 10 10>;
++		};
++		map1 {
++			trip = <&cpu_alert2>;
++			cooling-device = <&cpu0 13 13>, <&cpu1 13 13>,
++					 <&cpu2 13 13>, <&cpu3 13 13>;
++		};
++	};
++};
++
+ &ehci {
+ 	phys = <&exynos_usbphy 2>;
+ 	phy-names = "hsic0";
+diff --git a/arch/arm/boot/dts/samsung/exynos4412-odroidx2.dts b/arch/arm/boot/dts/samsung/exynos4412-odroidx2.dts
+index f4b68c75c962..4a4549d31b40 100644
+--- a/arch/arm/boot/dts/samsung/exynos4412-odroidx2.dts
++++ b/arch/arm/boot/dts/samsung/exynos4412-odroidx2.dts
+@@ -9,7 +9,6 @@
+  */
+ 
+ #include "exynos4412-odroidx.dts"
+-#include "exynos4412-prime.dtsi"
+ 
+ / {
+ 	model = "Hardkernel ODROID-X2 board based on Exynos4412";
+@@ -20,3 +19,12 @@
+ 		reg = <0x40000000 0x7FF00000>;
+ 	};
+ };
++
++&cpu0_opp_table {
++	opp-1600000000 {
++		status = "okay";
++	};
++	opp-1704000000 {
++		status = "okay";
++	};
++};
