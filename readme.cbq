@@ -5,11 +5,13 @@
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-cbq - chromebook qualcom
 
+# INFO - required: apt-get -y install libelf-dev libtraceevent-dev
+
 cd /compile/source/linux-stable-cbq
 
 # patches:
 # fix kernel version number: + instead of -dirty at the end
-patch -p1 < /compile/doc/stable/misc.cbq/patches/fix-kernel-version-number.patch
+patch -p1 < /compile/doc/stable/misc.cbq/patches/fix-kernel-version-number-v6.6.patch
 
 export ARCH=arm64
 scripts/kconfig/merge_config.sh -m  arch/arm64/configs/defconfig /compile/doc/kernel-config-options/chromebooks-aarch64.cfg /compile/doc/kernel-config-options/mediatek.cfg /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.cbq/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.cbq/options/additional-options-special.cfg
@@ -17,6 +19,8 @@ scripts/kconfig/merge_config.sh -m  arch/arm64/configs/defconfig /compile/doc/ke
 make olddefconfig
 make -j 8 Image dtbs modules
 cd tools/perf
+# this is to avoid compile errors
+export NO_JEVENTS=1
 make
 cd ../power/cpupower
 make
