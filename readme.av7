@@ -5,6 +5,9 @@
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-av7 - arm v7
 
+# it looks like for newer kernel versions like v6.5 the following packages have to be
+# installed in order to get the tool compiled well: libelf-dev python3-dev libtraceevent-dev
+
 cd /compile/source/linux-stable-av7
 
 # patches:
@@ -39,6 +42,10 @@ scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/
 make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
+# this is to avoid compile errors
+export NO_JEVENTS=1
 make
 cd ../power/cpupower
 make
