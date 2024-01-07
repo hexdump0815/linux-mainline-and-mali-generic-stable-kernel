@@ -5,7 +5,8 @@
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
 # name: stb-exy - exynos
 
-# INFO - required: apt-get -y install libelf-dev libtraceevent-dev
+# it looks like for newer kernel versions like v6.5 the following packages have to be
+# installed in order to get the tool compiled well: libelf-dev python3-dev libtraceevent-dev
 
 cd /compile/source/linux-stable-exy
 
@@ -36,6 +37,8 @@ scripts/kconfig/merge_config.sh -m arch/arm/configs/exynos_defconfig /compile/do
 make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
 # this is to avoid compile errors
 export NO_JEVENTS=1
 make
