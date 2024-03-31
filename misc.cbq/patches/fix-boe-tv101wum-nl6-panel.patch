@@ -1,0 +1,15 @@
+see: https://gitlab.freedesktop.org/drm/msm/-/issues/47
+via: https://github.com/hexdump0815/imagebuilder/issues/182#issuecomment-1868752053
+
+diff --git a/drivers/gpu/drm/panel/panel-boe-tv101wum-nl6.c b/drivers/gpu/drm/panel/panel-boe-tv101wum-nl6.c
+index 7990c519a56b..031be181e7c8 100644
+--- a/drivers/gpu/drm/panel/panel-boe-tv101wum-nl6.c
++++ b/drivers/gpu/drm/panel/panel-boe-tv101wum-nl6.c
+@@ -2243,6 +2243,7 @@ static int boe_panel_add(struct boe_panel *boe)
+ 
+ 	drm_panel_init(&boe->base, dev, &boe_panel_funcs,
+ 		       DRM_MODE_CONNECTOR_DSI);
++	boe->base.prepare_prev_first=true;
+ 	err = of_drm_get_panel_orientation(dev->of_node, &boe->orientation);
+ 	if (err < 0) {
+ 		dev_err(dev, "%pOF: failed to get orientation %d\n", dev->of_node, err);
