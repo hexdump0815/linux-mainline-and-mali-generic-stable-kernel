@@ -11,8 +11,8 @@
 cd /compile/source/linux-stable-cbe
 
 # patches:
-# bring in patches from v6.3 of pmos exynos5 mainline tree
-patch -p1 < /compile/doc/stable/misc.cbe/patches/pmos-exynos-v6.3.patch
+# bring in patches from v6.11-rc7 of pmos exynos5 mainline tree
+patch -p1 < /compile/doc/stable/misc.cbp/patches/pmos-exynos-v6.11-rc7.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/stable/misc.cbe/patches/fix-kernel-version-number.patch
 
@@ -43,9 +43,9 @@ cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcp
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 mkdir -p /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos5250-snow.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos5250-snow-rev5.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/exynos5250-spring.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos5250-snow.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos5250-snow-rev5.dtb /boot/dtb-${kver}
+cp -v arch/arm/boot/dts/samsung/exynos5250-spring.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 # start chromebook special - required: apt-get install liblz4-tool vboot-kernel-utils
 cp arch/arm/boot/zImage zImage
@@ -53,7 +53,7 @@ dd if=/dev/zero of=bootloader.bin bs=512 count=1
 cp /compile/doc/stable/misc.cbe/misc/cmdline cmdline
 cp /compile/doc/stable/misc.cbe/misc/kernel.its kernel.its
 # this one for some reason did not result in a bootable image
-#mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b arch/arm/boot/dts/exynos5250-snow.dtb -b arch/arm/boot/dts/exynos5250-snow-rev5.dtb -b arch/arm/boot/dts/exynos5250-spring.dtb kernel.itb
+#mkimage -D "-I dts -O dtb -p 2048" -f auto -A arm -O linux -T kernel -C none -a 0 -d zImage -b arch/arm/boot/dts/samsung/exynos5250-snow.dtb -b arch/arm/boot/dts/samsung/exynos5250-snow-rev5.dtb -b arch/arm/boot/dts/samsung/exynos5250-spring.dtb kernel.itb
 mkimage -D "-I dts -O dtb -p 2048" -f kernel.its kernel.itb
 vbutil_kernel --pack vmlinux.kpart --keyblock /usr/share/vboot/devkeys/kernel.keyblock --signprivate /usr/share/vboot/devkeys/kernel_data_key.vbprivk --version 1 --config cmdline --bootloader bootloader.bin --vmlinuz kernel.itb --arch arm
 cp -v vmlinux.kpart /boot/vmlinux.kpart-${kver}
