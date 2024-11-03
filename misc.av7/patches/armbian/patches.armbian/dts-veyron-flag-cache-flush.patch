@@ -12,13 +12,13 @@ Veyron Chromebooks, and avoiding issues other RK3288 boards.
 
 Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
 ---
- arch/arm/boot/dts/rk3288-veyron.dtsi | 1 +
+ arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+diff --git a/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi b/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
 index 2075120cf..fa4951fd7 100644
---- a/arch/arm/boot/dts/rk3288-veyron.dtsi
-+++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+--- a/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
 @@ -123,6 +123,7 @@
  	mmc-hs200-1_8v;
  	mmc-pwrseq = <&emmc_pwrseq>;

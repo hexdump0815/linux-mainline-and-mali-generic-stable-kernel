@@ -925,7 +925,7 @@ index 000000000000..f4b9320733be
 +	src_vq->io_modes = VB2_MMAP | VB2_DMABUF;
 +	src_vq->drv_priv = ctx;
 +	src_vq->buf_struct_size = sizeof(struct v4l2_m2m_buffer);
-+	src_vq->min_buffers_needed = 1;
++	src_vq->min_queued_buffers = 1;
 +	src_vq->ops = &iep_qops;
 +	src_vq->mem_ops = &vb2_dma_contig_memops;
 +	src_vq->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
@@ -942,7 +942,7 @@ index 000000000000..f4b9320733be
 +	dst_vq->io_modes = VB2_MMAP | VB2_DMABUF;
 +	dst_vq->drv_priv = ctx;
 +	dst_vq->buf_struct_size = sizeof(struct v4l2_m2m_buffer);
-+	dst_vq->min_buffers_needed = 2;
++	dst_vq->min_queued_buffers = 2;
 +	dst_vq->ops = &iep_qops;
 +	dst_vq->mem_ops = &vb2_dma_contig_memops;
 +	dst_vq->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
@@ -1474,7 +1474,7 @@ index 000000000000..f4b9320733be
 +return ret;
 +}
 +
-+static int iep_remove(struct platform_device *pdev)
++static void iep_remove(struct platform_device *pdev)
 +{
 +	struct rockchip_iep *iep = platform_get_drvdata(pdev);
 +
@@ -1485,7 +1485,7 @@ index 000000000000..f4b9320733be
 +	video_unregister_device(&iep->vfd);
 +	v4l2_device_unregister(&iep->v4l2_dev);
 +
-+	return 0;
++	return;
 +}
 +
 +static int __maybe_unused iep_runtime_suspend(struct device *dev)
@@ -1769,13 +1769,13 @@ Subject: [PATCH] ARM: dts: rockchip: Add IEP node for RK3288
 
 Signed-off-by: Alex Bee <knaerzche@gmail.com>
 ---
- arch/arm/boot/dts/rk3288.dtsi | 13 ++++++++++++-
+ arch/arm/boot/dts/rockchip/rk3288.dtsi | 13 ++++++++++++-
  1 file changed, 12 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+diff --git a/arch/arm/boot/dts/rockchip/rk3288.dtsi b/arch/arm/boot/dts/rockchip/rk3288.dtsi
 index 59fba3ac6aae..06545f423de2 100644
---- a/arch/arm/boot/dts/rk3288.dtsi
-+++ b/arch/arm/boot/dts/rk3288.dtsi
+--- a/arch/arm/boot/dts/rockchip/rk3288.dtsi
++++ b/arch/arm/boot/dts/rockchip/rk3288.dtsi
 @@ -984,14 +984,25 @@ crypto: crypto@ff8a0000 {
  		reset-names = "crypto-rst";
  	};

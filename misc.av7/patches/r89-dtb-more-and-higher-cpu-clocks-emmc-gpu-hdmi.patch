@@ -1,7 +1,7 @@
 diff --git a/arch/arm/boot/dts/rk3288-r89.dts b/arch/arm/boot/dts/rk3288-r89.dts
 index 55467bc30fa6..560f2f2e56a2 100644
---- a/arch/arm/boot/dts/rk3288-r89.dts
-+++ b/arch/arm/boot/dts/rk3288-r89.dts
+--- a/arch/arm/boot/dts/rockchip/rk3288-r89.dts
++++ b/arch/arm/boot/dts/rockchip/rk3288-r89.dts
 @@ -12,6 +12,13 @@
  	model = "Netxeon R89";
  	compatible = "netxeon,r89", "rockchip,rk3288";

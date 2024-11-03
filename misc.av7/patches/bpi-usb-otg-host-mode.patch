@@ -1,7 +1,7 @@
 diff --git a/arch/arm/boot/dts/sun7i-a20-bananapi.dts b/arch/arm/boot/dts/sun7i-a20-bananapi.dts
 index 67c8a76..7d05b25 100644
---- a/arch/arm/boot/dts/sun7i-a20-bananapi.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-bananapi.dts
+--- a/arch/arm/boot/dts/allwinner/sun7i-a20-bananapi.dts
++++ b/arch/arm/boot/dts/allwinner/sun7i-a20-bananapi.dts
 @@ -273,7 +278,7 @@
  };
  
