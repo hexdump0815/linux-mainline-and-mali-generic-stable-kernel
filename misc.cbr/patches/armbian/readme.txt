@@ -1,1 +1,11 @@
-those patches are taken from armbianthose patches are taken from armbian https://github.com/armbian/build.git at a392a2a38155886f82370e1f1202531d98f6108a (on main branch) path patch/kernel/archive/rockchip-6.4 - only the more generic patches were taken
+those patches were taken from https://github.com/armbian/build at commit ced0c4a4e9c5adb4066302d6614c3e72112eb642
+
+all credits for them go to the armbian team
+
+only the more generic patches potentially relevant for the veyron chromebooks and the r89 tv box were taken
+
+the "maybe" subdir of the armbian patches contains patches which could maybe be applied as well, but were not used for now
+
+the "off" subdir of the armbian patches contains a patch which relies on rk3228 patches not used and is thus disabled
+
+patches with a filename ending in ".org" were modified to make them patch properly and are around to see the changes done
