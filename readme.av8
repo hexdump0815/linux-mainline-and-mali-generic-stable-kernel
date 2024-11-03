@@ -34,7 +34,7 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/additional-disabled-opp-entires
 # allow higher cpu temps
 patch -p1 < /compile/doc/stable/misc.av8/patches/gxl-higher-temps.patch
 # add new dtbs to Makefile
-patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v6.4.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v6.11.patch
 # copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
 cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
 # fix kernel version number: + instead of -dirty at the end

@@ -1,0 +1,34 @@
+diff --git a/arch/arm64/boot/dts/amlogic/Makefile b/arch/arm64/boot/dts/amlogic/Makefile
+index 29417f04f886..34d2188440bf 100644
+--- a/arch/arm64/boot/dts/amlogic/Makefile
++++ b/arch/arm64/boot/dts/amlogic/Makefile
+@@ -16,6 +16,11 @@ dtb-$(CONFIG_ARCH_MESON) += meson-g12a-radxa-zero.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-g12a-sei510.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-g12a-u200.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-g12a-x96-max.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-g12a-x96-max-rmii.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-g12a-x96-max-no-cvbs.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-g12a-gt1-mini-a.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-g12a-tanix-tx5max.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-g12a-t95q.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-g12b-a311d-bananapi-m2s.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-g12b-a311d-khadas-vim3.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-g12b-a311d-khadas-vim3-ts050.dtb
+@@ -58,6 +63,8 @@ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905d-vero4k-plus.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905w-jethome-jethub-j80.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905w-p281.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905w-tx3-mini.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905x-mi-box.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905l2-x7-5g.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905x-hwacom-amazetv.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905x-khadas-vim.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905x-libretech-cc-v2.dtb
+@@ -91,6 +98,8 @@ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-odroid-hc4.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-sei610.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air-gbit.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-max-plus.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-sm1-h96max-x3.dtb
+ 
+ # Overlays
+ meson-g12a-fbx8am-brcm-dtbs	:= meson-g12a-fbx8am.dtb meson-g12a-fbx8am-brcm.dtbo
