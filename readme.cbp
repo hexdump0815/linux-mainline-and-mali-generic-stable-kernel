@@ -12,7 +12,7 @@ cd /compile/source/linux-stable-cbp
 
 # patches:
 # bring in patches from v6.11-rc7 of pmos exynos5 mainline tree
-patch -p1 < /compile/doc/stable/misc.cbp/patches/pmos-exynos-v6.11-rc7.patch
+patch -p1 < /compile/doc/stable/misc.cbp/patches/pmos-exynos-v6.12-rc6.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/stable/misc.cbp/patches/fix-kernel-version-number.patch
 
