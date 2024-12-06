@@ -1,4 +1,4 @@
-those patches were taken from https://github.com/armbian/build at commit ced0c4a4e9c5adb4066302d6614c3e72112eb642
+those patches were taken from https://github.com/armbian/build at commit 523be17a78916ee6e55aa99c23c7b1d5155ba73b
 
 all credits for them go to the armbian team
 
