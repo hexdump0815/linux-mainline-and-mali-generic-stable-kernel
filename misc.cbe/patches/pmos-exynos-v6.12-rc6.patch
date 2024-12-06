@@ -1,0 +1,5841 @@
+created via git diff 59b723cd2adbac2a34fc8e12c74ae26ae45bf230 ba25f4a03b7a18dc73e11c9328ce94dc5dde339a of https://gitlab.com/exynos5-mainline/linux (master branch as of ba25f4a03b7a18dc73e11c9328ce94dc5dde339a)
+
+diff --git a/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml b/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml
+index 01dcbd8aa703..f6c076494ac8 100644
+--- a/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml
++++ b/Documentation/devicetree/bindings/arm/samsung/samsung-boards.yaml
+@@ -120,6 +120,7 @@ properties:
+               - google,snow-rev5                # Google Snow Rev 5+
+               - google,spring                   # Google Spring
+               - insignal,arndale                # Insignal Arndale
++              - samsung,nexus10-manta           # Samsung Manta (Google Nexus 10)
+               - samsung,smdk5250                # Samsung SMDK5250 eval
+           - const: samsung,exynos5250
+           - const: samsung,exynos5
+@@ -152,6 +153,8 @@ properties:
+               - insignal,arndale-octa           # Insignal Arndale Octa
+               - samsung,chagall-wifi            # Samsung SM-T800
+               - samsung,klimt-wifi              # Samsung SM-T700
++              - samsung,klimt-lte               # Samsung SM-T705
++              - samsung,n2awifi                 # Samsung SM-T520
+               - samsung,smdk5420                # Samsung SMDK5420 eval
+           - const: samsung,exynos5420
+           - const: samsung,exynos5
+diff --git a/Documentation/devicetree/bindings/display/panel/panel-edp-legacy.yaml b/Documentation/devicetree/bindings/display/panel/panel-edp-legacy.yaml
+index b308047c1edf..0b71ac57d3f1 100644
+--- a/Documentation/devicetree/bindings/display/panel/panel-edp-legacy.yaml
++++ b/Documentation/devicetree/bindings/display/panel/panel-edp-legacy.yaml
+@@ -64,6 +64,8 @@ properties:
+       - lg,lp129qe
+         # NewEast Optoelectronics CO., LTD WJFH116008A eDP TFT LCD panel
+       - neweast,wjfh116008a
++        # Samsung 10.1" WQXGA (2560x1600) TFT LCD panel
++      - samsung,lsl101dl01
+         # Samsung 12.2" (2560x1600 pixels) TFT LCD panel
+       - samsung,lsn122dl01-c01
+         # Samsung Electronics 14" WXGA (1366x768) TFT LCD panel
+diff --git a/Documentation/devicetree/bindings/display/panel/panel-simple.yaml b/Documentation/devicetree/bindings/display/panel/panel-simple.yaml
+index b89e39790579..22eec1e4236a 100644
+--- a/Documentation/devicetree/bindings/display/panel/panel-simple.yaml
++++ b/Documentation/devicetree/bindings/display/panel/panel-simple.yaml
+@@ -257,6 +257,8 @@ properties:
+         # Samsung Electronics 10.1" WXGA (1280x800) TFT LCD panel
+       - samsung,ltl101al01
+         # Samsung Electronics 10.1" WSVGA TFT LCD panel
++      - samsung,ltl101dl02-002
++        # Samsung Electronics 10.1" WQXGA (2560x1600) TFT LCD panel
+       - samsung,ltn101nt05
+         # Satoz SAT050AT40H12R2 5.0" WVGA TFT LCD panel
+       - satoz,sat050at40h12r2
+diff --git a/Documentation/devicetree/bindings/i2c/google,cros-ec-i2c-tunnel.yaml b/Documentation/devicetree/bindings/i2c/google,cros-ec-i2c-tunnel.yaml
+index 580003cdfff5..dd5079260783 100644
+--- a/Documentation/devicetree/bindings/i2c/google,cros-ec-i2c-tunnel.yaml
++++ b/Documentation/devicetree/bindings/i2c/google,cros-ec-i2c-tunnel.yaml
+@@ -31,6 +31,10 @@ properties:
+     description: The EC bus we'd like to talk to.
+     $ref: /schemas/types.yaml#/definitions/uint32
+ 
++  google,limited-passthrough:
++    description: Use algorithm for limited passthrough
++    type: boolean
++
+ required:
+   - compatible
+   - google,remote-bus
+diff --git a/Documentation/devicetree/bindings/iio/light/bh1750.yaml b/Documentation/devicetree/bindings/iio/light/bh1750.yaml
+index 1a88b3c253d5..f5088d871e69 100644
+--- a/Documentation/devicetree/bindings/iio/light/bh1750.yaml
++++ b/Documentation/devicetree/bindings/iio/light/bh1750.yaml
+@@ -24,6 +24,11 @@ properties:
+   reg:
+     maxItems: 1
+ 
++  reset-gpios:
++    maxItems: 1
++    description: An optional reset line, should be flagged with
++      GPIO_ACTIVE_HIGH.
++
+ required:
+   - compatible
+   - reg
+@@ -39,6 +44,7 @@ examples:
+       light-sensor@23 {
+         compatible = "rohm,bh1750";
+         reg = <0x23>;
++        reset-gpios = <&gph1 2 GPIO_ACTIVE_HIGH>;
+       };
+     };
+ 
+diff --git a/Documentation/devicetree/bindings/sound/samsung,snow.yaml b/Documentation/devicetree/bindings/sound/samsung,snow.yaml
+index 3d49aa4c9be2..1221f884f06a 100644
+--- a/Documentation/devicetree/bindings/sound/samsung,snow.yaml
++++ b/Documentation/devicetree/bindings/sound/samsung,snow.yaml
+@@ -13,6 +13,7 @@ maintainers:
+ properties:
+   compatible:
+     enum:
++      - google,snow-audio-max98089
+       - google,snow-audio-max98090
+       - google,snow-audio-max98091
+       - google,snow-audio-max98095
+diff --git a/Documentation/devicetree/bindings/w1/maxim,ds2482.yaml b/Documentation/devicetree/bindings/w1/maxim,ds2482.yaml
+index 422becc6e1fa..f6ee4999d7b2 100644
+--- a/Documentation/devicetree/bindings/w1/maxim,ds2482.yaml
++++ b/Documentation/devicetree/bindings/w1/maxim,ds2482.yaml
+@@ -25,6 +25,10 @@ properties:
+   reg:
+     maxItems: 1
+ 
++  sleep-gpios:
++    maxItems: 1
++    description: GPIO connected to SLPZ pin.
++
+ required:
+   - compatible
+   - reg
+@@ -40,5 +44,9 @@ examples:
+       onewire@18 {
+         compatible = "maxim,ds2484";
+         reg = <0x18>;
++
++        pinctrl-names = "default";
++        pinctrl-0 = <&onewire_sleep>;
++        sleep-gpios = <&gpg0 0 GPIO_ACTIVE_HIGH>;
+       };
+     };
+diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+index 9f406e9c0ea6..750c8c0d5d9e 100644
+--- a/arch/arm/boot/compressed/head.S
++++ b/arch/arm/boot/compressed/head.S
+@@ -892,6 +892,8 @@ __armv7_mmu_cache_on:
+ 		bic     r6, r6, #1 << 31        @ 32-bit translation system
+ 		bic     r6, r6, #(7 << 0) | (1 << 4)	@ use only ttbr0
+ 		mcrne	p15, 0, r3, c2, c0, 0	@ load page table pointer
++		mcrne	p15, 0, r0, c8, c7, 0	@ flush I,D TLBs
++		mcr	p15, 0, r0, c7, c5, 4	@ ISB
+ 		mcrne	p15, 0, r1, c3, c0, 0	@ load domain access control
+ 		mcrne   p15, 0, r6, c2, c0, 2   @ load ttb control
+ #endif
+diff --git a/arch/arm/boot/dts/samsung/Makefile b/arch/arm/boot/dts/samsung/Makefile
+index 7becf36656b1..bbd1e75426d3 100644
+--- a/arch/arm/boot/dts/samsung/Makefile
++++ b/arch/arm/boot/dts/samsung/Makefile
+@@ -26,6 +26,7 @@ dtb-$(CONFIG_ARCH_EXYNOS4) += \
+ 	exynos4412-trats2.dtb
+ dtb-$(CONFIG_ARCH_EXYNOS5) += \
+ 	exynos5250-arndale.dtb \
++	exynos5250-samsung-nexus10-manta.dtb \
+ 	exynos5250-smdk5250.dtb \
+ 	exynos5250-snow.dtb \
+ 	exynos5250-snow-rev5.dtb \
+@@ -37,7 +38,9 @@ dtb-$(CONFIG_ARCH_EXYNOS5) += \
+ 	exynos5420-peach-pit.dtb \
+ 	exynos5420-smdk5420.dtb \
+ 	exynos5420-chagall-wifi.dtb \
++	exynos5420-klimt-lte.dtb \
+ 	exynos5420-klimt-wifi.dtb \
++	exynos5420-n2awifi.dtb \
+ 	exynos5422-odroidhc1.dtb \
+ 	exynos5422-odroidxu3.dtb \
+ 	exynos5422-odroidxu3-lite.dtb \
+diff --git a/arch/arm/boot/dts/samsung/exynos5250-samsung-nexus10-manta.dts b/arch/arm/boot/dts/samsung/exynos5250-samsung-nexus10-manta.dts
+new file mode 100644
+index 000000000000..cbc906e3d479
+--- /dev/null
++++ b/arch/arm/boot/dts/samsung/exynos5250-samsung-nexus10-manta.dts
+@@ -0,0 +1,792 @@
++/dts-v1/;
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/clock/maxim,max77686.h>
++#include <dt-bindings/input/linux-event-codes.h>
++#include <dt-bindings/power/summit,smb347-charger.h>
++#include "exynos-pinctrl.h"
++#include "exynos5250.dtsi"
++
++/ {
++	model = "Google Nexus 10";
++	compatible = "samsung,nexus10-manta", "samsung,exynos5250", "samsung,exynos5";
++
++	aliases {
++		mmc0 = &mmc_0; /* eMMC */
++		mmc1 = &mmc_1; /* WiFi */
++	};
++
++	memory@40000000 {
++		device_type = "memory";
++		reg = <0x40000000 0x20000000
++		       0x60000000 0x20000000
++		       0x80000000 0x20000000
++		       0xa0000000 0x1FF00000>;
++	};
++
++	chosen {
++		stdout-path = &serial_2;
++	};
++
++	firmware@204f000 {
++		compatible = "samsung,secure-firmware";
++		reg = <0x0204f000 0x1000>;
++	};
++
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&pwm 0 1000000 0>;
++		brightness-levels = <2 255>;
++		num-interpolated-steps = <254>;
++		default-brightness-level = <102>;
++		power-supply = <&backlight_reg>;
++		enable-gpios = <&gpg0 5 GPIO_ACTIVE_HIGH>;
++		post-pwm-on-delay-ms = <97>;
++		pinctrl-0 = <&led_bl_rst &pwm0_out>;
++		pinctrl-names = "default";
++	};
++
++	battery_cell: battery-cell {
++		compatible = "simple-battery";
++		device-chemistry = "lithium-ion";
++		constant-charge-current-max-microamp = <2500000>;
++		constant-charge-voltage-max-microvolt = <4300000>;
++		precharge-current-microamp = <200000>;
++		charge-term-current-microamp = <250000>;
++
++		power-supplies = <&power_supply>;
++	};
++
++	connector {
++		compatible = "gpio-usb-b-connector", "usb-b-connector";
++		label = "mini-USB";
++		type = "micro";
++		pinctrl-names = "default";
++		pinctrl-0 = <&usb_id &otg_vbus_sense &otg_vbus_sense_fac>;
++		id-gpios = <&gpx1 1 GPIO_ACTIVE_HIGH>;
++		vbus-gpios = <&gpx1 0 GPIO_ACTIVE_HIGH>;
++		vbus-supply = <&usb_vbus>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++				usb_con_hs: endpoint {
++					remote-endpoint = <&hsotg_hs>;
++				};
++			};
++		};
++	};
++
++	fixed-rate-clocks {
++		xxti {
++			compatible = "samsung,clock-xxti";
++			clock-frequency = <24000000>;
++		};
++
++		xusbxti {
++			compatible = "samsung,clock-xusbxti";
++			clock-frequency = <24000000>;
++		};
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++		pinctrl-names = "default";
++		pinctrl-0 = <&gpio_keys>;
++
++		key-down {
++			gpios = <&gpx2 1 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_VOLUMEDOWN>;
++			label = "volume down";
++			debounce-interval = <5>;
++		};
++
++		key-up {
++			gpios = <&gpx2 0 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_VOLUMEUP>;
++			label = "volume up";
++			debounce-interval = <5>;
++		};
++
++		key-power {
++			gpios = <&gpx2 7 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_POWER>;
++			label = "power";
++			debounce-interval = <5>;
++			wakeup-source;
++		};
++
++		lid-switch {
++			label = "Lid";
++			gpios = <&gpx1 3 GPIO_ACTIVE_LOW>;
++			linux,input-type = <5>; /* EV_SW */
++			linux,code = <0>; /* SW_LID */
++			debounce-interval = <10>;
++			wakeup-source;
++		};
++	};
++
++	panel {
++		compatible = "samsung,ltl101dl02-002";
++
++		backlight = <&backlight>;
++		power-supply = <&panel_reg>;
++		enable-gpios = <&gph1 7 GPIO_ACTIVE_HIGH>;
++		pinctrl-0 = <&lcd_en>;
++		pinctrl-names = "default";
++		no-hpd;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&dp_out>;
++			};
++		};
++	};
++
++	wlan_pwrseq: mmc1-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpv1 0 GPIO_ACTIVE_LOW>;
++		pinctrl-0 = <&wlan_pmena>;
++		pinctrl-names = "default";
++		clocks = <&max77686 MAX77686_CLK_PMIC>;
++		clock-names = "ext_clock";
++		post-power-on-delay-ms = <300>;
++		power-off-delay-us = <50>;
++	};
++
++	backlight_reg: regulator-backlight {
++		compatible = "regulator-fixed";
++		regulator-name = "APS_EN_18V";
++		pinctrl-0 = <&aps_en_18v>;
++		pinctrl-names = "default";
++	};
++
++	hdmi_dcdc_reg: regulator-hdmi-dcdc {
++		compatible = "regulator-fixed";
++		regulator-name = "HDMI_DCDC";
++		pinctrl-0 = <&hdmi_dcdc_en>;
++		pinctrl-names = "default";
++		gpio = <&gpa0 4 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	hdmi_ls_reg: regulator-hdmi-ls {
++		compatible = "regulator-fixed";
++		regulator-name = "HDMI_LS";
++		pinctrl-0 = <&hdmi_ls_en>;
++		pinctrl-names = "default";
++		gpio = <&gpg0 7 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++	};
++
++	mxt_booster_reg: regulator-mxt-booster {
++		compatible = "regulator-fixed";
++		regulator-name = "MXT_BOOSTER";
++		pinctrl-0 = <&mxt_booster>;
++		pinctrl-names = "default";
++		gpio = <&gpd1 1 GPIO_ACTIVE_HIGH>;
++	};
++
++	regulator-mxt-xvdd {
++		compatible = "regulator-fixed";
++		regulator-name = "MXT_XVDD";
++		pinctrl-0 = <&mxt_xvdd>;
++		pinctrl-names = "default";
++		gpio = <&gpg0 1 GPIO_ACTIVE_HIGH>;
++		startup-delay-us = <3000>;
++		vin-supply = <&mxt_booster_reg>;
++	};
++
++	/*
++	 * The panel node requires a power-supply property, but no information
++	 * were found on the actual hardware used to supply power to the panel.
++	 */
++	panel_reg: regulator-panel {
++		compatible = "regulator-fixed";
++		regulator-name = "LCD_EN";
++	};
++};
++
++&clock {
++	assigned-clocks = <&clock CLK_FOUT_APLL>;
++	assigned-clock-rates = <1000000000>;
++};
++
++&cpu0 {
++	cpu0-supply = <&buck2_reg>;
++};
++
++&dp {
++	status = "okay";
++	samsung,color-space = <0>;
++	samsung,color-depth = <1>;
++	samsung,link-rate = <0x0a>;
++	samsung,lane-count = <4>;
++	samsung,dynamic-range = <0>;
++	samsung,ycbcr-coeff = <0>;
++	force-hpd;
++
++	ports {
++		port {
++			dp_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
++&ehci {
++	status = "disabled";
++};
++
++&fimd {
++	status = "okay";
++	assigned-clocks = <&clock CLK_MOUT_FIMD1>, <&clock CLK_MOUT_VPLL>;
++	assigned-clock-parents = <&clock CLK_MOUT_VPLL>;
++};
++
++&hdmi {
++	status = "okay";
++	pinctrl-0 = <&hdmi_hpd>;
++	pinctrl-names = "default";
++	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
++	ddc = <&i2c_0>;
++	hdmi-en-supply = <&hdmi_dcdc_reg>;
++	vdd-supply = <&hdmi_ls_reg>;
++	vdd_osc-supply = <&ldo10_reg>;
++	vdd_pll-supply = <&ldo8_reg>;
++};
++
++&hdmicec {
++	status = "okay";
++};
++
++&hsotg {
++	status = "okay";
++	vusb_d-supply = <&ldo15_reg>;
++	vusb_a-supply = <&ldo12_reg>;
++	dr_mode = "otg";
++	usb-role-switch;
++	role-switch-default-mode = "peripheral";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			hsotg_hs: endpoint {
++				remote-endpoint = <&usb_con_hs>;
++			};
++		};
++	};
++};
++
++&i2c_0 {
++	status = "okay";
++	samsung,i2c-sda-delay = <100>;
++	samsung,i2c-slave-addr = <0x10>;
++};
++
++&i2c_1 {
++	status = "okay";
++
++	pressure@77 {
++		compatible = "bosch,bmp180";
++		reg = <0x77>;
++	};
++
++	imu@68 {
++		compatible = "invensense,mpu6050";
++		reg = <0x68>;
++		mount-matrix = "0",  "-1",  "0",
++				"-1",  "0",  "0",
++				"0",  "0", "-1";
++		invensense,level-shifter = <0>;
++
++		i2c-gate {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			magnetometer@c {
++				compatible = "asahi-kasei,ak8963";
++				reg = <0x0c>;
++				pinctrl-names = "default";
++				pinctrl-0 = <&msense_rst>;
++				mount-matrix = "-1",  "0",  "0",
++						"0",  "1",  "0",
++						"0",  "0", "-1";
++			};
++		};
++	};
++};
++
++&i2c_2 {
++	status = "okay";
++
++        light-sensor@23 {
++                compatible = "rohm,bh1721";
++                reg = <0x23>;
++                pinctrl-names = "default";
++                pinctrl-0 = <&bh1721fvc_reset>;
++                reset-gpios = <&gph1 2 GPIO_ACTIVE_HIGH>;
++        };
++
++	onewire@18 {
++		compatible = "maxim,ds2484";
++		reg = <0x18>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&onewire_sleep>;
++		sleep-gpios = <&gpg0 0 GPIO_ACTIVE_HIGH>;
++	};
++
++	power_supply: charger@6 {
++		compatible = "summit,smb347";
++		reg = <0x06>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&ta_en &usb_sel_1>;
++		enable-gpios = <&gpg1 5 GPIO_ACTIVE_HIGH>;
++
++		monitored-battery = <&battery_cell>;
++		summit,enable-usb-charging;
++		summit,enable-mains-charging;
++		summit,enable-charge-control = <SMB3XX_CHG_ENABLE_PIN_ACTIVE_LOW>;
++		summit,fast-voltage-threshold-microvolt = <2600000>;
++		summit,mains-current-limit-microamp = <2000000>;
++		summit,usb-current-limit-microamp = <1800000>;
++		summit,inok-polarity = <SMB3XX_SYSOK_INOK_ACTIVE_LOW>;
++
++		usb_vbus: usb-vbus {
++			regulator-name = "vbus";
++			regulator-min-microvolt = <5000000>;
++			regulator-max-microvolt = <5000000>;
++			regulator-min-microamp = <750000>;
++			regulator-max-microamp = <750000>;
++		};
++	};
++};
++
++&i2c_3 {
++	status = "okay";
++
++	touchscreen@4a {
++		compatible = "atmel,maxtouch";
++		reg = <0x4a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&mxt_rst &mxt_irq>;
++		interrupt-parent = <&gpg1>;
++		interrupts = <2 IRQ_TYPE_EDGE_FALLING>;
++		reset-gpios = <&gpg1 3 GPIO_ACTIVE_LOW>;
++		vdda-supply = <&ldo23_reg>;
++		vdd-supply = <&ldo9_reg>;
++	};
++};
++
++&i2c_5 {
++	status = "okay";
++	samsung,i2c-sda-delay = <100>;
++
++	max77686: pmic@9 {
++		compatible = "maxim,max77686";
++		reg = <0x09>;
++		interrupt-parent = <&gpx0>;
++		interrupts = <2 IRQ_TYPE_LEVEL_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&max77686_irq>;
++		#clock-cells = <1>;
++		wakeup-source;
++
++		voltage-regulators {
++			ldo3_reg: LDO3 {
++				regulator-name = "VCC_1.8V_AP";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			ldo8_reg: LDO8 {
++				regulator-name = "VMIPI_1.0V";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			ldo9_reg: LDO9 {
++				regulator-name = "TOUCH_VDD_1.8V";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++			ldo10_reg: LDO10 {
++				regulator-name = "VMIPI_1.8V";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			ldo12_reg: LDO12 {
++				regulator-name = "VUOTG_3.0V";
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			ldo15_reg: LDO15 {
++				regulator-name = "VHSIC_1.0V";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			ldo16_reg: LDO16 {
++				regulator-name = "VHSIC_1.8V";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			ldo17_reg: LDO17 {
++				regulator-name = "5M_CORE_1.5V";
++				regulator-min-microvolt = <1500000>;
++				regulator-max-microvolt = <1500000>;
++			};
++			ldo18_reg: LDO18 {
++				regulator-name = "CAM_IO_1.8V";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++			ldo19_reg: LDO19 {
++				regulator-name = "VT_CAM_1.8V";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++			ldo20_reg: LDO20 {
++				regulator-name = "TA_CHECK_1.35V";
++				regulator-min-microvolt = <1350000>;
++				regulator-max-microvolt = <1350000>;
++			};
++			ldo23_reg: LDO23 {
++				regulator-name = "TSP_AVDD_2.8V";
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++			};
++			ldo24_reg: LDO24 {
++				regulator-name = "CAM_AF_2.8V";
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++			};
++			ldo25_reg: LDO25 {
++				regulator-name = "VADC_3.3V";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			buck1_reg: BUCK1 {
++				regulator-name = "vdd_mif";
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			buck2_reg: BUCK2 {
++				regulator-name = "vdd_arm";
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			buck3_reg: BUCK3 {
++				regulator-name = "vdd_int";
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++			buck4_reg: BUCK4 {
++				regulator-name = "vdd_g3d";
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-boot-on;
++			};
++		};
++	};
++};
++
++&i2c_8 {
++	status = "okay";
++};
++
++&mali {
++	status = "okay";
++	mali-supply = <&buck4_reg>;
++};
++
++&mixer {
++	status = "okay";
++};
++
++&mmc_0 {
++	status = "okay";
++	broken-cd;
++	non-removable;
++	max-frequency = <200000000>;
++	sd-uhs-ddr50;
++	mmc-ddr-1_8v;
++	cap-mmc-hw-reset;
++	mmc-hs200-1_8v;
++	bus-width = <8>;
++	card-detect-delay = <200>;
++	samsung,dw-mshc-ciu-div = <3>;
++	samsung,dw-mshc-sdr-timing = <1 2>;
++	samsung,dw-mshc-ddr-timing = <2 3>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
++};
++
++&mmc_1 {
++	status = "okay";
++	non-removable;
++	max-frequency = <100000000>;
++	sd-uhs-sdr50;
++	cap-sd-highspeed;
++	keep-power-in-suspend;
++	bus-width = <4>;
++	card-detect-delay = <0>;
++	samsung,dw-mshc-ciu-div = <3>;
++	samsung,dw-mshc-sdr-timing = <2 4>;
++	samsung,dw-mshc-ddr-timing = <2 3>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
++	mmc-pwrseq = <&wlan_pwrseq>;
++
++	wifi@1 {
++		compatible = "brcm,bcm4330-fmac", "brcm,bcm4329-fmac";
++		reg = <1>;
++		interrupt-parent = <&gpx2>;
++		interrupts = <5 IRQ_TYPE_NONE>;
++		interrupt-names = "host-wake";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wlan_irq>;
++	};
++};
++
++&ohci {
++	status = "disabled";
++};
++
++&pinctrl_0 {
++	mxt_booster: mxt-booster-pins {
++		samsung,pins = "gpd1-1";
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++	};
++
++	max77686_irq: max77686-irq-pins {
++		samsung,pins = "gpx0-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_F>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++	otg_vbus_sense: otg-vbus-sense-pins {
++		samsung,pins = "gpx1-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++	otg_vbus_sense_fac: otg-vbus-sense-fac-pins {
++		samsung,pins = "gpb0-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++	pwm_in_18v: pwm-in-18v-pins {
++		samsung,pins = "gpb2-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_INPUT>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_UP>;
++		samsung,pin-val = <0>;
++	};
++	gpio_keys: gpio-keys-pins-pins {
++		samsung,pins = "gpx2-0", "gpx2-1", "gpx2-7", "gpx1-3";
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++	usb_id: usb-id-pins {
++		samsung,pins = "gpx1-1";
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_INPUT>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++	wlan_irq: wlan-irq-pins {
++		samsung,pins = "gpx2-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV3>;
++	};
++	bt_host_wakeup: bt-host-wakeup-pins {
++		samsung,pins = "gpx2-6";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++	hdmi_dcdc_en: hdmi-dcdc-en-pins {
++		samsung,pins = "gpa0-4";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-val = <1>;
++	};
++};
++
++&pinctrl_1 {
++	bh1721fvc_reset: bh1721fvc-reset-pins {
++		samsung,pins = "gph1-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++	led_bl_rst: led-bl-rst-pins {
++		samsung,pins = "gpg0-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-val = <0>;
++	};
++	aps_en_18v: aps-en-18v-pins {
++		samsung,pins = "gph1-6";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_INPUT>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_UP>;
++		samsung,pin-val = <0>;
++	};
++	lcd_en: lcd-en-pins {
++		samsung,pins = "gph1-7";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-val = <0>;
++	};
++	msense_rst: msense-rst-pins {
++		samsung,pins = "gpg2-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-val = <1>;
++	};
++	mxt_irq: mxt-irq-pins {
++		samsung,pins = "gpg1-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_EINT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++	mxt_rst: mxt-rst-pins {
++		samsung,pins = "gpg1-3";
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++	};
++	mxt_xvdd: mxt-xvdd-pins {
++		samsung,pins = "gpg0-1";
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++	};
++	ta_en: ta-en-pins {
++		samsung,pins = "gpg1-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++	usb_sel_1: usb-sel-1-pins {
++		samsung,pins = "gph0-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-val = <1>;
++	};
++	bt_reg_on: bt-reg-on-pins {
++		samsung,pins = "gph0-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++	bt_wake: bt-wake-pins {
++		samsung,pins = "gph1-3";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++	hdmi_ls_en: hdmi-ls-en-pins {
++		samsung,pins = "gpg0-7";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-val = <1>;
++	};
++	onewire_sleep: onewire-sleep-pins {
++		samsung,pins = "gpg0-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_INPUT>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++	};
++};
++
++&pinctrl_2 {
++	wlan_pmena: wlan-pmena-pins {
++		samsung,pins = "gpv1-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV3>;
++		samsung,pin-con-pdn = <EXYNOS_PIN_PDN_PREV>;
++		samsung,pin-val = <0>;
++	};
++};
++
++&sd1_bus4 {
++	samsung,pin-con-pdn = <EXYNOS_PIN_PDN_INPUT>;
++	samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++};
++
++&sd1_cmd {
++	samsung,pin-con-pdn = <EXYNOS_PIN_PDN_INPUT>;
++	samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++};
++
++&serial_0 {
++	pinctrl-0 = <&uart0_data &uart0_fctl>;
++	pinctrl-names = "default";
++
++	bluetooth {
++		compatible = "brcm,bcm4330-bt";
++		pinctrl-0 = <&bt_reg_on &bt_wake &bt_host_wakeup>;
++		pinctrl-names = "default";
++
++		shutdown-gpios = <&gph0 0 GPIO_ACTIVE_HIGH>;
++		device-wakeup-gpios = <&gph1 3 GPIO_ACTIVE_HIGH>;
++
++		interrupt-parent = <&gpx2>;
++		interrupts = <6 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-names = "host-wakeup";
++
++		clocks = <&max77686 MAX77686_CLK_PMIC>;
++		clock-names = "lpo";
++	};
++};
++
++&serial_1 {
++	pinctrl-names = "default", "flow-control";
++	pinctrl-0 = <&uart1_data>;
++	pinctrl-1 = <&uart1_data>, <&uart1_fctl>;
++};
++
++&serial_2 {
++	pinctrl-names = "default", "flow-control";
++	pinctrl-0 = <&uart2_data>;
++	pinctrl-1 = <&uart2_data>, <&uart2_fctl>;
++};
++
++&usbdrd {
++	status = "disabled";
++};
++
++&usbdrd_dwc3 {
++	status = "disabled";
++};
++
++&usbdrd_phy {
++	status = "disabled";
++};
+diff --git a/arch/arm/boot/dts/samsung/exynos5250-snow-common.dtsi b/arch/arm/boot/dts/samsung/exynos5250-snow-common.dtsi
+index 65b000df176e..ae3f5c01c01b 100644
+--- a/arch/arm/boot/dts/samsung/exynos5250-snow-common.dtsi
++++ b/arch/arm/boot/dts/samsung/exynos5250-snow-common.dtsi
+@@ -76,6 +76,22 @@ i2c_104: i2c-arb {
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+ 
++			usb-hub@8 {
++				compatible = "smsc,usb3503a";
++				reg = <0x08>;
++
++				reset-gpios = <&gpe1 0 GPIO_ACTIVE_LOW>;
++				disabled-ports = <3>;
++				initial-mode = <1>;
++
++				clock-names = "refclk";
++				clocks = <&pmu_system_controller 0>;
++				refclk-frequency = <24000000>;
++
++				pinctrl-names = "default";
++				pinctrl-0 = <&usb_hub_reset>;
++			};
++
+ 			battery: sbs-battery@b {
+ 				compatible = "sbs,sbs-battery";
+ 				reg = <0xb>;
+@@ -173,6 +189,11 @@ charger {
+ 
+ 	sound {
+ 		samsung,i2s-controller = <&i2s0>;
++		samsung,hp-det-gpios = <&gpx2 2 GPIO_ACTIVE_HIGH>;
++		samsung,mic-det-gpios = <&gpx2 0 GPIO_ACTIVE_LOW>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&hp_det_gpio &mic_det_gpio>;
+ 	};
+ 
+ 	usb3_vbus_reg: regulator-usb3 {
+@@ -186,6 +207,18 @@ usb3_vbus_reg: regulator-usb3 {
+ 		enable-active-high;
+ 	};
+ 
++	/* Make sure modem connected to USB is powered on */
++	regulator-wwan-en {
++		compatible = "regulator-fixed";
++		regulator-name = "wwan-en";
++		gpio = <&gpe0 0 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-boot-on;
++		regulator-always-on;
++		pinctrl-names = "default";
++		pinctrl-0 = <&wwan_en>;
++	};
++
+ 	fixed-rate-clocks {
+ 		xxti {
+ 			compatible = "samsung,clock-xxti";
+@@ -196,8 +229,9 @@ xxti {
+ 	backlight: backlight {
+ 		compatible = "pwm-backlight";
+ 		pwms = <&pwm 0 1000000 0>;
+-		brightness-levels = <0 100 500 1000 1500 2000 2500 2800>;
+-		default-brightness-level = <7>;
++		brightness-levels = <1 255>;
++		num-interpolated-steps = <254>;
++		default-brightness-level = <254>;
+ 		enable-gpios = <&gpx3 0 GPIO_ACTIVE_HIGH>;
+ 		power-supply = <&fet1>;
+ 		pinctrl-0 = <&pwm0_out>;
+@@ -445,6 +479,21 @@ trackpad@67 {
+ 		interrupt-parent = <&gpx1>;
+ 		wakeup-source;
+ 	};
++
++	/* Atmel mXT which is used in some revisions */
++	trackpad@4b {
++		compatible = "atmel,maxtouch";
++		reg = <0x4b>;
++		interrupt-parent = <&gpx1>;
++		interrupts = <2 IRQ_TYPE_EDGE_FALLING>;
++		wakeup-source;
++		linux,gpio-keymap = <KEY_RESERVED
++				     KEY_RESERVED
++				     KEY_RESERVED	/* GPIO0 */
++				     KEY_RESERVED	/* GPIO1 */
++				     KEY_RESERVED	/* GPIO2 */
++				     BTN_LEFT>;		/* GPIO3 */
++	};
+ };
+ 
+ /*
+@@ -587,6 +636,13 @@ &mmc_3 {
+ };
+ 
+ &pinctrl_0 {
++	flash_spi_cs: flash-spi-cs-pins {
++		samsung,pins = "gpa2-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV3>;
++	};
++
+ 	wifi_en: wifi-en-pins {
+ 		samsung,pins = "gpx0-1";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
+@@ -615,6 +671,20 @@ ec_irq: ec-irq-pins {
+ 		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+ 	};
+ 
++	mic_det_gpio: mic-det-gpio-pins {
++		samsung,pins = "gpx2-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
++	hp_det_gpio: hp-det-gpio-pins {
++		samsung,pins = "gpx2-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_DOWN>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
+ 	tps65090_irq: tps65090-irq-pins {
+ 		samsung,pins = "gpx2-6";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+@@ -665,6 +735,20 @@ arb_our_claim: arb-our-claim-pins {
+ 		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+ 		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+ 	};
++
++	usb_hub_reset: usb-hub-reset-pins {
++		samsung,pins = "gpe1-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
++	wwan_en: wwan-en-pins {
++		samsung,pins = "gpe0-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
+ };
+ 
+ &pmu_system_controller {
+@@ -696,6 +780,20 @@ &spi_1 {
+ 	samsung,spi-src-clk = <0>;
+ 	num-cs = <1>;
+ 	cs-gpios = <&gpa2 5 GPIO_ACTIVE_HIGH>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++
++		spi-max-frequency = <10000000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&flash_spi_cs>;
++
++		controller-data {
++			samsung,spi-feedback-delay = <2>;
++		};
++	};
+ };
+ 
+ &usbdrd {
+diff --git a/arch/arm/boot/dts/samsung/exynos5250-snow-rev5.dts b/arch/arm/boot/dts/samsung/exynos5250-snow-rev5.dts
+index 3d32c3476e84..4be66509dbc3 100644
+--- a/arch/arm/boot/dts/samsung/exynos5250-snow-rev5.dts
++++ b/arch/arm/boot/dts/samsung/exynos5250-snow-rev5.dts
+@@ -27,7 +27,7 @@ cpu {
+ 		};
+ 
+ 		codec {
+-			sound-dai = <&max98090>, <&hdmi>;
++			sound-dai = <&max98090>;
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/samsung/exynos5250-snow.dts b/arch/arm/boot/dts/samsung/exynos5250-snow.dts
+index 906aa7aae710..4c2c3e9f1467 100644
+--- a/arch/arm/boot/dts/samsung/exynos5250-snow.dts
++++ b/arch/arm/boot/dts/samsung/exynos5250-snow.dts
+@@ -25,7 +25,7 @@ cpu {
+ 		};
+ 
+ 		codec {
+-			sound-dai = <&max98095 0>, <&hdmi>;
++			sound-dai = <&max98095 0>;
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/samsung/exynos5250-spring.dts b/arch/arm/boot/dts/samsung/exynos5250-spring.dts
+index d126fccdcaf3..1a2cec4385ff 100644
+--- a/arch/arm/boot/dts/samsung/exynos5250-spring.dts
++++ b/arch/arm/boot/dts/samsung/exynos5250-spring.dts
+@@ -55,6 +55,31 @@ lid-switch {
+ 		};
+ 	};
+ 
++	mmc3_pwrseq: mmc3-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpx0 2 GPIO_ACTIVE_LOW>, /* WIFI_RSTn */
++			      <&gpx0 1 GPIO_ACTIVE_LOW>; /* WIFI_EN */
++		clocks = <&s5m8767_osc S2MPS11_CLK_BT>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_en>, <&wifi_rst>;
++	};
++
++	panel {
++		/* 
++		 * FIXME: The actual panel model is unknown, we use auo b116xw03
++		 * because of compatible timings.
++		 */
++		compatible = "auo,b116xw03";
++		power-supply = <&tps65090_fet6>;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&bridge_out>;
++			};
++		};
++	};
++
+ 	usb-hub {
+ 		compatible = "smsc,usb3503a";
+ 		reset-gpios = <&gpe1 0 GPIO_ACTIVE_LOW>;
+@@ -68,6 +93,33 @@ xxti {
+ 			clock-frequency = <24000000>;
+ 		};
+ 	};
++
++	vbat: vbat-fixed-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vbat-supply";
++		regulator-boot-on;
++	};
++
++	sound {
++		compatible = "google,snow-audio-max98089";
++
++		samsung,model = "Spring-I2S-MAX98089";
++		samsung,i2s-controller = <&i2s0>;
++		samsung,audio-codec = <&max98089>;
++		samsung,hp-det-gpios = <&gpx2 2 GPIO_ACTIVE_HIGH>;
++		samsung,mic-det-gpios = <&gpx2 0 GPIO_ACTIVE_LOW>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&hp_det_gpio &mic_det_gpio>;
++
++		cpu {
++			sound-dai = <&i2s0 0>;
++		};
++
++		codec {
++			sound-dai = <&max98089>;
++		};
++	};
+ };
+ 
+ &cpu0 {
+@@ -83,6 +135,14 @@ &dp {
+ 	samsung,link-rate = <0x0a>;
+ 	samsung,lane-count = <1>;
+ 	hpd-gpios = <&gpc3 0 GPIO_ACTIVE_HIGH>;
++
++	ports {
++		port {
++			dp_out: endpoint {
++				remote-endpoint = <&bridge_in>;
++			};
++		};
++	};
+ };
+ 
+ &ehci {
+@@ -390,6 +450,56 @@ cros_ec: embedded-controller@1e {
+ 		wakeup-source;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&ec_irq>;
++
++		power-regulator {
++			compatible = "ti,cros-ec-tps65090";
++
++			infet1-supply = <&vbat>;
++			infet2-supply = <&vbat>;
++			infet3-supply = <&vbat>;
++			infet4-supply = <&vbat>;
++			infet5-supply = <&vbat>;
++			infet6-supply = <&vbat>;
++			infet7-supply = <&vbat>;
++
++			regulators {
++				fet1 {
++					ti,control-reg = <0x0f>;
++					regulator-name = "vcd_led";
++					regulator-min-microvolt = <12000000>;
++					regulator-max-microvolt = <12000000>;
++					/* Panel backlight controlled by ps8622 bridge */
++					regulator-always-on;
++				};
++				tps65090_fet3: fet3 {
++					ti,control-reg = <0x11>;
++					regulator-name = "wwan_r";
++					regulator-min-microvolt = <3300000>;
++					regulator-max-microvolt = <3300000>;
++				};
++				fet5 {
++					ti,control-reg = <0x13>;
++					regulator-name = "cam";
++					regulator-min-microvolt = <3300000>;
++					regulator-max-microvolt = <3300000>;
++					/* Camera is connected to USB */
++					regulator-always-on;
++					regulator-suspend-mem-disabled;
++				};
++				tps65090_fet6: fet6 {
++					ti,control-reg = <0x14>;
++					regulator-name = "lcd_vdd";
++					regulator-min-microvolt = <3300000>;
++					regulator-max-microvolt = <3300000>;
++				};
++				tps65090_fet7: fet7 {
++					ti,control-reg = <0x15>;
++					regulator-name = "ts";
++					regulator-min-microvolt = <5000000>;
++					regulator-max-microvolt = <5000000>;
++				};
++			};
++		};
+ 	};
+ };
+ 
+@@ -404,6 +514,45 @@ &i2c_7 {
+ 	samsung,i2c-sda-delay = <100>;
+ 	samsung,i2c-max-bus-freq = <66000>;
+ 
++	edp-bridge@8 {
++		compatible = "parade,ps8622";
++		reg = <0x08>;
++		sleep-gpio = <&gpc3 6 0>;
++		reset-gpio = <&gpc3 1 0>;
++		lane-count = <1>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&ps8622_gpios>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++
++				bridge_out: endpoint {
++					remote-endpoint = <&panel_in>;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++
++				bridge_in: endpoint {
++					remote-endpoint = <&dp_out>;
++				};
++			};
++		};
++	};
++
++	max98089: audio-codec@10 {
++		compatible = "maxim,max98089";
++		reg = <0x10>;
++		clocks = <&pmu_system_controller 0>;
++		clock-names = "mclk";
++		#sound-dai-cells = <0>;
++	};
++
+ 	temperature-sensor@4c {
+ 		compatible = "gmt,g781";
+ 		reg = <0x4c>;
+@@ -421,6 +570,11 @@ &i2s0 {
+ 	status = "okay";
+ };
+ 
++&mali {
++	mali-supply = <&buck4_reg>;
++	status = "okay";
++};
++
+ &mixer {
+ 	status = "okay";
+ };
+@@ -454,9 +608,31 @@ &mmc_1 {
+ 	pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_cd &sd1_bus4>;
+ 	bus-width = <4>;
+ 	cap-sd-highspeed;
++	mmc-pwrseq = <&mmc3_pwrseq>;
+ };
+ 
+ &pinctrl_0 {
++	flash_spi_cs: flash-spi-cs-pins {
++		samsung,pins = "gpa2-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV3>;
++	};
++
++	wifi_en: wifi-en-pins {
++		samsung,pins = "gpx0-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
++	wifi_rst: wifi-rst-pins {
++		samsung,pins = "gpx0-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
+ 	s5m8767_dvs: s5m8767-dvs-pins {
+ 		samsung,pins = "gpd1-0", "gpd1-1", "gpd1-2";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+@@ -478,6 +654,13 @@ trackpad_irq: trackpad-irq-pins {
+ 		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+ 	};
+ 
++	ps8622_gpios: ps8622-pins {
++		samsung,pins = "gpc3-1", "gpc3-6";
++		samsung,pin-function = <1>;
++		samsung,pin-pud = <0>;
++		samsung,pin-drv = <0>;
++	};
++
+ 	power_key_irq: power-key-irq-pins {
+ 		samsung,pins = "gpx1-3";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_F>;
+@@ -492,6 +675,20 @@ ec_irq: ec-irq-pins {
+ 		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+ 	};
+ 
++	mic_det_gpio: mic-det-gpio-pins {
++		samsung,pins = "gpx2-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
++	hp_det_gpio: hp-det-gpio-pins {
++		samsung,pins = "gpx2-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_DOWN>;
++		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
++	};
++
+ 	s5m8767_ds: s5m8767-ds-pins {
+ 		samsung,pins = "gpx2-3", "gpx2-4", "gpx2-5";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+@@ -530,6 +727,11 @@ hsic_reset: hsic-reset-pins {
+ 	};
+ };
+ 
++&pmu_system_controller {
++	assigned-clocks = <&pmu_system_controller 0>;
++	assigned-clock-parents = <&clock CLK_FIN_PLL>;
++};
++
+ &rtc {
+ 	status = "okay";
+ 	clocks = <&clock CLK_RTC>, <&s5m8767_osc S2MPS11_CLK_AP>;
+@@ -557,6 +759,21 @@ &spi_1 {
+ 	status = "okay";
+ 	samsung,spi-src-clk = <0>;
+ 	num-cs = <1>;
++	cs-gpios = <&gpa2 5 GPIO_ACTIVE_HIGH>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++
++		spi-max-frequency = <10000000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&flash_spi_cs>;
++
++		controller-data {
++			samsung,spi-feedback-delay = <2>;
++		};
++	};
+ };
+ 
+ &usbdrd {
+@@ -564,4 +781,8 @@ &usbdrd {
+ 	vdd33-supply = <&ldo12_reg>;
+ };
+ 
++&usbdrd_dwc3 {
++	dr_mode = "host";
++};
++
+ #include "../cros-ec-keyboard.dtsi"
+diff --git a/arch/arm/boot/dts/samsung/exynos5250.dtsi b/arch/arm/boot/dts/samsung/exynos5250.dtsi
+index b9e7c4938818..648f5a256ec5 100644
+--- a/arch/arm/boot/dts/samsung/exynos5250.dtsi
++++ b/arch/arm/boot/dts/samsung/exynos5250.dtsi
+@@ -240,6 +240,17 @@ clock_audss: audss-clock-controller@3810000 {
+ 			power-domains = <&pd_mau>;
+ 		};
+ 
++		hsotg: hsotg@12140000 {
++			compatible = "samsung,s3c6400-hsotg";
++			reg = <0x12140000 0x20000>;
++			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&clock CLK_USBOTG>;
++			clock-names = "otg";
++			phys = <&usb2_phy_gen 0>;
++			phy-names = "usb2-phy";
++			status = "disabled";
++		};
++
+ 		timer@101c0000 {
+ 			compatible = "samsung,exynos5250-mct",
+ 				     "samsung,exynos4210-mct";
+diff --git a/arch/arm/boot/dts/samsung/exynos5420-klimt-lte.dts b/arch/arm/boot/dts/samsung/exynos5420-klimt-lte.dts
+new file mode 100644
+index 000000000000..2a9af1f18de7
+--- /dev/null
++++ b/arch/arm/boot/dts/samsung/exynos5420-klimt-lte.dts
+@@ -0,0 +1,83 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Samsung's Exynos5420 Klimt LTE board device tree source
++ *
++ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
++ *		http://www.samsung.com
++ * Copyright (c) 2022 Henrik Grimler
++ */
++
++/dts-v1/;
++#include "exynos5420-galaxy-tab-common.dtsi"
++
++/ {
++	model = "Samsung Klimt LTE based on Exynos5420";
++	compatible = "samsung,klimt-lte", "samsung,exynos5420", \
++		     "samsung,exynos5";
++};
++
++&ldo15_reg {
++	regulator-name = "VDD_LEDA_2V8";
++	regulator-min-microvolt = <2800000>;
++	regulator-max-microvolt = <2800000>;
++
++	regulator-state-mem {
++		regulator-on-in-suspend;
++	};
++};
++
++&ldo17_reg {
++	regulator-name = "VDD_VCI_3V0";
++	regulator-min-microvolt = <3000000>;
++	regulator-max-microvolt = <3000000>;
++
++	regulator-state-mem {
++		regulator-off-in-suspend;
++	};
++};
++
++&ldo28_reg {
++	regulator-name = "VDD3_1V8";
++	regulator-min-microvolt = <1800000>;
++	regulator-max-microvolt = <1800000>;
++
++	regulator-state-mem {
++		regulator-off-in-suspend;
++	};
++};
++
++&ldo29_reg {
++	regulator-name = "VDDR_1V6";
++	regulator-min-microvolt = <1600000>;
++	regulator-max-microvolt = <1600000>;
++
++	regulator-state-mem {
++		regulator-off-in-suspend;
++	};
++};
++
++&ldo31_reg {
++	regulator-name = "VDD_GRIP_1V8";
++	regulator-min-microvolt = <1800000>;
++	regulator-max-microvolt = <1800000>;
++	regulator-always-on;
++	regulator-boot-on;
++
++	regulator-state-mem {
++		regulator-off-in-suspend;
++	};
++};
++
++&ldo32_reg {
++	regulator-name = "VDD_TSP_1V8";
++	regulator-min-microvolt = <1800000>;
++	regulator-max-microvolt = <1800000>;
++
++	regulator-state-mem {
++		regulator-off-in-suspend;
++	};
++};
++
++&mmc_2 {
++	sd-uhs-sdr104;
++};
+diff --git a/arch/arm/boot/dts/samsung/exynos5420-n2awifi.dts b/arch/arm/boot/dts/samsung/exynos5420-n2awifi.dts
+new file mode 100644
+index 000000000000..4b4d0a0a2c0d
+--- /dev/null
++++ b/arch/arm/boot/dts/samsung/exynos5420-n2awifi.dts
+@@ -0,0 +1,779 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Samsung's Exynos5420 n2awifi board device tree source
++ *
++ * Copyright (c) 2012-2013 Samsung Electronics Co., Ltd.
++ *		http://www.samsung.com
++ * Copyright (c) 2022 Henrik Grimler
++ * Copyright (c) 2024 Hendrik Noack
++ */
++
++/dts-v1/;
++#include "exynos5420.dtsi"
++#include "exynos5420-cpus.dtsi"
++#include <dt-bindings/clock/maxim,max77802.h>
++#include <dt-bindings/regulator/maxim,max77802.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++/ {
++	chassis-type = "tablet";
++	model = "Samsung n2awifi based on Exynos5420";
++	compatible = "samsung,n2awifi", "samsung,exynos5420", \
++			"samsung,exynos5";
++
++	aliases {
++		mmc0 = &mmc_0;	/* Internal storage */
++		mmc1 = &mmc_1;	/* WiFi */
++		mmc2 = &mmc_2;	/* External sdcard */
++	};
++
++	chosen {
++		stdout-path = "serial2:115200n8";
++	};
++
++	memory@20000000 {
++		device_type = "memory";
++		reg = <0x20000000 0x7fa00000>;
++	};
++
++	firmware@2073000 {
++		compatible = "samsung,secure-firmware";
++		reg = <0x02073000 0x1000>;
++	};
++
++	fixed-rate-clocks {
++		oscclk {
++			compatible = "samsung,exynos5420-oscclk";
++			clock-frequency = <24000000>;
++		};
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++
++		key-power {
++			debounce-interval = <10>;
++			gpios = <&gpx2 2 GPIO_ACTIVE_LOW>;
++			label = "Power";
++			linux,code = <KEY_POWER>;
++			wakeup-source;
++		};
++
++		key-home {
++			debounce-interval = <10>;
++			gpios = <&gpx0 5 GPIO_ACTIVE_LOW>;
++			label = "Home";
++			linux,code = <KEY_HOME>;
++			wakeup-source;
++		};
++
++		key-volume-up {
++			debounce-interval = <10>;
++			gpios = <&gpx0 2 GPIO_ACTIVE_LOW>;
++			label = "Volume Up";
++			linux,code = <KEY_VOLUMEUP>;
++		};
++
++		key-volume-down {
++			debounce-interval = <10>;
++			gpios = <&gpx0 3 GPIO_ACTIVE_LOW>;
++			label = "Volume Down";
++			linux,code = <KEY_VOLUMEDOWN>;
++		};
++	};
++
++	panel {
++		compatible = "samsung,lsl101dl01";
++
++		backlight = <&backlight>;
++		power-supply = <&lcd_supply>;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&dp_out>;
++			};
++		};
++	};
++
++	mmc1_pwrseq: pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpy7 7 GPIO_ACTIVE_LOW>;
++		clocks = <&max77802 MAX77802_CLK_32K_CP>;
++		clock-names = "ext_clock";
++	};
++
++	i2c_fuel: i2c-18 {
++		compatible = "i2c-gpio";
++		pinctrl-names = "default";
++		pinctrl-0 = <&i2c18_gpio_bus>;
++		sda-gpios = <&gpb0 3 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++		scl-gpios = <&gpb0 4 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++		i2c-gpio,delay-us = <2>;
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		battery@36 {
++			compatible = "maxim,max17050";
++			reg = <0x36>;
++			pinctrl-0 = <&fuel_alert_irq>;
++			pinctrl-names = "default";
++			interrupt-parent = <&gpx1>;
++			interrupts = <5 IRQ_TYPE_EDGE_BOTH>;
++			maxim,rsns-microohm = <10000>;
++			maxim,over-heat-temp = <600>;
++			maxim,over-volt = <4300>;
++		};
++	};
++
++	backlight_reset_supply: backlight-reset-supply {
++		compatible = "regulator-fixed";
++		regulator-name = "BACKLIGHT_RESET_SUPPLY";
++		pinctrl-names = "default";
++		pinctrl-0 = <&backlight_reset>;
++		gpio = <&gpg1 1 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		vin-supply = <&lcd_supply>;	/* Pulls i2c pins down if not enabled */
++	};
++
++	lcd_supply: lcd-supply {
++		compatible = "regulator-fixed";
++		regulator-name = "LCD_SUPPLY";
++		pinctrl-names = "default";
++		pinctrl-0 = <&lcd_en>;
++		gpio = <&gpg1 2 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++};
++
++&cci {
++	/* CCI is disabled in hardware */
++	status = "disabled";
++};
++
++&cpu0 {
++	cpu-supply = <&buck2_reg>;
++};
++
++&cpu4 {
++	cpu-supply = <&buck6_reg>;
++};
++
++&dp {
++	status = "okay";
++	samsung,link-rate = <0x0a>;
++	samsung,lane-count = <4>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&dp_hpd>;
++	hpd-gpios = <&gpx0 7 GPIO_ACTIVE_HIGH>;
++
++	ports {
++		port {
++			dp_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
++&fimd {
++	status = "okay";
++	assigned-clocks = <&clock CLK_MOUT_VPLL>;
++	assigned-clock-parents = <&clock CLK_MOUT_VPLL>;
++};
++
++&hsi2c_5 {
++	status = "okay";
++
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	backlight: backlight@2c {
++		compatible = "ti,lp8556";
++		reg = <0x2c>;
++
++		bl-name = "lcd-bl";
++		dev-ctrl = /bits/ 8 <0x01>;
++		init-brt = /bits/ 8 <0x72>;	/* 114 */
++
++		pwms = <&pwm 0 100000 0>;
++		pwm-names = "lp8556";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwm0_out>;
++
++		enable-supply = <&backlight_reset_supply>;
++
++		/* higher inductor current limit */
++		rom-98h {
++			rom-addr = /bits/ 8 <0x98>;
++			rom-val = /bits/ 8 <0xa1>;
++		};
++
++		/* automatic standby via pwm disabled, 25 mA max LED current */
++		rom-a1h {
++			rom-addr = /bits/ 8 <0xa1>;
++			rom-val = /bits/ 8 <0x5f>;
++		};
++
++		/* 200 ms slope, heavy smoothing, 1-bit PWM input hysteresis */
++		rom-a3h {
++			rom-addr = /bits/ 8 <0xa3>;
++			rom-val = /bits/ 8 <0x5e>;
++		};
++
++		/* disable PWM passthrough, 6 PWM output phases, 9616 Hz PWM frequency */
++		rom-a5h {
++			rom-addr = /bits/ 8 <0xa5>;
++			rom-val = /bits/ 8 <0x04>;
++		};
++
++		/* all reserved */
++		rom-a8h {
++			rom-addr = /bits/ 8 <0xa8>;
++			rom-val = /bits/ 8 <0x00>;
++		};
++
++		/* 24 V max output voltage, jump detection on pwm input disabled */
++		rom-a9h {
++			rom-addr = /bits/ 8 <0xa9>;
++			rom-val = /bits/ 8 <0xa0>;
++		};
++	};
++};
++
++&hsi2c_7 {
++	status = "okay";
++
++	max77802: pmic@9 {
++		compatible = "maxim,max77802";
++		interrupt-parent = <&gpx3>;
++		interrupts = <1 IRQ_TYPE_NONE>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&max77802_irq>;
++		wakeup-source;
++		reg = <0x9>;
++		#clock-cells = <1>;
++
++		regulators {
++			buck1_reg: BUCK1 {
++				regulator-name = "vdd_mif";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1300000>;
++				regulator-always-on;
++				regulator-boot-on;
++
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			buck2_reg: BUCK2 {
++				regulator-name = "vdd_arm";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++				regulator-boot-on;
++
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			buck3_reg: BUCK3 {
++				regulator-name = "vdd_int";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <1400000>;
++				regulator-always-on;
++				regulator-boot-on;
++
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			buck4_reg: BUCK4 {
++				regulator-name = "vdd_g3d";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1400000>;
++				regulator-always-on;
++				regulator-boot-on;
++
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			buck5_reg: BUCK5 {
++				/* No info doesn't go past populating /dev without it, something with 1.2V */
++				regulator-name = "vdd_buck5";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			buck6_reg: BUCK6 {
++				regulator-name = "vdd_kfc";
++				regulator-min-microvolt = <800000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++				regulator-boot-on;
++
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			buck7_reg: BUCK7 {
++				/* No info doesn't go past populating /dev without it, something with 1.35V */
++				regulator-name = "vdd_buck7";
++				regulator-min-microvolt = <1350000>;
++				regulator-max-microvolt = <1350000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			buck8_reg: BUCK8 {
++				/* Not defined, something with 2.85V */
++				regulator-name = "vdd_buck8";
++				regulator-min-microvolt = <2850000>;
++				regulator-max-microvolt = <2850000>;
++			};
++
++			buck9_reg: BUCK9 {
++				/* No info doesn't go past populating /dev without it, something with 2V */
++				regulator-name = "vdd_buck9";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			buck10_reg: BUCK10 {
++				/* Something to do with sdcard, 2.95V */
++				regulator-name = "vdd_buck10";
++				regulator-min-microvolt = <2950000>;
++				regulator-max-microvolt = <2950000>;
++			};
++
++			ldo1_reg: LDO1 {
++				regulator-name = "vdd_alive_1v0";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			ldo2_reg: LDO2 {
++				regulator-name = "vmem2_1v2_ap";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			ldo3_reg: LDO3 {
++				regulator-name = "vcc_1v8_ap";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo4_reg: LDO4 {
++				regulator-name = "vmmc2_2v8_ap";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <2800000>;
++			};
++
++			ldo5_reg: LDO5 {
++				regulator-name = "vhsic_1v8_ap";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo6_reg: LDO6 {
++				regulator-name = "vxpll_1v8_ap";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo7_reg: LDO7 {
++				/* Not defined, something with 1.8V */
++				regulator-name = "vdd_ldo7";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			ldo8_reg: LDO8 {
++				regulator-name = "vmipi_1v0_ap";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			ldo9_reg: LDO9 {
++				regulator-name = "vadc_1v8";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo10_reg: LDO10 {
++				regulator-name = "vmipi_1v8_ap";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo11_reg: LDO11 {
++				regulator-name = "vddq_pre_1v8";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo12_reg: LDO12 {
++				regulator-name = "vuotg_3v0_ap";
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-always-on;
++			};
++
++			ldo13_reg: LDO13 {
++				/* No info doesn't boot without it, something with 1.8V */
++				regulator-name = "vdd_ldo13";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo14_reg: LDO14 {
++				regulator-name = "vabb1_1v8_ap";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			ldo15_reg: LDO15 {
++				regulator-name = "vhsic_1v0_ap";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			ldo17_reg: LDO17 {
++				regulator-name = "vg3ds_1v0_ap";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			ldo18_reg: LDO18 {
++				regulator-name = "cam_isp_sensor_io_1v8";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			ldo19_reg: LDO19 {
++				regulator-name = "vt_cam_1v8";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			ldo20_reg: LDO20 {
++				/* Not defined, something with 1.8V */
++				regulator-name = "vdd_ldo20";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			ldo21_reg: LDO21 {
++				/* Not defined, something with 2.8V */
++				regulator-name = "vdd_ldo21";
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++			};
++
++			ldo23_reg: LDO23 {
++				regulator-name = "key_led_3v3";
++				regulator-min-microvolt = <2500000>;
++				regulator-max-microvolt = <3300000>;
++			};
++
++			ldo24_reg: LDO24 {
++				regulator-name = "cam_af_2v8_pm";
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++			};
++
++			ldo25_reg: LDO25 {
++				regulator-name = "vcc_3v3_mhl";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++			};
++
++			ldo26_reg: LDO26 {
++				regulator-name = "vcc_3v0_motor";
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++			};
++
++			ldo27_reg: LDO27 {
++				regulator-name = "vsil_1a2";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++			};
++
++			ldo28_reg: LDO28 {
++				regulator-name = "vcc_1v8_mhl";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			ldo29_reg: LDO29 {
++				regulator-name = "tsp_vdd_1v8";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++
++			ldo30_reg: LDO30 {
++				regulator-name = "vmifs_1v0_ap";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			ldo32_reg: LDO32 {
++				regulator-name = "irled_3v3";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++			};
++
++			ldo33_reg: LDO33 {
++				regulator-name = "vcc_2v8_ap";
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++				regulator-always-on;
++			};
++
++			ldo34_reg: LDO34 {
++				/* Not defined, something with 3V */
++				regulator-name = "vdd_ldo34";
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++			};
++
++			ldo35_reg: LDO35 {
++				regulator-name = "cam_sensor_core_1v2";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1200000>;
++			};
++		};
++	};
++};
++
++/* Internal storage */
++&mmc_0 {
++	status = "okay";
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	card-detect-delay = <200>;
++	mmc-ddr-1_8v;
++	mmc-hs200-1_8v;
++	non-removable;
++	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
++	pinctrl-names = "default";
++	samsung,dw-mshc-ciu-div = <3>;
++	samsung,dw-mshc-ddr-timing = <0 2>;
++	samsung,dw-mshc-sdr-timing = <0 4>;
++};
++
++/* WiFi */
++&mmc_1 {
++	status = "okay";
++	non-removable;
++	sd-uhs-ddr50;
++	cap-sd-highspeed;
++	keep-power-in-suspend;
++	bus-width = <4>;
++	card-detect-delay = <0>;
++	samsung,dw-mshc-ciu-div = <1>;
++	samsung,dw-mshc-ddr-timing = <0 2>;
++	samsung,dw-mshc-sdr-timing = <0 1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sd1_clk>, <&sd1_cmd>, <&sd1_bus1>, <&sd1_bus4>, <&wifi_en>;
++	mmc-pwrseq = <&mmc1_pwrseq>;
++	vqmmc-supply = <&ldo3_reg>;
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	wifi@1 {
++		compatible = "brcm,bcm4339-fmac", "brcm,bcm4329-fmac";
++		reg = <1>;
++		interrupt-parent = <&gpx2>;
++		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-names = "host-wake";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wlan_irq>;
++	};
++};
++
++/* External sdcard */
++&mmc_2 {
++	status = "okay";
++	bus-width = <4>;
++	cap-sd-highspeed;
++	card-detect-delay = <200>;
++	cd-gpios = <&gpx2 4 GPIO_ACTIVE_LOW>;
++	pinctrl-0 = <&sd2_clk &sd2_cmd &mmc2_cd &sd2_bus1 &sd2_bus4>;
++	pinctrl-names = "default";
++	samsung,dw-mshc-ciu-div = <3>;
++	samsung,dw-mshc-ddr-timing = <0 2>;
++	samsung,dw-mshc-sdr-timing = <0 4>;
++	sd-uhs-sdr50;
++	vmmc-supply = <&buck10_reg>;
++	vqmmc-supply = <&ldo4_reg>;
++};
++
++&serial_0 {
++	uart-has-rtscts;
++	pinctrl-0 = <&uart0_data &uart0_fctl>;
++	pinctrl-names = "default";
++
++	bluetooth {
++		compatible = "brcm,bcm4335a0";
++		pinctrl-0 = <&bt_en &bt_wake &bt_host_wakeup>;
++		pinctrl-names = "default";
++
++		shutdown-gpios = <&gpg0 7 GPIO_ACTIVE_HIGH>;
++		device-wakeup-gpios = <&gpx3 2 GPIO_ACTIVE_HIGH>;
++
++		interrupt-parent = <&gpx2>;
++		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-names = "host-wakeup";
++
++		clocks = <&max77802 MAX77802_CLK_32K_CP>;
++		clock-names = "lpo";
++
++		vddio-supply = <&ldo3_reg>;
++	};
++};
++
++&pinctrl_0 {
++	wifi_en: wifi-en-pins {
++		samsung,pins = "gpy7-7";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++
++	fuel_alert_irq: fuel-alert-irq-pins {
++		samsung,pins = "gpx1-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++
++	wlan_irq: wlan-irq-pins {
++		samsung,pins = "gpx2-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_F>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_DOWN>;
++	};
++
++	bt_host_wakeup: bt-host-wakeup-pins {
++		samsung,pins = "gpx2-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++
++	mmc2_cd: mmc2-cd-pins {
++		samsung,pins = "gpx2-4";
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++
++	max77802_irq: max77802-irq-pins {
++		samsung,pins = "gpx3-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_F>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++
++	bt_wake: bt-wake-pins {
++		samsung,pins = "gpx3-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud-pdn = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++};
++
++&pinctrl_2 {
++	bt_en: bt-en-pins {
++		samsung,pins = "gpg0-7";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++
++	backlight_reset: backlight-reset-pins {
++		samsung,pins = "gpg1-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++
++	lcd_en: lcd-en-pins {
++		samsung,pins = "gpg1-2";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++	};
++};
++
++&pinctrl_3 {
++	i2c18_gpio_bus: i2c18-gpio-bus-pins {
++		samsung,pins = "gpb0-3", "gpb0-4";
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++};
++
++&rtc {
++	status = "okay";
++	clocks = <&clock CLK_RTC>, <&max77802 MAX77802_CLK_32K_AP>;
++	clock-names = "rtc", "rtc_src";
++};
++
++&tmu_cpu0 {
++	vtmu-supply = <&ldo11_reg>;
++};
++
++&tmu_cpu1 {
++	vtmu-supply = <&ldo11_reg>;
++};
++
++&tmu_cpu2 {
++	vtmu-supply = <&ldo11_reg>;
++};
++
++&tmu_cpu3 {
++	vtmu-supply = <&ldo11_reg>;
++};
++
++&tmu_gpu {
++	vtmu-supply = <&ldo11_reg>;
++};
++
++&usbdrd_dwc3_0 {
++	dr_mode = "peripheral";
++};
++
++&usbdrd_dwc3_1 {
++	dr_mode = "peripheral";
++};
++
++&usbdrd3_0 {
++	vdd33-supply = <&ldo12_reg>;
++	vdd10-supply = <&ldo15_reg>;
++};
++
++&usbdrd3_1 {
++	vdd33-supply = <&ldo12_reg>;
++	vdd10-supply = <&ldo15_reg>;
++};
+diff --git a/arch/arm/boot/dts/samsung/exynos5420-peach-pit.dts b/arch/arm/boot/dts/samsung/exynos5420-peach-pit.dts
+index 3759742d38ca..72fdc34d5abb 100644
+--- a/arch/arm/boot/dts/samsung/exynos5420-peach-pit.dts
++++ b/arch/arm/boot/dts/samsung/exynos5420-peach-pit.dts
+@@ -39,8 +39,9 @@ aliases {
+ 	backlight: backlight {
+ 		compatible = "pwm-backlight";
+ 		pwms = <&pwm 0 1000000 0>;
+-		brightness-levels = <0 100 500 1000 1500 2000 2500 2800>;
+-		default-brightness-level = <7>;
++		brightness-levels = <1 255>;
++		num-interpolated-steps = <254>;
++		default-brightness-level = <254>;
+ 		power-supply = <&tps65090_fet1>;
+ 		pinctrl-0 = <&pwm0_out>;
+ 		pinctrl-names = "default";
+@@ -91,13 +92,18 @@ sound {
+ 		samsung,model = "Peach-Pit-I2S-MAX98090";
+ 		samsung,i2s-controller = <&i2s0>;
+ 		samsung,audio-codec = <&max98090>;
++		samsung,hp-det-gpios = <&gpx2 1 GPIO_ACTIVE_HIGH>;
++		samsung,mic-det-gpios = <&gpx1 7 GPIO_ACTIVE_LOW>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&hp_det_gpio &mic_det_gpio>;
+ 
+ 		cpu {
+ 			sound-dai = <&i2s0 0>;
+ 		};
+ 
+ 		codec {
+-			sound-dai = <&max98090>, <&hdmi>;
++			sound-dai = <&max98090>;
+ 		};
+ 	};
+ 
+@@ -192,6 +198,11 @@ &fimd {
+ 	samsung,invert-vclk;
+ };
+ 
++&gpu {
++	status = "okay";
++	mali-supply = <&buck4_reg>;
++};
++
+ &hdmi {
+ 	status = "okay";
+ 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
+@@ -829,6 +840,20 @@ ec_irq: ec-irq-pins {
+ 		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
+ 	};
+ 
++	mic_det_gpio: mic-det-gpio-pins {
++		samsung,pins = "gpx1-7";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++
++	hp_det_gpio: hp-det-gpio-pins {
++		samsung,pins = "gpx2-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++
+ 	tps65090_irq: tps65090-irq-pins {
+ 		samsung,pins = "gpx2-5";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+@@ -911,6 +936,13 @@ &spi2_bus {
+ 
+ &pinctrl_3 {
+ 	/* Drive SPI chip select at x2 for better integrity */
++	flash_spi_cs: flash-spi-cs-pins {
++		samsung,pins = "gpa2-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV3>;
++	};
++
+ 	ec_spi_cs: ec-spi-cs-pins {
+ 		samsung,pins = "gpb1-2";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
+@@ -952,6 +984,27 @@ &rtc {
+ 	clock-names = "rtc", "rtc_src";
+ };
+ 
++&spi_1 {
++	status = "okay";
++	num-cs = <1>;
++	samsung,spi-src-clk = <0>;
++	cs-gpios = <&gpa2 5 GPIO_ACTIVE_HIGH>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++
++		spi-max-frequency = <50000000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&flash_spi_cs>;
++
++		controller-data {
++			samsung,spi-feedback-delay = <2>;
++		};
++	};
++};
++
+ &spi_2 {
+ 	status = "okay";
+ 	num-cs = <1>;
+diff --git a/arch/arm/boot/dts/samsung/exynos5800-peach-pi.dts b/arch/arm/boot/dts/samsung/exynos5800-peach-pi.dts
+index bb019868b996..95deaa208b52 100644
+--- a/arch/arm/boot/dts/samsung/exynos5800-peach-pi.dts
++++ b/arch/arm/boot/dts/samsung/exynos5800-peach-pi.dts
+@@ -37,8 +37,9 @@ aliases {
+ 	backlight: backlight {
+ 		compatible = "pwm-backlight";
+ 		pwms = <&pwm 0 1000000 0>;
+-		brightness-levels = <0 100 500 1000 1500 2000 2500 2800>;
+-		default-brightness-level = <7>;
++		brightness-levels = <1 255>;
++		num-interpolated-steps = <254>;
++		default-brightness-level = <254>;
+ 		enable-gpios = <&gpx2 2 GPIO_ACTIVE_HIGH>;
+ 		power-supply = <&tps65090_fet1>;
+ 		pinctrl-0 = <&pwm0_out>;
+@@ -91,13 +92,18 @@ sound {
+ 		samsung,model = "Peach-Pi-I2S-MAX98091";
+ 		samsung,i2s-controller = <&i2s0>;
+ 		samsung,audio-codec = <&max98091>;
++		samsung,hp-det-gpios = <&gpx2 1 GPIO_ACTIVE_HIGH>;
++		samsung,mic-det-gpios = <&gpx1 7 GPIO_ACTIVE_LOW>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&hp_det_gpio &mic_det_gpio>;
+ 
+ 		cpu {
+ 			sound-dai = <&i2s0 0>;
+ 		};
+ 
+ 		codec {
+-			sound-dai = <&max98091>, <&hdmi>;
++			sound-dai = <&max98091>;
+ 		};
+ 	};
+ 
+@@ -201,6 +207,11 @@ &fimd {
+ 	samsung,invert-vclk;
+ };
+ 
++&gpu {
++	status = "okay";
++	mali-supply = <&buck4_reg>;
++};
++
+ &hdmi {
+ 	status = "okay";
+ 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
+@@ -811,6 +822,20 @@ ec_irq: ec-irq-pins {
+ 		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
+ 	};
+ 
++	mic_det_gpio: mic-det-gpio-pins {
++		samsung,pins = "gpx1-7";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++
++	hp_det_gpio: hp-det-gpio-pins {
++		samsung,pins = "gpx2-1";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
++	};
++
+ 	tps65090_irq: tps65090-irq-pins {
+ 		samsung,pins = "gpx2-5";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+@@ -893,6 +918,13 @@ &spi2_bus {
+ 
+ &pinctrl_3 {
+ 	/* Drive SPI chip select at x2 for better integrity */
++	flash_spi_cs: flash-spi-cs-pins {
++		samsung,pins = "gpa2-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV3>;
++	};
++
+ 	ec_spi_cs: ec-spi-cs-pins {
+ 		samsung,pins = "gpb1-2";
+ 		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
+@@ -934,6 +966,27 @@ &rtc {
+ 	clock-names = "rtc", "rtc_src";
+ };
+ 
++&spi_1 {
++	status = "okay";
++	num-cs = <1>;
++	samsung,spi-src-clk = <0>;
++	cs-gpios = <&gpa2 5 GPIO_ACTIVE_HIGH>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++
++		spi-max-frequency = <50000000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&flash_spi_cs>;
++
++		controller-data {
++			samsung,spi-feedback-delay = <2>;
++		};
++	};
++};
++
+ &spi_2 {
+ 	status = "okay";
+ 	num-cs = <1>;
+diff --git a/arch/arm/configs/exynos5_defconfig b/arch/arm/configs/exynos5_defconfig
+new file mode 100644
+index 000000000000..7bdae1192d0e
+--- /dev/null
++++ b/arch/arm/configs/exynos5_defconfig
+@@ -0,0 +1,1424 @@
++CONFIG_LOCALVERSION="-postmarketos-exynos5"
++CONFIG_KERNEL_XZ=y
++CONFIG_SYSVIPC=y
++CONFIG_POSIX_MQUEUE=y
++CONFIG_AUDIT=y
++CONFIG_GENERIC_IRQ_DEBUGFS=y
++CONFIG_NO_HZ=y
++CONFIG_HIGH_RES_TIMERS=y
++CONFIG_BPF_SYSCALL=y
++CONFIG_PREEMPT=y
++CONFIG_IRQ_TIME_ACCOUNTING=y
++CONFIG_BSD_PROCESS_ACCT=y
++CONFIG_TASKSTATS=y
++CONFIG_TASK_DELAY_ACCT=y
++CONFIG_TASK_XACCT=y
++CONFIG_TASK_IO_ACCOUNTING=y
++CONFIG_PSI=y
++CONFIG_IKCONFIG=y
++CONFIG_IKCONFIG_PROC=y
++CONFIG_UCLAMP_TASK=y
++CONFIG_CGROUPS=y
++CONFIG_MEMCG=y
++CONFIG_BLK_CGROUP=y
++CONFIG_CGROUP_SCHED=y
++CONFIG_CFS_BANDWIDTH=y
++CONFIG_UCLAMP_TASK_GROUP=y
++CONFIG_CGROUP_PIDS=y
++CONFIG_CGROUP_RDMA=y
++CONFIG_CGROUP_FREEZER=y
++CONFIG_CPUSETS=y
++CONFIG_CGROUP_DEVICE=y
++CONFIG_CGROUP_CPUACCT=y
++CONFIG_CGROUP_PERF=y
++CONFIG_CGROUP_BPF=y
++CONFIG_USER_NS=y
++CONFIG_CHECKPOINT_RESTORE=y
++CONFIG_RELAY=y
++CONFIG_BLK_DEV_INITRD=y
++CONFIG_PROFILING=y
++CONFIG_ARCH_EXYNOS=y
++# CONFIG_ARCH_EXYNOS3 is not set
++# CONFIG_ARCH_EXYNOS4 is not set
++# CONFIG_SOC_EXYNOS5260 is not set
++# CONFIG_SOC_EXYNOS5410 is not set
++CONFIG_ARM_LPAE=y
++CONFIG_SMP=y
++CONFIG_SCHED_MC=y
++CONFIG_BIG_LITTLE=y
++CONFIG_NR_CPUS=8
++CONFIG_HZ_250=y
++CONFIG_HIGHMEM=y
++# CONFIG_ARM_MODULE_PLTS is not set
++CONFIG_ARCH_FORCE_MAX_ORDER=11
++CONFIG_ARM_APPENDED_DTB=y
++CONFIG_ARM_ATAG_DTB_COMPAT=y
++CONFIG_CMDLINE="earlycon console=ttySAC2,115200 loglevel=7 PMOS_NO_OUTPUT_REDIRECT"
++CONFIG_CPU_FREQ=y
++CONFIG_CPU_IDLE=y
++CONFIG_ARM_EXYNOS_CPUIDLE=y
++CONFIG_VFP=y
++CONFIG_NEON=y
++CONFIG_KERNEL_MODE_NEON=y
++CONFIG_PM_DEBUG=y
++CONFIG_PM_ADVANCED_DEBUG=y
++CONFIG_MODULES=y
++CONFIG_MODULE_UNLOAD=y
++CONFIG_MODULE_FORCE_UNLOAD=y
++CONFIG_BLK_DEV_ZONED=y
++CONFIG_BLK_DEV_THROTTLING=y
++CONFIG_BLK_WBT=y
++CONFIG_PARTITION_ADVANCED=y
++CONFIG_BINFMT_MISC=m
++CONFIG_ZSMALLOC_STAT=y
++CONFIG_CMA=y
++CONFIG_LRU_GEN=y
++CONFIG_LRU_GEN_ENABLED=y
++CONFIG_NET=y
++CONFIG_PACKET=y
++CONFIG_PACKET_DIAG=m
++CONFIG_UNIX=y
++CONFIG_UNIX_DIAG=m
++CONFIG_XFRM_USER=m
++CONFIG_XFRM_SUB_POLICY=y
++CONFIG_XFRM_STATISTICS=y
++CONFIG_NET_KEY=y
++CONFIG_NET_KEY_MIGRATE=y
++CONFIG_INET=y
++CONFIG_IP_MULTICAST=y
++CONFIG_IP_ADVANCED_ROUTER=y
++CONFIG_IP_FIB_TRIE_STATS=y
++CONFIG_IP_MULTIPLE_TABLES=y
++CONFIG_IP_ROUTE_MULTIPATH=y
++CONFIG_IP_ROUTE_VERBOSE=y
++CONFIG_IP_PNP=y
++CONFIG_IP_PNP_DHCP=y
++CONFIG_IP_PNP_BOOTP=y
++CONFIG_IP_PNP_RARP=y
++CONFIG_NET_IPIP=m
++CONFIG_NET_IPGRE_DEMUX=m
++CONFIG_NET_IPGRE=m
++CONFIG_NET_IPGRE_BROADCAST=y
++CONFIG_IP_MROUTE=y
++CONFIG_IP_MROUTE_MULTIPLE_TABLES=y
++CONFIG_IP_PIMSM_V1=y
++CONFIG_IP_PIMSM_V2=y
++CONFIG_NET_IPVTI=m
++CONFIG_NET_FOU_IP_TUNNELS=y
++CONFIG_INET_AH=m
++CONFIG_INET_ESP=m
++CONFIG_INET_IPCOMP=m
++CONFIG_INET_DIAG=m
++CONFIG_INET_UDP_DIAG=m
++CONFIG_INET_DIAG_DESTROY=y
++CONFIG_TCP_CONG_ADVANCED=y
++CONFIG_TCP_CONG_HSTCP=m
++CONFIG_TCP_CONG_HYBLA=m
++CONFIG_TCP_CONG_NV=m
++CONFIG_TCP_CONG_SCALABLE=m
++CONFIG_TCP_CONG_LP=m
++CONFIG_TCP_CONG_VENO=m
++CONFIG_TCP_CONG_YEAH=m
++CONFIG_TCP_CONG_ILLINOIS=m
++CONFIG_TCP_CONG_DCTCP=m
++CONFIG_TCP_CONG_CDG=m
++CONFIG_TCP_CONG_BBR=m
++CONFIG_TCP_MD5SIG=y
++CONFIG_IPV6=m
++CONFIG_IPV6_ROUTER_PREF=y
++CONFIG_IPV6_ROUTE_INFO=y
++CONFIG_IPV6_OPTIMISTIC_DAD=y
++CONFIG_INET6_AH=m
++CONFIG_INET6_ESP=m
++CONFIG_INET6_IPCOMP=m
++CONFIG_IPV6_MIP6=m
++CONFIG_IPV6_ILA=m
++CONFIG_IPV6_VTI=m
++CONFIG_IPV6_SIT_6RD=y
++CONFIG_IPV6_GRE=m
++CONFIG_IPV6_MULTIPLE_TABLES=y
++CONFIG_IPV6_SUBTREES=y
++CONFIG_IPV6_MROUTE=y
++CONFIG_IPV6_MROUTE_MULTIPLE_TABLES=y
++CONFIG_IPV6_PIMSM_V2=y
++CONFIG_NETWORK_PHY_TIMESTAMPING=y
++CONFIG_NETFILTER=y
++CONFIG_BRIDGE_NETFILTER=m
++CONFIG_NF_CONNTRACK=m
++CONFIG_NF_CONNTRACK_ZONES=y
++CONFIG_NF_CONNTRACK_PROCFS=y
++CONFIG_NF_CONNTRACK_EVENTS=y
++CONFIG_NF_CONNTRACK_TIMEOUT=y
++CONFIG_NF_CONNTRACK_TIMESTAMP=y
++CONFIG_NF_CONNTRACK_AMANDA=m
++CONFIG_NF_CONNTRACK_FTP=m
++CONFIG_NF_CONNTRACK_H323=m
++CONFIG_NF_CONNTRACK_IRC=m
++CONFIG_NF_CONNTRACK_NETBIOS_NS=m
++CONFIG_NF_CONNTRACK_SNMP=m
++CONFIG_NF_CONNTRACK_PPTP=m
++CONFIG_NF_CONNTRACK_SANE=m
++CONFIG_NF_CONNTRACK_SIP=m
++CONFIG_NF_CONNTRACK_TFTP=m
++CONFIG_NF_CT_NETLINK=m
++CONFIG_NF_CT_NETLINK_TIMEOUT=m
++CONFIG_NF_CT_NETLINK_HELPER=m
++CONFIG_NETFILTER_NETLINK_GLUE_CT=y
++CONFIG_NF_TABLES=y
++CONFIG_NF_TABLES_INET=y
++CONFIG_NFT_NUMGEN=m
++CONFIG_NFT_CT=m
++CONFIG_NFT_LOG=m
++CONFIG_NFT_LIMIT=m
++CONFIG_NFT_MASQ=m
++CONFIG_NFT_REDIR=m
++CONFIG_NFT_NAT=m
++CONFIG_NFT_QUEUE=m
++CONFIG_NFT_QUOTA=m
++CONFIG_NFT_REJECT=m
++CONFIG_NFT_COMPAT=m
++CONFIG_NFT_HASH=m
++CONFIG_NETFILTER_XTABLES=y
++CONFIG_NETFILTER_XT_SET=m
++CONFIG_NETFILTER_XT_TARGET_CHECKSUM=m
++CONFIG_NETFILTER_XT_TARGET_CLASSIFY=m
++CONFIG_NETFILTER_XT_TARGET_CONNMARK=m
++CONFIG_NETFILTER_XT_TARGET_DSCP=m
++CONFIG_NETFILTER_XT_TARGET_HMARK=m
++CONFIG_NETFILTER_XT_TARGET_IDLETIMER=m
++CONFIG_NETFILTER_XT_TARGET_LED=m
++CONFIG_NETFILTER_XT_TARGET_LOG=m
++CONFIG_NETFILTER_XT_TARGET_MARK=m
++CONFIG_NETFILTER_XT_TARGET_NFLOG=m
++CONFIG_NETFILTER_XT_TARGET_NFQUEUE=m
++CONFIG_NETFILTER_XT_TARGET_NOTRACK=m
++CONFIG_NETFILTER_XT_TARGET_TEE=m
++CONFIG_NETFILTER_XT_TARGET_TPROXY=m
++CONFIG_NETFILTER_XT_TARGET_TRACE=m
++CONFIG_NETFILTER_XT_TARGET_TCPMSS=m
++CONFIG_NETFILTER_XT_TARGET_TCPOPTSTRIP=m
++CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=m
++CONFIG_NETFILTER_XT_MATCH_BPF=m
++CONFIG_NETFILTER_XT_MATCH_CGROUP=m
++CONFIG_NETFILTER_XT_MATCH_CLUSTER=m
++CONFIG_NETFILTER_XT_MATCH_COMMENT=m
++CONFIG_NETFILTER_XT_MATCH_CONNBYTES=m
++CONFIG_NETFILTER_XT_MATCH_CONNLABEL=m
++CONFIG_NETFILTER_XT_MATCH_CONNLIMIT=m
++CONFIG_NETFILTER_XT_MATCH_CONNMARK=m
++CONFIG_NETFILTER_XT_MATCH_CONNTRACK=m
++CONFIG_NETFILTER_XT_MATCH_CPU=m
++CONFIG_NETFILTER_XT_MATCH_DCCP=m
++CONFIG_NETFILTER_XT_MATCH_DEVGROUP=m
++CONFIG_NETFILTER_XT_MATCH_DSCP=m
++CONFIG_NETFILTER_XT_MATCH_ESP=m
++CONFIG_NETFILTER_XT_MATCH_HASHLIMIT=m
++CONFIG_NETFILTER_XT_MATCH_HELPER=m
++CONFIG_NETFILTER_XT_MATCH_IPCOMP=m
++CONFIG_NETFILTER_XT_MATCH_IPRANGE=m
++CONFIG_NETFILTER_XT_MATCH_IPVS=m
++CONFIG_NETFILTER_XT_MATCH_LENGTH=m
++CONFIG_NETFILTER_XT_MATCH_LIMIT=m
++CONFIG_NETFILTER_XT_MATCH_MAC=m
++CONFIG_NETFILTER_XT_MATCH_MARK=m
++CONFIG_NETFILTER_XT_MATCH_MULTIPORT=m
++CONFIG_NETFILTER_XT_MATCH_NFACCT=m
++CONFIG_NETFILTER_XT_MATCH_OSF=m
++CONFIG_NETFILTER_XT_MATCH_OWNER=m
++CONFIG_NETFILTER_XT_MATCH_POLICY=m
++CONFIG_NETFILTER_XT_MATCH_PHYSDEV=m
++CONFIG_NETFILTER_XT_MATCH_PKTTYPE=m
++CONFIG_NETFILTER_XT_MATCH_QUOTA=m
++CONFIG_NETFILTER_XT_MATCH_RATEEST=m
++CONFIG_NETFILTER_XT_MATCH_REALM=m
++CONFIG_NETFILTER_XT_MATCH_RECENT=m
++CONFIG_NETFILTER_XT_MATCH_STATE=m
++CONFIG_NETFILTER_XT_MATCH_STATISTIC=m
++CONFIG_NETFILTER_XT_MATCH_STRING=m
++CONFIG_NETFILTER_XT_MATCH_TCPMSS=m
++CONFIG_NETFILTER_XT_MATCH_TIME=m
++CONFIG_NETFILTER_XT_MATCH_U32=m
++CONFIG_IP_SET=m
++CONFIG_IP_SET_BITMAP_IP=m
++CONFIG_IP_SET_BITMAP_IPMAC=m
++CONFIG_IP_SET_BITMAP_PORT=m
++CONFIG_IP_SET_HASH_IP=m
++CONFIG_IP_SET_HASH_IPMARK=m
++CONFIG_IP_SET_HASH_IPPORT=m
++CONFIG_IP_SET_HASH_IPPORTIP=m
++CONFIG_IP_SET_HASH_IPPORTNET=m
++CONFIG_IP_SET_HASH_MAC=m
++CONFIG_IP_SET_HASH_NETPORTNET=m
++CONFIG_IP_SET_HASH_NET=m
++CONFIG_IP_SET_HASH_NETNET=m
++CONFIG_IP_SET_HASH_NETPORT=m
++CONFIG_IP_SET_HASH_NETIFACE=m
++CONFIG_IP_SET_LIST_SET=m
++CONFIG_IP_VS=m
++CONFIG_IP_VS_IPV6=y
++CONFIG_IP_VS_DEBUG=y
++CONFIG_IP_VS_PROTO_TCP=y
++CONFIG_IP_VS_PROTO_UDP=y
++CONFIG_IP_VS_PROTO_ESP=y
++CONFIG_IP_VS_PROTO_AH=y
++CONFIG_IP_VS_PROTO_SCTP=y
++CONFIG_IP_VS_RR=m
++CONFIG_IP_VS_WRR=m
++CONFIG_IP_VS_LC=m
++CONFIG_IP_VS_WLC=m
++CONFIG_IP_VS_FO=m
++CONFIG_IP_VS_OVF=m
++CONFIG_IP_VS_LBLC=m
++CONFIG_IP_VS_LBLCR=m
++CONFIG_IP_VS_DH=m
++CONFIG_IP_VS_SH=m
++CONFIG_IP_VS_SED=m
++CONFIG_IP_VS_NQ=m
++CONFIG_IP_VS_FTP=m
++CONFIG_IP_VS_PE_SIP=m
++CONFIG_NFT_FIB_IPV4=m
++CONFIG_NF_LOG_ARP=m
++CONFIG_NF_LOG_IPV4=m
++CONFIG_IP_NF_IPTABLES=m
++CONFIG_IP_NF_MATCH_AH=m
++CONFIG_IP_NF_MATCH_ECN=m
++CONFIG_IP_NF_MATCH_RPFILTER=m
++CONFIG_IP_NF_MATCH_TTL=m
++CONFIG_IP_NF_FILTER=m
++CONFIG_IP_NF_TARGET_REJECT=m
++CONFIG_IP_NF_TARGET_SYNPROXY=m
++CONFIG_IP_NF_NAT=m
++CONFIG_IP_NF_TARGET_MASQUERADE=m
++CONFIG_IP_NF_TARGET_NETMAP=m
++CONFIG_IP_NF_TARGET_REDIRECT=m
++CONFIG_IP_NF_MANGLE=m
++CONFIG_IP_NF_TARGET_ECN=m
++CONFIG_IP_NF_TARGET_TTL=m
++CONFIG_IP_NF_RAW=m
++CONFIG_NFT_FIB_IPV6=m
++CONFIG_IP6_NF_IPTABLES=m
++CONFIG_IP6_NF_MATCH_AH=m
++CONFIG_IP6_NF_MATCH_EUI64=m
++CONFIG_IP6_NF_MATCH_FRAG=m
++CONFIG_IP6_NF_MATCH_OPTS=m
++CONFIG_IP6_NF_MATCH_HL=m
++CONFIG_IP6_NF_MATCH_IPV6HEADER=m
++CONFIG_IP6_NF_MATCH_MH=m
++CONFIG_IP6_NF_MATCH_RPFILTER=m
++CONFIG_IP6_NF_MATCH_RT=m
++CONFIG_IP6_NF_TARGET_HL=m
++CONFIG_IP6_NF_FILTER=m
++CONFIG_IP6_NF_TARGET_REJECT=m
++CONFIG_IP6_NF_TARGET_SYNPROXY=m
++CONFIG_IP6_NF_MANGLE=m
++CONFIG_IP6_NF_RAW=m
++CONFIG_IP6_NF_NAT=m
++CONFIG_IP6_NF_TARGET_MASQUERADE=m
++CONFIG_IP6_NF_TARGET_NPT=m
++CONFIG_NF_TABLES_BRIDGE=m
++CONFIG_NFT_BRIDGE_META=m
++CONFIG_BRIDGE_NF_EBTABLES=m
++CONFIG_BRIDGE_EBT_BROUTE=m
++CONFIG_BRIDGE_EBT_T_FILTER=m
++CONFIG_BRIDGE_EBT_T_NAT=m
++CONFIG_BRIDGE_EBT_802_3=m
++CONFIG_BRIDGE_EBT_AMONG=m
++CONFIG_BRIDGE_EBT_ARP=m
++CONFIG_BRIDGE_EBT_IP=m
++CONFIG_BRIDGE_EBT_IP6=m
++CONFIG_BRIDGE_EBT_LIMIT=m
++CONFIG_BRIDGE_EBT_MARK=m
++CONFIG_BRIDGE_EBT_PKTTYPE=m
++CONFIG_BRIDGE_EBT_STP=m
++CONFIG_BRIDGE_EBT_VLAN=m
++CONFIG_BRIDGE_EBT_ARPREPLY=m
++CONFIG_BRIDGE_EBT_DNAT=m
++CONFIG_BRIDGE_EBT_MARK_T=m
++CONFIG_BRIDGE_EBT_REDIRECT=m
++CONFIG_BRIDGE_EBT_SNAT=m
++CONFIG_BRIDGE_EBT_LOG=m
++CONFIG_BRIDGE_EBT_NFLOG=m
++CONFIG_IP_SCTP=m
++CONFIG_RDS=m
++CONFIG_RDS_TCP=m
++CONFIG_ATM=m
++CONFIG_ATM_CLIP=m
++CONFIG_ATM_CLIP_NO_ICMP=y
++CONFIG_ATM_LANE=m
++CONFIG_ATM_MPOA=m
++CONFIG_ATM_BR2684=m
++CONFIG_ATM_BR2684_IPFILTER=y
++CONFIG_L2TP=m
++CONFIG_L2TP_DEBUGFS=m
++CONFIG_L2TP_V3=y
++CONFIG_L2TP_IP=m
++CONFIG_L2TP_ETH=m
++CONFIG_BRIDGE=m
++CONFIG_BRIDGE_VLAN_FILTERING=y
++CONFIG_VLAN_8021Q=m
++CONFIG_VLAN_8021Q_GVRP=y
++CONFIG_VLAN_8021Q_MVRP=y
++CONFIG_LLC2=m
++CONFIG_ATALK=m
++CONFIG_6LOWPAN=m
++CONFIG_6LOWPAN_GHC_EXT_HDR_HOP=m
++CONFIG_6LOWPAN_GHC_UDP=m
++CONFIG_6LOWPAN_GHC_ICMPV6=m
++CONFIG_6LOWPAN_GHC_EXT_HDR_DEST=m
++CONFIG_6LOWPAN_GHC_EXT_HDR_FRAG=m
++CONFIG_6LOWPAN_GHC_EXT_HDR_ROUTE=m
++CONFIG_IEEE802154=m
++CONFIG_IEEE802154_NL802154_EXPERIMENTAL=y
++CONFIG_IEEE802154_6LOWPAN=m
++CONFIG_MAC802154=m
++CONFIG_NET_SCHED=y
++CONFIG_NET_SCH_HTB=m
++CONFIG_NET_SCH_HFSC=m
++CONFIG_NET_SCH_PRIO=m
++CONFIG_NET_SCH_MULTIQ=m
++CONFIG_NET_SCH_RED=m
++CONFIG_NET_SCH_SFB=m
++CONFIG_NET_SCH_SFQ=m
++CONFIG_NET_SCH_TEQL=m
++CONFIG_NET_SCH_TBF=m
++CONFIG_NET_SCH_GRED=m
++CONFIG_NET_SCH_NETEM=m
++CONFIG_NET_SCH_DRR=m
++CONFIG_NET_SCH_MQPRIO=m
++CONFIG_NET_SCH_CHOKE=m
++CONFIG_NET_SCH_QFQ=m
++CONFIG_NET_SCH_CODEL=m
++CONFIG_NET_SCH_FQ_CODEL=m
++CONFIG_NET_SCH_FQ=m
++CONFIG_NET_SCH_HHF=m
++CONFIG_NET_SCH_PIE=m
++CONFIG_NET_SCH_INGRESS=m
++CONFIG_NET_SCH_PLUG=m
++CONFIG_NET_SCH_DEFAULT=y
++CONFIG_DEFAULT_FQ=y
++CONFIG_NET_CLS_BASIC=m
++CONFIG_NET_CLS_ROUTE4=m
++CONFIG_NET_CLS_FW=m
++CONFIG_NET_CLS_U32=m
++CONFIG_CLS_U32_PERF=y
++CONFIG_CLS_U32_MARK=y
++CONFIG_NET_CLS_FLOW=m
++CONFIG_NET_CLS_CGROUP=m
++CONFIG_NET_CLS_BPF=m
++CONFIG_NET_CLS_FLOWER=m
++CONFIG_NET_CLS_MATCHALL=m
++CONFIG_NET_EMATCH=y
++CONFIG_NET_EMATCH_CMP=m
++CONFIG_NET_EMATCH_NBYTE=m
++CONFIG_NET_EMATCH_U32=m
++CONFIG_NET_EMATCH_META=m
++CONFIG_NET_EMATCH_TEXT=m
++CONFIG_NET_EMATCH_IPSET=m
++CONFIG_NET_CLS_ACT=y
++CONFIG_NET_ACT_POLICE=m
++CONFIG_NET_ACT_GACT=m
++CONFIG_GACT_PROB=y
++CONFIG_NET_ACT_MIRRED=m
++CONFIG_NET_ACT_NAT=m
++CONFIG_NET_ACT_PEDIT=m
++CONFIG_NET_ACT_SIMP=m
++CONFIG_NET_ACT_SKBEDIT=m
++CONFIG_NET_ACT_CSUM=m
++CONFIG_NET_ACT_VLAN=m
++CONFIG_NET_ACT_BPF=m
++CONFIG_NET_ACT_CONNMARK=m
++CONFIG_NET_ACT_SKBMOD=m
++CONFIG_NET_ACT_IFE=m
++CONFIG_NET_ACT_TUNNEL_KEY=m
++CONFIG_NET_IFE_SKBMARK=m
++CONFIG_NET_IFE_SKBPRIO=m
++CONFIG_NET_IFE_SKBTCINDEX=m
++CONFIG_DNS_RESOLVER=y
++CONFIG_BATMAN_ADV=m
++CONFIG_BATMAN_ADV_NC=y
++CONFIG_OPENVSWITCH=m
++CONFIG_VSOCKETS=m
++CONFIG_NETLINK_DIAG=m
++CONFIG_CGROUP_NET_PRIO=y
++CONFIG_NET_PKTGEN=m
++CONFIG_NET_DROP_MONITOR=m
++CONFIG_HAMRADIO=y
++CONFIG_CAN=m
++CONFIG_BT=m
++CONFIG_BT_RFCOMM=m
++CONFIG_BT_RFCOMM_TTY=y
++CONFIG_BT_BNEP=m
++CONFIG_BT_BNEP_MC_FILTER=y
++CONFIG_BT_BNEP_PROTO_FILTER=y
++CONFIG_BT_HIDP=m
++CONFIG_BT_6LOWPAN=m
++CONFIG_BT_LEDS=y
++CONFIG_BT_HCIBTUSB=m
++CONFIG_BT_HCIBTSDIO=m
++CONFIG_BT_HCIUART=m
++CONFIG_BT_HCIUART_BCSP=y
++CONFIG_BT_HCIUART_ATH3K=y
++CONFIG_BT_HCIUART_INTEL=y
++CONFIG_BT_HCIUART_BCM=y
++CONFIG_BT_HCIUART_AG6XX=y
++CONFIG_BT_HCIBCM203X=m
++CONFIG_BT_HCIBPA10X=m
++CONFIG_BT_HCIBFUSB=m
++CONFIG_BT_HCIVHCI=m
++CONFIG_BT_MRVL=m
++CONFIG_BT_MRVL_SDIO=m
++CONFIG_BT_ATH3K=m
++CONFIG_CFG80211=m
++CONFIG_CFG80211_WEXT=y
++CONFIG_MAC80211=m
++CONFIG_MAC80211_MESH=y
++CONFIG_RFKILL=m
++CONFIG_UEVENT_HELPER=y
++CONFIG_DEVTMPFS=y
++CONFIG_DEVTMPFS_MOUNT=y
++CONFIG_FW_LOADER_COMPRESS=y
++# CONFIG_FW_LOADER_COMPRESS_XZ is not set
++CONFIG_FW_LOADER_COMPRESS_ZSTD=y
++CONFIG_PARPORT=m
++CONFIG_BLK_DEV_NULL_BLK=m
++CONFIG_ZRAM=m
++CONFIG_ZRAM_WRITEBACK=y
++CONFIG_BLK_DEV_LOOP=m
++CONFIG_BLK_DEV_DRBD=m
++CONFIG_BLK_DEV_NBD=m
++CONFIG_BLK_DEV_RAM=y
++CONFIG_BLK_DEV_RAM_SIZE=16384
++CONFIG_RAID_ATTRS=m
++CONFIG_SCSI=m
++CONFIG_BLK_DEV_SD=m
++CONFIG_CHR_DEV_ST=m
++CONFIG_BLK_DEV_SR=m
++CONFIG_CHR_DEV_SG=m
++CONFIG_CHR_DEV_SCH=m
++CONFIG_SCSI_SCAN_ASYNC=y
++CONFIG_ISCSI_TCP=m
++CONFIG_ISCSI_BOOT_SYSFS=m
++CONFIG_MD=y
++CONFIG_BCACHE=m
++CONFIG_BLK_DEV_DM=y
++CONFIG_DM_DEBUG_BLOCK_MANAGER_LOCKING=y
++CONFIG_DM_DEBUG_BLOCK_STACK_TRACING=y
++CONFIG_DM_CRYPT=m
++CONFIG_DM_SNAPSHOT=m
++CONFIG_DM_THIN_PROVISIONING=m
++CONFIG_DM_CACHE=m
++CONFIG_DM_ERA=m
++CONFIG_DM_MIRROR=m
++CONFIG_DM_RAID=m
++CONFIG_DM_ZERO=m
++CONFIG_DM_MULTIPATH=m
++CONFIG_DM_MULTIPATH_QL=m
++CONFIG_DM_MULTIPATH_ST=m
++CONFIG_DM_DELAY=m
++CONFIG_DM_UEVENT=y
++CONFIG_DM_FLAKEY=m
++CONFIG_DM_VERITY=m
++CONFIG_DM_VERITY_FEC=y
++CONFIG_DM_SWITCH=m
++CONFIG_DM_LOG_WRITES=m
++CONFIG_DM_INTEGRITY=m
++CONFIG_DM_ZONED=m
++CONFIG_TARGET_CORE=m
++CONFIG_TCM_IBLOCK=m
++CONFIG_TCM_FILEIO=m
++CONFIG_TCM_PSCSI=m
++CONFIG_TCM_USER2=m
++CONFIG_LOOPBACK_TARGET=m
++CONFIG_ISCSI_TARGET=m
++CONFIG_NETDEVICES=y
++CONFIG_BONDING=m
++CONFIG_DUMMY=m
++CONFIG_WIREGUARD=m
++CONFIG_IFB=m
++CONFIG_NET_TEAM=m
++CONFIG_NET_TEAM_MODE_BROADCAST=m
++CONFIG_NET_TEAM_MODE_ROUNDROBIN=m
++CONFIG_NET_TEAM_MODE_RANDOM=m
++CONFIG_NET_TEAM_MODE_ACTIVEBACKUP=m
++CONFIG_NET_TEAM_MODE_LOADBALANCE=m
++CONFIG_MACVLAN=m
++CONFIG_MACVTAP=m
++CONFIG_IPVLAN=m
++CONFIG_VXLAN=m
++CONFIG_MACSEC=m
++CONFIG_NETCONSOLE=m
++CONFIG_NETCONSOLE_DYNAMIC=y
++CONFIG_TUN=m
++CONFIG_VETH=m
++CONFIG_ATM_DUMMY=m
++CONFIG_ATM_TCP=m
++# CONFIG_NET_VENDOR_ARC is not set
++# CONFIG_NET_VENDOR_BROADCOM is not set
++# CONFIG_NET_VENDOR_CIRRUS is not set
++# CONFIG_NET_VENDOR_EZCHIP is not set
++# CONFIG_NET_VENDOR_FARADAY is not set
++# CONFIG_NET_VENDOR_HISILICON is not set
++# CONFIG_NET_VENDOR_INTEL is not set
++# CONFIG_NET_VENDOR_MARVELL is not set
++# CONFIG_NET_VENDOR_MICREL is not set
++# CONFIG_NET_VENDOR_MICROCHIP is not set
++# CONFIG_NET_VENDOR_NATSEMI is not set
++# CONFIG_NET_VENDOR_NETRONOME is not set
++# CONFIG_NET_VENDOR_QUALCOMM is not set
++# CONFIG_NET_VENDOR_RENESAS is not set
++# CONFIG_NET_VENDOR_ROCKER is not set
++# CONFIG_NET_VENDOR_SAMSUNG is not set
++CONFIG_SMSC911X=y
++CONFIG_CAN_SLCAN=m
++CONFIG_CAN_MCP251X=m
++CONFIG_CAN_8DEV_USB=m
++CONFIG_CAN_EMS_USB=m
++CONFIG_CAN_GS_USB=m
++CONFIG_CAN_KVASER_USB=m
++CONFIG_CAN_PEAK_USB=m
++CONFIG_PLIP=m
++CONFIG_PPP=m
++CONFIG_PPP_BSDCOMP=m
++CONFIG_PPP_DEFLATE=m
++CONFIG_PPP_FILTER=y
++CONFIG_PPP_MPPE=m
++CONFIG_PPP_MULTILINK=y
++CONFIG_PPPOATM=m
++CONFIG_PPPOE=m
++CONFIG_PPTP=m
++CONFIG_PPPOL2TP=m
++CONFIG_PPP_ASYNC=m
++CONFIG_PPP_SYNC_TTY=m
++CONFIG_USB_CATC=m
++CONFIG_USB_KAWETH=m
++CONFIG_USB_PEGASUS=m
++CONFIG_USB_RTL8150=m
++CONFIG_USB_RTL8152=m
++CONFIG_USB_LAN78XX=m
++CONFIG_USB_USBNET=y
++CONFIG_USB_NET_AX8817X=m
++CONFIG_USB_NET_AX88179_178A=m
++CONFIG_USB_NET_CDC_EEM=m
++CONFIG_USB_NET_CDC_NCM=m
++CONFIG_USB_NET_HUAWEI_CDC_NCM=m
++CONFIG_USB_NET_CDC_MBIM=m
++CONFIG_USB_NET_DM9601=m
++CONFIG_USB_NET_SR9700=m
++CONFIG_USB_NET_SR9800=m
++CONFIG_USB_NET_SMSC75XX=m
++CONFIG_USB_NET_SMSC95XX=m
++CONFIG_USB_NET_GL620A=m
++CONFIG_USB_NET_NET1080=m
++CONFIG_USB_NET_PLUSB=m
++CONFIG_USB_NET_MCS7830=m
++CONFIG_USB_NET_CDC_SUBSET=m
++CONFIG_USB_ALI_M5632=y
++CONFIG_USB_AN2720=y
++CONFIG_USB_EPSON2888=y
++CONFIG_USB_KC2190=y
++CONFIG_USB_NET_ZAURUS=m
++CONFIG_USB_NET_CX82310_ETH=m
++CONFIG_USB_NET_KALMIA=m
++CONFIG_USB_NET_QMI_WWAN=m
++CONFIG_USB_HSO=m
++CONFIG_USB_NET_INT51X1=m
++CONFIG_USB_IPHETH=m
++CONFIG_USB_SIERRA_NET=m
++CONFIG_USB_VL600=m
++CONFIG_USB_NET_CH9200=m
++CONFIG_USB_NET_AQC111=m
++CONFIG_ATH9K=m
++CONFIG_ATH9K_HTC=m
++CONFIG_CARL9170=m
++CONFIG_CARL9170_HWRNG=y
++CONFIG_AR5523=m
++CONFIG_ATH10K=m
++CONFIG_WCN36XX=m
++CONFIG_AT76C50X_USB=m
++CONFIG_BRCMFMAC=m
++CONFIG_BRCMFMAC_USB=y
++CONFIG_P54_COMMON=m
++CONFIG_P54_USB=m
++CONFIG_LIBERTAS=m
++CONFIG_LIBERTAS_USB=m
++CONFIG_LIBERTAS_THINFIRM=m
++CONFIG_LIBERTAS_THINFIRM_USB=m
++CONFIG_MWIFIEX=m
++CONFIG_MWIFIEX_SDIO=m
++CONFIG_MWIFIEX_USB=m
++CONFIG_MT7601U=m
++CONFIG_RT2X00=m
++CONFIG_RT2500USB=m
++CONFIG_RT73USB=m
++CONFIG_RT2800USB=m
++CONFIG_RT2800USB_RT3573=y
++CONFIG_RT2800USB_RT53XX=y
++CONFIG_RT2800USB_RT55XX=y
++CONFIG_RT2800USB_UNKNOWN=y
++CONFIG_RTL8187=m
++CONFIG_RTL8192CU=m
++CONFIG_RTL8XXXU=m
++CONFIG_RTL8XXXU_UNTESTED=y
++# CONFIG_WLAN_VENDOR_RSI is not set
++# CONFIG_WLAN_VENDOR_ST is not set
++# CONFIG_WLAN_VENDOR_TI is not set
++CONFIG_ZD1211RW=m
++CONFIG_WAN=y
++CONFIG_HDLC=m
++CONFIG_HDLC_RAW=m
++CONFIG_HDLC_RAW_ETH=m
++CONFIG_HDLC_CISCO=m
++CONFIG_HDLC_FR=m
++CONFIG_HDLC_PPP=m
++CONFIG_INPUT_MOUSEDEV=y
++CONFIG_INPUT_MOUSEDEV_PSAUX=y
++CONFIG_INPUT_JOYDEV=y
++CONFIG_INPUT_EVDEV=m
++CONFIG_KEYBOARD_ATKBD=m
++CONFIG_KEYBOARD_GPIO=m
++CONFIG_KEYBOARD_SAMSUNG=y
++CONFIG_KEYBOARD_CROS_EC=m
++# CONFIG_MOUSE_PS2 is not set
++CONFIG_MOUSE_APPLETOUCH=m
++CONFIG_MOUSE_BCM5974=m
++CONFIG_MOUSE_CYAPA=m
++CONFIG_MOUSE_ELAN_I2C=m
++CONFIG_MOUSE_ELAN_I2C_SMBUS=y
++CONFIG_MOUSE_SYNAPTICS_I2C=m
++CONFIG_MOUSE_SYNAPTICS_USB=m
++CONFIG_INPUT_JOYSTICK=y
++CONFIG_JOYSTICK_ANALOG=m
++CONFIG_JOYSTICK_A3D=m
++CONFIG_JOYSTICK_ADI=m
++CONFIG_JOYSTICK_COBRA=m
++CONFIG_JOYSTICK_GF2K=m
++CONFIG_JOYSTICK_GRIP=m
++CONFIG_JOYSTICK_GRIP_MP=m
++CONFIG_JOYSTICK_GUILLEMOT=m
++CONFIG_JOYSTICK_INTERACT=m
++CONFIG_JOYSTICK_SIDEWINDER=m
++CONFIG_JOYSTICK_TMDC=m
++CONFIG_JOYSTICK_IFORCE=m
++CONFIG_JOYSTICK_IFORCE_USB=m
++CONFIG_JOYSTICK_IFORCE_232=m
++CONFIG_JOYSTICK_WARRIOR=m
++CONFIG_JOYSTICK_MAGELLAN=m
++CONFIG_JOYSTICK_SPACEORB=m
++CONFIG_JOYSTICK_SPACEBALL=m
++CONFIG_JOYSTICK_STINGER=m
++CONFIG_JOYSTICK_TWIDJOY=m
++CONFIG_JOYSTICK_ZHENHUA=m
++CONFIG_JOYSTICK_DB9=m
++CONFIG_JOYSTICK_GAMECON=m
++CONFIG_JOYSTICK_TURBOGRAFX=m
++CONFIG_JOYSTICK_AS5011=m
++CONFIG_JOYSTICK_JOYDUMP=m
++CONFIG_JOYSTICK_XPAD=m
++CONFIG_JOYSTICK_XPAD_FF=y
++CONFIG_JOYSTICK_XPAD_LEDS=y
++CONFIG_JOYSTICK_WALKERA0701=m
++CONFIG_JOYSTICK_PSXPAD_SPI=m
++CONFIG_JOYSTICK_PSXPAD_SPI_FF=y
++CONFIG_INPUT_TABLET=y
++CONFIG_TABLET_USB_ACECAD=m
++CONFIG_TABLET_USB_AIPTEK=m
++CONFIG_TABLET_USB_HANWANG=m
++CONFIG_TABLET_USB_KBTAB=m
++CONFIG_INPUT_TOUCHSCREEN=y
++CONFIG_TOUCHSCREEN_ATMEL_MXT=m
++CONFIG_INPUT_MISC=y
++CONFIG_INPUT_AD714X=m
++CONFIG_INPUT_ATMEL_CAPTOUCH=m
++CONFIG_INPUT_BMA150=m
++CONFIG_INPUT_E3X0_BUTTON=m
++CONFIG_INPUT_MMA8450=m
++CONFIG_INPUT_GPIO_BEEPER=m
++CONFIG_INPUT_GPIO_DECODER=m
++CONFIG_INPUT_ATI_REMOTE2=m
++CONFIG_INPUT_KEYSPAN_REMOTE=m
++CONFIG_INPUT_KXTJ9=m
++CONFIG_INPUT_POWERMATE=m
++CONFIG_INPUT_YEALINK=m
++CONFIG_INPUT_CM109=m
++CONFIG_INPUT_REGULATOR_HAPTIC=m
++CONFIG_INPUT_UINPUT=m
++CONFIG_INPUT_PCF8574=m
++CONFIG_INPUT_PWM_BEEPER=m
++CONFIG_INPUT_PWM_VIBRA=m
++CONFIG_INPUT_GPIO_ROTARY_ENCODER=m
++CONFIG_INPUT_ADXL34X=m
++CONFIG_INPUT_IMS_PCU=m
++CONFIG_INPUT_CMA3000=m
++CONFIG_INPUT_CMA3000_I2C=m
++CONFIG_INPUT_DRV260X_HAPTICS=m
++CONFIG_INPUT_DRV2665_HAPTICS=m
++CONFIG_INPUT_DRV2667_HAPTICS=m
++CONFIG_SERIO=m
++CONFIG_SERIO_RAW=m
++CONFIG_SERIAL_8250=y
++CONFIG_SERIAL_OF_PLATFORM=y
++CONFIG_SERIAL_SAMSUNG=y
++CONFIG_SERIAL_SAMSUNG_CONSOLE=y
++CONFIG_SERIAL_DEV_BUS=y
++CONFIG_HW_RANDOM=y
++CONFIG_TCG_TPM=y
++CONFIG_TCG_TIS_I2C_INFINEON=y
++CONFIG_I2C_CHARDEV=y
++CONFIG_I2C_MUX=y
++CONFIG_I2C_ARB_GPIO_CHALLENGE=y
++CONFIG_I2C_GPIO=y
++CONFIG_I2C_S3C2410=y
++CONFIG_I2C_CROS_EC_TUNNEL=y
++CONFIG_SPI=y
++CONFIG_SPI_GPIO=y
++CONFIG_SPI_S3C64XX=y
++CONFIG_SPI_SPIDEV=m
++CONFIG_PPS=y
++CONFIG_PPS_DEBUG=y
++CONFIG_PPS_CLIENT_KTIMER=m
++CONFIG_PPS_CLIENT_LDISC=m
++CONFIG_PPS_CLIENT_PARPORT=m
++CONFIG_PPS_CLIENT_GPIO=m
++# CONFIG_PTP_1588_CLOCK is not set
++CONFIG_W1_MASTER_DS2490=m
++CONFIG_W1_MASTER_DS2482=m
++CONFIG_W1_MASTER_GPIO=m
++CONFIG_W1_SLAVE_THERM=m
++CONFIG_W1_SLAVE_SMEM=m
++CONFIG_W1_SLAVE_DS2408=m
++# CONFIG_W1_SLAVE_DS2408_READBACK is not set
++CONFIG_W1_SLAVE_DS2413=m
++CONFIG_W1_SLAVE_DS2406=m
++CONFIG_W1_SLAVE_DS2423=m
++CONFIG_W1_SLAVE_DS2431=m
++CONFIG_W1_SLAVE_DS2433=m
++CONFIG_W1_SLAVE_DS2433_CRC=y
++CONFIG_W1_SLAVE_DS2781=m
++CONFIG_W1_SLAVE_DS28E04=m
++CONFIG_POWER_RESET_GPIO=y
++CONFIG_POWER_RESET_GPIO_RESTART=y
++CONFIG_BATTERY_DS2780=m
++CONFIG_BATTERY_SBS=y
++CONFIG_BATTERY_MAX17042=m
++CONFIG_CHARGER_SMB347=m
++CONFIG_CHARGER_TPS65090=m
++CONFIG_HWMON=m
++CONFIG_SENSORS_LM90=m
++CONFIG_SENSORS_NTC_THERMISTOR=m
++CONFIG_SENSORS_PWM_FAN=m
++CONFIG_CPU_THERMAL=y
++CONFIG_THERMAL_EMULATION=y
++CONFIG_WATCHDOG=y
++CONFIG_S3C2410_WATCHDOG=y
++CONFIG_MFD_MAX77686=y
++CONFIG_MFD_SEC_CORE=y
++CONFIG_MFD_TPS65090=y
++CONFIG_REGULATOR=y
++CONFIG_REGULATOR_FIXED_VOLTAGE=y
++CONFIG_REGULATOR_CROS_EC_TPS65090=y
++CONFIG_REGULATOR_GPIO=y
++CONFIG_REGULATOR_MAX77686=y
++CONFIG_REGULATOR_MAX77802=y
++CONFIG_REGULATOR_S2MPA01=y
++CONFIG_REGULATOR_S2MPS11=y
++CONFIG_REGULATOR_S5M8767=y
++CONFIG_REGULATOR_TPS65090=y
++CONFIG_RC_CORE=m
++CONFIG_RC_DECODERS=y
++CONFIG_IR_JVC_DECODER=m
++CONFIG_IR_MCE_KBD_DECODER=m
++CONFIG_IR_NEC_DECODER=m
++CONFIG_IR_RC5_DECODER=m
++CONFIG_IR_RC6_DECODER=m
++CONFIG_IR_SANYO_DECODER=m
++CONFIG_IR_SHARP_DECODER=m
++CONFIG_IR_SONY_DECODER=m
++CONFIG_IR_XMP_DECODER=m
++CONFIG_RC_DEVICES=y
++CONFIG_IR_GPIO_CIR=m
++CONFIG_IR_HIX5HD2=m
++CONFIG_IR_IGORPLUGUSB=m
++CONFIG_IR_IGUANA=m
++CONFIG_IR_IMON=m
++CONFIG_IR_MCEUSB=m
++CONFIG_IR_REDRAT3=m
++CONFIG_IR_STREAMZAP=m
++CONFIG_IR_TTUSBIR=m
++CONFIG_RC_ATI_REMOTE=m
++CONFIG_MEDIA_CEC_SUPPORT=y
++CONFIG_CEC_SAMSUNG_S5P=m
++CONFIG_MEDIA_SUPPORT=m
++CONFIG_MEDIA_CAMERA_SUPPORT=y
++CONFIG_MEDIA_PLATFORM_SUPPORT=y
++CONFIG_MEDIA_USB_SUPPORT=y
++CONFIG_USB_GSPCA=m
++CONFIG_USB_GSPCA_BENQ=m
++CONFIG_USB_GSPCA_CONEX=m
++CONFIG_USB_GSPCA_CPIA1=m
++CONFIG_USB_GSPCA_DTCS033=m
++CONFIG_USB_GSPCA_ETOMS=m
++CONFIG_USB_GSPCA_FINEPIX=m
++CONFIG_USB_GSPCA_JEILINJ=m
++CONFIG_USB_GSPCA_JL2005BCD=m
++CONFIG_USB_GSPCA_KINECT=m
++CONFIG_USB_GSPCA_KONICA=m
++CONFIG_USB_GSPCA_MARS=m
++CONFIG_USB_GSPCA_MR97310A=m
++CONFIG_USB_GSPCA_NW80X=m
++CONFIG_USB_GSPCA_OV519=m
++CONFIG_USB_GSPCA_OV534=m
++CONFIG_USB_GSPCA_OV534_9=m
++CONFIG_USB_GSPCA_PAC207=m
++CONFIG_USB_GSPCA_PAC7302=m
++CONFIG_USB_GSPCA_PAC7311=m
++CONFIG_USB_GSPCA_SE401=m
++CONFIG_USB_GSPCA_SN9C2028=m
++CONFIG_USB_GSPCA_SN9C20X=m
++CONFIG_USB_GSPCA_SONIXB=m
++CONFIG_USB_GSPCA_SONIXJ=m
++CONFIG_USB_GSPCA_SPCA1528=m
++CONFIG_USB_GSPCA_SPCA500=m
++CONFIG_USB_GSPCA_SPCA501=m
++CONFIG_USB_GSPCA_SPCA505=m
++CONFIG_USB_GSPCA_SPCA506=m
++CONFIG_USB_GSPCA_SPCA508=m
++CONFIG_USB_GSPCA_SPCA561=m
++CONFIG_USB_GSPCA_SQ905=m
++CONFIG_USB_GSPCA_SQ905C=m
++CONFIG_USB_GSPCA_SQ930X=m
++CONFIG_USB_GSPCA_STK014=m
++CONFIG_USB_GSPCA_STK1135=m
++CONFIG_USB_GSPCA_STV0680=m
++CONFIG_USB_GSPCA_SUNPLUS=m
++CONFIG_USB_GSPCA_T613=m
++CONFIG_USB_GSPCA_TOPRO=m
++CONFIG_USB_GSPCA_TOUPTEK=m
++CONFIG_USB_GSPCA_TV8532=m
++CONFIG_USB_GSPCA_VC032X=m
++CONFIG_USB_GSPCA_VICAM=m
++CONFIG_USB_GSPCA_XIRLINK_CIT=m
++CONFIG_USB_GSPCA_ZC3XX=m
++CONFIG_USB_GL860=m
++CONFIG_USB_M5602=m
++CONFIG_USB_STV06XX=m
++CONFIG_USB_PWC=m
++CONFIG_USB_S2255=m
++CONFIG_VIDEO_USBTV=m
++CONFIG_USB_VIDEO_CLASS=m
++CONFIG_VIDEO_EM28XX=m
++CONFIG_VIDEO_EM28XX_V4L2=m
++CONFIG_VIDEO_EM28XX_ALSA=m
++CONFIG_V4L_MEM2MEM_DRIVERS=y
++CONFIG_VIDEO_MEM2MEM_DEINTERLACE=m
++CONFIG_VIDEO_SAMSUNG_EXYNOS_GSC=m
++CONFIG_VIDEO_SAMSUNG_S5P_G2D=m
++CONFIG_VIDEO_SAMSUNG_S5P_JPEG=m
++CONFIG_VIDEO_SAMSUNG_S5P_MFC=m
++CONFIG_VIDEO_OV7640=m
++CONFIG_DRM=y
++CONFIG_DRM_LOAD_EDID_FIRMWARE=y
++CONFIG_DRM_EXYNOS=y
++CONFIG_DRM_EXYNOS_FIMD=y
++CONFIG_DRM_EXYNOS_MIXER=y
++CONFIG_DRM_EXYNOS_DSI=y
++CONFIG_DRM_EXYNOS_HDMI=y
++CONFIG_DRM_EXYNOS_FIMC=y
++CONFIG_DRM_EXYNOS_ROTATOR=y
++CONFIG_DRM_PANEL_EDP=m
++CONFIG_DRM_PANEL_SIMPLE=m
++CONFIG_DRM_NXP_PTN3460=y
++CONFIG_DRM_PARADE_PS8622=y
++CONFIG_DRM_PANFROST=m
++CONFIG_FB=y
++CONFIG_FIRMWARE_EDID=y
++CONFIG_FB_MODE_HELPERS=y
++CONFIG_LCD_CLASS_DEVICE=m
++CONFIG_LCD_PLATFORM=m
++CONFIG_BACKLIGHT_PWM=y
++CONFIG_BACKLIGHT_LP855X=m
++CONFIG_FRAMEBUFFER_CONSOLE_ROTATION=y
++CONFIG_SOUND=m
++CONFIG_SND=m
++CONFIG_SND_OSSEMUL=y
++CONFIG_SND_MIXER_OSS=m
++CONFIG_SND_PCM_OSS=m
++CONFIG_SND_HRTIMER=m
++CONFIG_SND_DYNAMIC_MINORS=y
++CONFIG_SND_SEQUENCER=m
++CONFIG_SND_SEQ_DUMMY=m
++CONFIG_SND_SEQUENCER_OSS=m
++CONFIG_SND_ALOOP=m
++CONFIG_SND_VIRMIDI=m
++CONFIG_SND_USB_AUDIO=m
++CONFIG_SND_USB_UA101=m
++CONFIG_SND_USB_CAIAQ=m
++CONFIG_SND_USB_CAIAQ_INPUT=y
++CONFIG_SND_USB_6FIRE=m
++CONFIG_SND_USB_HIFACE=m
++CONFIG_SND_BCD2000=m
++CONFIG_SND_USB_POD=m
++CONFIG_SND_USB_PODHD=m
++CONFIG_SND_USB_TONEPORT=m
++CONFIG_SND_USB_VARIAX=m
++CONFIG_SND_SOC=m
++CONFIG_SND_SOC_SAMSUNG=m
++CONFIG_SND_SOC_SAMSUNG_SMDK_WM8994=m
++CONFIG_SND_SOC_SAMSUNG_SMDK_SPDIF=m
++CONFIG_SND_SOC_SMDK_WM8994_PCM=m
++CONFIG_SND_SOC_SNOW=m
++CONFIG_SND_SOC_ODROID=m
++CONFIG_SND_SOC_MAX98088=m
++CONFIG_SND_SOC_RT5631=m
++CONFIG_SND_SIMPLE_CARD=m
++CONFIG_HID_BATTERY_STRENGTH=y
++CONFIG_HIDRAW=y
++CONFIG_UHID=y
++CONFIG_HID_A4TECH=m
++CONFIG_HID_ACCUTOUCH=m
++CONFIG_HID_ACRUX=m
++CONFIG_HID_ACRUX_FF=y
++CONFIG_HID_APPLEIR=m
++CONFIG_HID_ASUS=m
++CONFIG_HID_AUREAL=m
++CONFIG_HID_BELKIN=m
++CONFIG_HID_BETOP_FF=m
++CONFIG_HID_CHERRY=m
++CONFIG_HID_CORSAIR=m
++CONFIG_HID_PRODIKEYS=m
++CONFIG_HID_CMEDIA=m
++CONFIG_HID_CP2112=m
++CONFIG_HID_CYPRESS=m
++CONFIG_HID_DRAGONRISE=m
++CONFIG_DRAGONRISE_FF=y
++CONFIG_HID_EMS_FF=m
++CONFIG_HID_ELECOM=m
++CONFIG_HID_ELO=m
++CONFIG_HID_EZKEY=m
++CONFIG_HID_GEMBIRD=m
++CONFIG_HID_GFRM=m
++CONFIG_HID_HOLTEK=m
++CONFIG_HOLTEK_FF=y
++CONFIG_HID_GT683R=m
++CONFIG_HID_KEYTOUCH=m
++CONFIG_HID_KYE=m
++CONFIG_HID_UCLOGIC=m
++CONFIG_HID_WALTOP=m
++CONFIG_HID_GYRATION=m
++CONFIG_HID_ICADE=m
++CONFIG_HID_ITE=m
++CONFIG_HID_TWINHAN=m
++CONFIG_HID_KENSINGTON=m
++CONFIG_HID_LCPOWER=m
++CONFIG_HID_LENOVO=m
++CONFIG_HID_LOGITECH_DJ=m
++CONFIG_LOGITECH_FF=y
++CONFIG_LOGIRUMBLEPAD2_FF=y
++CONFIG_LOGIG940_FF=y
++CONFIG_HID_MAGICMOUSE=m
++CONFIG_HID_MAYFLASH=m
++CONFIG_HID_MICROSOFT=m
++CONFIG_HID_MONTEREY=m
++CONFIG_HID_MULTITOUCH=m
++CONFIG_HID_NTI=m
++CONFIG_HID_NTRIG=m
++CONFIG_HID_ORTEK=m
++CONFIG_HID_PANTHERLORD=m
++CONFIG_PANTHERLORD_FF=y
++CONFIG_HID_PENMOUNT=m
++CONFIG_HID_PETALYNX=m
++CONFIG_HID_PICOLCD=m
++CONFIG_HID_PLANTRONICS=m
++CONFIG_HID_PRIMAX=m
++CONFIG_HID_RETRODE=m
++CONFIG_HID_ROCCAT=m
++CONFIG_HID_SAITEK=m
++CONFIG_HID_SAMSUNG=m
++CONFIG_HID_SONY=m
++CONFIG_SONY_FF=y
++CONFIG_HID_SPEEDLINK=m
++CONFIG_HID_STEELSERIES=m
++CONFIG_HID_SUNPLUS=m
++CONFIG_HID_RMI=m
++CONFIG_HID_GREENASIA=m
++CONFIG_GREENASIA_FF=y
++CONFIG_HID_SMARTJOYPLUS=m
++CONFIG_SMARTJOYPLUS_FF=y
++CONFIG_HID_TIVO=m
++CONFIG_HID_TOPSEED=m
++CONFIG_HID_THINGM=m
++CONFIG_HID_THRUSTMASTER=m
++CONFIG_THRUSTMASTER_FF=y
++CONFIG_HID_UDRAW_PS3=m
++CONFIG_HID_WACOM=m
++CONFIG_HID_WIIMOTE=m
++CONFIG_HID_XINMO=m
++CONFIG_HID_ZEROPLUS=m
++CONFIG_ZEROPLUS_FF=y
++CONFIG_HID_ZYDACRON=m
++CONFIG_HID_SENSOR_HUB=m
++CONFIG_HID_SENSOR_CUSTOM_SENSOR=m
++CONFIG_HID_ALPS=m
++CONFIG_HID_MCP2221=m
++CONFIG_USB_HID=m
++CONFIG_HID_PID=y
++CONFIG_USB_HIDDEV=y
++CONFIG_USB_CONN_GPIO=y
++CONFIG_USB=y
++CONFIG_USB_ANNOUNCE_NEW_DEVICES=y
++CONFIG_USB_OTG=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_EHCI_EXYNOS=y
++CONFIG_USB_OHCI_HCD=y
++CONFIG_USB_OHCI_EXYNOS=y
++CONFIG_USB_PRINTER=m
++CONFIG_USB_TMC=m
++CONFIG_USB_STORAGE=m
++CONFIG_USB_STORAGE_REALTEK=m
++CONFIG_USB_STORAGE_DATAFAB=m
++CONFIG_USB_STORAGE_FREECOM=m
++CONFIG_USB_STORAGE_ISD200=m
++CONFIG_USB_STORAGE_USBAT=m
++CONFIG_USB_STORAGE_SDDR09=m
++CONFIG_USB_STORAGE_SDDR55=m
++CONFIG_USB_STORAGE_JUMPSHOT=m
++CONFIG_USB_STORAGE_ALAUDA=m
++CONFIG_USB_STORAGE_ONETOUCH=m
++CONFIG_USB_STORAGE_KARMA=m
++CONFIG_USB_STORAGE_CYPRESS_ATACB=m
++CONFIG_USB_STORAGE_ENE_UB6250=m
++CONFIG_USB_UAS=m
++CONFIG_USBIP_CORE=m
++CONFIG_USBIP_VHCI_HCD=m
++CONFIG_USBIP_HOST=m
++CONFIG_USBIP_VUDC=m
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC2=y
++CONFIG_USB_SERIAL=m
++CONFIG_USB_SERIAL_GENERIC=y
++CONFIG_USB_SERIAL_SIMPLE=m
++CONFIG_USB_SERIAL_AIRCABLE=m
++CONFIG_USB_SERIAL_ARK3116=m
++CONFIG_USB_SERIAL_BELKIN=m
++CONFIG_USB_SERIAL_CH341=m
++CONFIG_USB_SERIAL_WHITEHEAT=m
++CONFIG_USB_SERIAL_DIGI_ACCELEPORT=m
++CONFIG_USB_SERIAL_CP210X=m
++CONFIG_USB_SERIAL_CYPRESS_M8=m
++CONFIG_USB_SERIAL_EMPEG=m
++CONFIG_USB_SERIAL_FTDI_SIO=m
++CONFIG_USB_SERIAL_VISOR=m
++CONFIG_USB_SERIAL_IPAQ=m
++CONFIG_USB_SERIAL_IR=m
++CONFIG_USB_SERIAL_EDGEPORT=m
++CONFIG_USB_SERIAL_EDGEPORT_TI=m
++CONFIG_USB_SERIAL_F81232=m
++CONFIG_USB_SERIAL_GARMIN=m
++CONFIG_USB_SERIAL_IPW=m
++CONFIG_USB_SERIAL_IUU=m
++CONFIG_USB_SERIAL_KEYSPAN_PDA=m
++CONFIG_USB_SERIAL_KEYSPAN=m
++CONFIG_USB_SERIAL_KLSI=m
++CONFIG_USB_SERIAL_KOBIL_SCT=m
++CONFIG_USB_SERIAL_MCT_U232=m
++CONFIG_USB_SERIAL_METRO=m
++CONFIG_USB_SERIAL_MOS7720=m
++CONFIG_USB_SERIAL_MOS7840=m
++CONFIG_USB_SERIAL_MXUPORT=m
++CONFIG_USB_SERIAL_NAVMAN=m
++CONFIG_USB_SERIAL_PL2303=m
++CONFIG_USB_SERIAL_OTI6858=m
++CONFIG_USB_SERIAL_QCAUX=m
++CONFIG_USB_SERIAL_QUALCOMM=m
++CONFIG_USB_SERIAL_SPCP8X5=m
++CONFIG_USB_SERIAL_SAFE=m
++CONFIG_USB_SERIAL_SAFE_PADDED=y
++CONFIG_USB_SERIAL_SIERRAWIRELESS=m
++CONFIG_USB_SERIAL_SYMBOL=m
++CONFIG_USB_SERIAL_TI=m
++CONFIG_USB_SERIAL_CYBERJACK=m
++CONFIG_USB_SERIAL_OPTION=m
++CONFIG_USB_SERIAL_OMNINET=m
++CONFIG_USB_SERIAL_OPTICON=m
++CONFIG_USB_SERIAL_XSENS_MT=m
++CONFIG_USB_SERIAL_WISHBONE=m
++CONFIG_USB_SERIAL_SSU100=m
++CONFIG_USB_SERIAL_QT2=m
++CONFIG_USB_HSIC_USB3503=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_CONFIGFS=y
++CONFIG_USB_CONFIGFS_NCM=y
++CONFIG_USB_CONFIGFS_RNDIS=y
++CONFIG_USB_CDC_COMPOSITE=y
++CONFIG_USB_G_ACM_MS=m
++CONFIG_MMC=y
++CONFIG_MMC_BLOCK_MINORS=16
++CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_S3C=y
++CONFIG_MMC_SDHCI_S3C_DMA=y
++CONFIG_MMC_DW=y
++CONFIG_MMC_DW_EXYNOS=y
++CONFIG_LEDS_CLASS_FLASH=m
++CONFIG_LEDS_GPIO=m
++CONFIG_LEDS_PWM=m
++CONFIG_LEDS_TRIGGER_TIMER=m
++CONFIG_LEDS_TRIGGER_ONESHOT=m
++CONFIG_LEDS_TRIGGER_HEARTBEAT=m
++CONFIG_LEDS_TRIGGER_CPU=y
++CONFIG_LEDS_TRIGGER_DEFAULT_ON=m
++CONFIG_LEDS_TRIGGER_TRANSIENT=m
++CONFIG_LEDS_TRIGGER_PATTERN=m
++CONFIG_RTC_CLASS=y
++CONFIG_RTC_DRV_MAX77686=m
++CONFIG_RTC_DRV_S5M=m
++CONFIG_RTC_DRV_S3C=m
++CONFIG_DMADEVICES=y
++CONFIG_PL330_DMA=y
++CONFIG_UIO=m
++CONFIG_UIO_PDRV_GENIRQ=m
++CONFIG_UIO_DMEM_GENIRQ=m
++CONFIG_STAGING=y
++CONFIG_R8712U=m
++CONFIG_STAGING_MEDIA=y
++CONFIG_FB_TFT=m
++CONFIG_FB_TFT_AGM1264K_FL=m
++CONFIG_FB_TFT_BD663474=m
++CONFIG_FB_TFT_HX8340BN=m
++CONFIG_FB_TFT_HX8347D=m
++CONFIG_FB_TFT_HX8353D=m
++CONFIG_FB_TFT_HX8357D=m
++CONFIG_FB_TFT_ILI9163=m
++CONFIG_FB_TFT_ILI9320=m
++CONFIG_FB_TFT_ILI9325=m
++CONFIG_FB_TFT_ILI9340=m
++CONFIG_FB_TFT_ILI9341=m
++CONFIG_FB_TFT_ILI9481=m
++CONFIG_FB_TFT_ILI9486=m
++CONFIG_FB_TFT_PCD8544=m
++CONFIG_FB_TFT_RA8875=m
++CONFIG_FB_TFT_S6D02A1=m
++CONFIG_FB_TFT_S6D1121=m
++CONFIG_FB_TFT_SSD1289=m
++CONFIG_FB_TFT_SSD1305=m
++CONFIG_FB_TFT_SSD1306=m
++CONFIG_FB_TFT_SSD1331=m
++CONFIG_FB_TFT_SSD1351=m
++CONFIG_FB_TFT_ST7735R=m
++CONFIG_FB_TFT_ST7789V=m
++CONFIG_FB_TFT_TINYLCD=m
++CONFIG_FB_TFT_TLS8204=m
++CONFIG_FB_TFT_UC1611=m
++CONFIG_FB_TFT_UC1701=m
++CONFIG_FB_TFT_UPD161704=m
++CONFIG_CHROME_PLATFORMS=y
++CONFIG_CROS_EC=y
++CONFIG_CROS_EC_I2C=y
++CONFIG_CROS_EC_SPI=y
++CONFIG_COMMON_CLK_MAX77686=y
++CONFIG_COMMON_CLK_S2MPS11=y
++CONFIG_EXYNOS_IOMMU=y
++CONFIG_DEVFREQ_GOV_PERFORMANCE=m
++CONFIG_DEVFREQ_GOV_POWERSAVE=m
++CONFIG_DEVFREQ_GOV_USERSPACE=m
++CONFIG_ARM_EXYNOS_BUS_DEVFREQ=y
++CONFIG_DEVFREQ_EVENT_EXYNOS_NOCP=y
++CONFIG_EXTCON=y
++CONFIG_EXTCON_USB_GPIO=m
++CONFIG_IIO=y
++CONFIG_EXYNOS_ADC=y
++CONFIG_INV_MPU6050_I2C=m
++CONFIG_BH1750=m
++CONFIG_CM36651=y
++CONFIG_SENSORS_ISL29018=m
++CONFIG_AK8975=y
++CONFIG_BMP280=m
++CONFIG_PWM=y
++CONFIG_PWM_SAMSUNG=y
++CONFIG_ANDROID_BINDER_IPC=y
++CONFIG_DAX=y
++CONFIG_EXT2_FS=m
++CONFIG_EXT3_FS=m
++CONFIG_EXT3_FS_POSIX_ACL=y
++CONFIG_EXT3_FS_SECURITY=y
++CONFIG_EXT4_FS=y
++CONFIG_REISERFS_FS=m
++CONFIG_REISERFS_PROC_INFO=y
++CONFIG_REISERFS_FS_XATTR=y
++CONFIG_REISERFS_FS_POSIX_ACL=y
++CONFIG_REISERFS_FS_SECURITY=y
++CONFIG_XFS_FS=m
++CONFIG_XFS_QUOTA=y
++CONFIG_XFS_POSIX_ACL=y
++CONFIG_XFS_RT=y
++CONFIG_OCFS2_FS=m
++CONFIG_BTRFS_FS=y
++CONFIG_BTRFS_FS_POSIX_ACL=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
++CONFIG_F2FS_CHECK_FS=y
++CONFIG_FS_ENCRYPTION=y
++CONFIG_QUOTA_NETLINK_INTERFACE=y
++CONFIG_QFMT_V1=m
++CONFIG_QFMT_V2=m
++CONFIG_AUTOFS_FS=y
++CONFIG_FUSE_FS=m
++CONFIG_OVERLAY_FS=m
++CONFIG_ISO9660_FS=m
++CONFIG_JOLIET=y
++CONFIG_ZISOFS=y
++CONFIG_UDF_FS=m
++CONFIG_MSDOS_FS=m
++CONFIG_VFAT_FS=m
++CONFIG_FAT_DEFAULT_UTF8=y
++CONFIG_EXFAT_FS=m
++CONFIG_TMPFS=y
++CONFIG_TMPFS_POSIX_ACL=y
++CONFIG_HFS_FS=m
++CONFIG_HFSPLUS_FS=m
++CONFIG_CRAMFS=m
++CONFIG_SQUASHFS=m
++CONFIG_SQUASHFS_XATTR=y
++CONFIG_SQUASHFS_LZ4=y
++CONFIG_SQUASHFS_LZO=y
++CONFIG_SQUASHFS_XZ=y
++CONFIG_SQUASHFS_ZSTD=y
++CONFIG_SQUASHFS_4K_DEVBLK_SIZE=y
++CONFIG_MINIX_FS=m
++CONFIG_HPFS_FS=m
++CONFIG_ROMFS_FS=m
++CONFIG_UFS_FS=m
++CONFIG_UFS_FS_WRITE=y
++CONFIG_NFS_FS=m
++CONFIG_NFS_V3_ACL=y
++CONFIG_NFS_V4=m
++CONFIG_NFS_SWAP=y
++CONFIG_NFS_V4_1=y
++CONFIG_NFS_V4_2=y
++CONFIG_NFS_V4_1_MIGRATION=y
++CONFIG_NFSD=m
++CONFIG_NFSD_V3_ACL=y
++CONFIG_NFSD_V4=y
++CONFIG_NFSD_BLOCKLAYOUT=y
++CONFIG_NFSD_SCSILAYOUT=y
++CONFIG_NFSD_FLEXFILELAYOUT=y
++CONFIG_CIFS=m
++# CONFIG_CIFS_STATS2 is not set
++CONFIG_CIFS_UPCALL=y
++CONFIG_CIFS_XATTR=y
++CONFIG_CIFS_POSIX=y
++# CONFIG_CIFS_DEBUG is not set
++CONFIG_CIFS_DFS_UPCALL=y
++CONFIG_NLS_CODEPAGE_437=y
++CONFIG_NLS_CODEPAGE_737=m
++CONFIG_NLS_CODEPAGE_775=m
++CONFIG_NLS_CODEPAGE_850=m
++CONFIG_NLS_CODEPAGE_852=m
++CONFIG_NLS_CODEPAGE_855=m
++CONFIG_NLS_CODEPAGE_857=m
++CONFIG_NLS_CODEPAGE_860=m
++CONFIG_NLS_CODEPAGE_861=m
++CONFIG_NLS_CODEPAGE_862=m
++CONFIG_NLS_CODEPAGE_863=m
++CONFIG_NLS_CODEPAGE_864=m
++CONFIG_NLS_CODEPAGE_865=m
++CONFIG_NLS_CODEPAGE_866=m
++CONFIG_NLS_CODEPAGE_869=m
++CONFIG_NLS_CODEPAGE_936=m
++CONFIG_NLS_CODEPAGE_950=m
++CONFIG_NLS_CODEPAGE_932=m
++CONFIG_NLS_CODEPAGE_949=m
++CONFIG_NLS_CODEPAGE_874=m
++CONFIG_NLS_ISO8859_8=m
++CONFIG_NLS_CODEPAGE_1250=m
++CONFIG_NLS_CODEPAGE_1251=m
++CONFIG_NLS_ASCII=y
++CONFIG_NLS_ISO8859_1=m
++CONFIG_NLS_ISO8859_2=m
++CONFIG_NLS_ISO8859_3=m
++CONFIG_NLS_ISO8859_4=m
++CONFIG_NLS_ISO8859_5=m
++CONFIG_NLS_ISO8859_6=m
++CONFIG_NLS_ISO8859_7=m
++CONFIG_NLS_ISO8859_9=m
++CONFIG_NLS_ISO8859_13=m
++CONFIG_NLS_ISO8859_14=m
++CONFIG_NLS_ISO8859_15=m
++CONFIG_NLS_KOI8_R=m
++CONFIG_NLS_KOI8_U=m
++CONFIG_NLS_MAC_ROMAN=m
++CONFIG_NLS_MAC_CELTIC=m
++CONFIG_NLS_MAC_CENTEURO=m
++CONFIG_NLS_MAC_CROATIAN=m
++CONFIG_NLS_MAC_CYRILLIC=m
++CONFIG_NLS_MAC_GAELIC=m
++CONFIG_NLS_MAC_GREEK=m
++CONFIG_NLS_MAC_ICELAND=m
++CONFIG_NLS_MAC_INUIT=m
++CONFIG_NLS_MAC_ROMANIAN=m
++CONFIG_NLS_MAC_TURKISH=m
++CONFIG_ENCRYPTED_KEYS=y
++CONFIG_KEY_DH_OPERATIONS=y
++CONFIG_LSM="lockdown,yama,loadpin,safesetid,integrity"
++CONFIG_INIT_STACK_NONE=y
++CONFIG_CRYPTO_USER=m
++CONFIG_CRYPTO_PCRYPT=m
++CONFIG_CRYPTO_TEST=m
++CONFIG_CRYPTO_AES_TI=m
++CONFIG_CRYPTO_ANUBIS=m
++CONFIG_CRYPTO_BLOWFISH=m
++CONFIG_CRYPTO_CAMELLIA=m
++CONFIG_CRYPTO_CAST5=m
++CONFIG_CRYPTO_CAST6=m
++CONFIG_CRYPTO_DES=m
++CONFIG_CRYPTO_FCRYPT=m
++CONFIG_CRYPTO_KHAZAD=m
++CONFIG_CRYPTO_SEED=m
++CONFIG_CRYPTO_SERPENT=m
++CONFIG_CRYPTO_TEA=m
++CONFIG_CRYPTO_TWOFISH=m
++CONFIG_CRYPTO_ARC4=m
++CONFIG_CRYPTO_CTS=m
++CONFIG_CRYPTO_KEYWRAP=m
++CONFIG_CRYPTO_LRW=m
++CONFIG_CRYPTO_PCBC=m
++CONFIG_CRYPTO_XTS=m
++CONFIG_CRYPTO_CHACHA20POLY1305=m
++CONFIG_CRYPTO_MD4=m
++CONFIG_CRYPTO_MICHAEL_MIC=m
++CONFIG_CRYPTO_RMD160=m
++CONFIG_CRYPTO_VMAC=m
++CONFIG_CRYPTO_WP512=m
++CONFIG_CRYPTO_XCBC=m
++CONFIG_CRYPTO_LZO=m
++CONFIG_CRYPTO_842=m
++CONFIG_CRYPTO_LZ4=m
++CONFIG_CRYPTO_LZ4HC=m
++CONFIG_CRYPTO_ZSTD=m
++CONFIG_CRYPTO_ANSI_CPRNG=m
++CONFIG_CRYPTO_DRBG_MENU=y
++CONFIG_CRYPTO_USER_API_HASH=m
++CONFIG_CRYPTO_USER_API_SKCIPHER=m
++CONFIG_CRYPTO_USER_API_RNG=m
++CONFIG_CRYPTO_USER_API_AEAD=m
++CONFIG_CRYPTO_GHASH_ARM_CE=m
++CONFIG_CRYPTO_SHA1_ARM_NEON=m
++CONFIG_CRYPTO_SHA1_ARM_CE=m
++CONFIG_CRYPTO_SHA2_ARM_CE=m
++CONFIG_CRYPTO_SHA512_ARM=m
++CONFIG_CRYPTO_AES_ARM_BS=m
++CONFIG_CRYPTO_AES_ARM_CE=m
++CONFIG_CRYPTO_CRC32_ARM_CE=m
++CONFIG_CRYPTO_CRCT10DIF_ARM_CE=m
++CONFIG_CRYPTO_DEV_S5P=y
++CONFIG_CRYPTO_DEV_EXYNOS_HASH=y
++CONFIG_PKCS8_PRIVATE_KEY_PARSER=m
++CONFIG_DMA_CMA=y
++CONFIG_CMA_SIZE_MBYTES=128
++CONFIG_FONTS=y
++CONFIG_FONT_8x16=y
++CONFIG_FONT_7x14=y
++CONFIG_PRINTK_TIME=y
++CONFIG_DYNAMIC_DEBUG=y
++CONFIG_MAGIC_SYSRQ=y
++CONFIG_FTRACE=y
++CONFIG_ENABLE_DEFAULT_TRACERS=y
+diff --git a/arch/arm/mach-exynos/exynos.c b/arch/arm/mach-exynos/exynos.c
+index 2e8099479ffa..4ef8da15df05 100644
+--- a/arch/arm/mach-exynos/exynos.c
++++ b/arch/arm/mach-exynos/exynos.c
+@@ -225,3 +225,31 @@ DT_MACHINE_START(EXYNOS_DT, "Samsung Exynos (Flattened Device Tree)")
+ 	.dt_compat	= exynos_dt_compat,
+ 	.dt_fixup	= exynos_dt_fixup,
+ MACHINE_END
++
++#define ODROID_MACHINE_START(name, compat)			\
++	DT_MACHINE_START(EXYNOS5422_ODROID_##name, "ODROID-"#name)	\
++		.l2c_aux_val	= 0x3c400001,			\
++		.l2c_aux_mask	= 0xc20fffff,			\
++		.smp		= smp_ops(exynos_smp_ops),	\
++		.map_io		= exynos_init_io,		\
++		.init_early	= exynos_firmware_init,		\
++		.init_irq	= exynos_init_irq,		\
++		.init_machine	= exynos_dt_machine_init,	\
++		.init_late	= exynos_pm_init,		\
++		.dt_compat	= compat,			\
++		.dt_fixup	= exynos_dt_fixup,		\
++	MACHINE_END
++
++static char const *const exynos5422_odroidxu3_dt_compat[] __initconst = {
++	"hardkernel,odroid-xu3",
++	"hardkernel,odroid-xu3-lite",
++	NULL,
++};
++
++static char const *const exynos5422_odroidxu4_dt_compat[] __initconst = {
++	"hardkernel,odroid-xu4",
++	NULL,
++};
++
++ODROID_MACHINE_START(XU3, exynos5422_odroidxu3_dt_compat)
++ODROID_MACHINE_START(XU4, exynos5422_odroidxu4_dt_compat)
+diff --git a/arch/arm/mach-exynos/firmware.c b/arch/arm/mach-exynos/firmware.c
+index a5e22678e27b..80e645b4d338 100644
+--- a/arch/arm/mach-exynos/firmware.c
++++ b/arch/arm/mach-exynos/firmware.c
+@@ -61,10 +61,10 @@ static int exynos_cpu_boot(int cpu)
+ 	 * Exynos3250 doesn't need to send smc command for secondary CPU boot
+ 	 * because Exynos3250 removes WFE in secure mode.
+ 	 *
+-	 * On Exynos5 devices the call is ignored by trustzone firmware.
++	 * On most Exynos5 devices the call is ignored by trustzone firmware.
+ 	 */
+ 	if (!soc_is_exynos4210() && !soc_is_exynos4212() &&
+-	    !soc_is_exynos4412())
++	    !soc_is_exynos4412() && !of_machine_is_compatible("samsung,nexus10-manta"))
+ 		return 0;
+ 
+ 	/*
+diff --git a/drivers/clk/samsung/clk-exynos5250.c b/drivers/clk/samsung/clk-exynos5250.c
+index e02e7c013f3d..a117cbdd9a02 100644
+--- a/drivers/clk/samsung/clk-exynos5250.c
++++ b/drivers/clk/samsung/clk-exynos5250.c
+@@ -101,7 +101,7 @@
+ #define PWR_CTRL2_CORE1_UP_RATIO		(1 << 0)
+ 
+ /* NOTE: Must be equal to the last clock ID increased by one */
+-#define CLKS_NR					(CLK_MOUT_VPLLSRC + 1)
++#define CLKS_NR					(CLK_MOUT_VPLL + 1)
+ 
+ /* list of PLLs to be registered */
+ enum exynos5250_plls {
+@@ -282,7 +282,7 @@ static const struct samsung_mux_clock exynos5250_mux_clks[] __initconst = {
+ 
+ 	MUX(0, "mout_cpll", mout_cpll_p, SRC_TOP2, 8, 1),
+ 	MUX(0, "mout_epll", mout_epll_p, SRC_TOP2, 12, 1),
+-	MUX(0, "mout_vpll", mout_vpll_p, SRC_TOP2, 16, 1),
++	MUX(CLK_MOUT_VPLL, "mout_vpll", mout_vpll_p, SRC_TOP2, 16, 1),
+ 	MUX(0, "mout_mpll_user", mout_mpll_user_p, SRC_TOP2, 20, 1),
+ 	MUX(0, "mout_bpll_user", mout_bpll_user_p, SRC_TOP2, 24, 1),
+ 	MUX(CLK_MOUT_GPLL, "mout_gpll", mout_gpll_p, SRC_TOP2, 28, 1),
+@@ -303,7 +303,7 @@ static const struct samsung_mux_clock exynos5250_mux_clks[] __initconst = {
+ 	MUX(0, "mout_gscl_wa", mout_group1_p, SRC_GSCL, 24, 4),
+ 	MUX(0, "mout_gscl_wb", mout_group1_p, SRC_GSCL, 28, 4),
+ 
+-	MUX(0, "mout_fimd1", mout_group1_p, SRC_DISP1_0, 0, 4),
++	MUX(CLK_MOUT_FIMD1, "mout_fimd1", mout_group1_p, SRC_DISP1_0, 0, 4),
+ 	MUX(0, "mout_mipi1", mout_group1_p, SRC_DISP1_0, 12, 4),
+ 	MUX(0, "mout_dp", mout_group1_p, SRC_DISP1_0, 16, 4),
+ 	MUX(CLK_MOUT_HDMI, "mout_hdmi", mout_hdmi_p, SRC_DISP1_0, 20, 1),
+diff --git a/drivers/gpu/drm/drm_ioctl.c b/drivers/gpu/drm/drm_ioctl.c
+index 51f39912866f..04b18ed87001 100644
+--- a/drivers/gpu/drm/drm_ioctl.c
++++ b/drivers/gpu/drm/drm_ioctl.c
+@@ -633,9 +633,9 @@ static const struct drm_ioctl_desc drm_ioctls[] = {
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_CLOSEFB, drm_mode_closefb_ioctl, 0),
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_PAGE_FLIP, drm_mode_page_flip_ioctl, DRM_MASTER),
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_DIRTYFB, drm_mode_dirtyfb_ioctl, DRM_MASTER),
+-	DRM_IOCTL_DEF(DRM_IOCTL_MODE_CREATE_DUMB, drm_mode_create_dumb_ioctl, 0),
++	DRM_IOCTL_DEF(DRM_IOCTL_MODE_CREATE_DUMB, drm_mode_create_dumb_ioctl, DRM_RENDER_ALLOW),
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_MAP_DUMB, drm_mode_mmap_dumb_ioctl, 0),
+-	DRM_IOCTL_DEF(DRM_IOCTL_MODE_DESTROY_DUMB, drm_mode_destroy_dumb_ioctl, 0),
++	DRM_IOCTL_DEF(DRM_IOCTL_MODE_DESTROY_DUMB, drm_mode_destroy_dumb_ioctl, DRM_RENDER_ALLOW),
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_OBJ_GETPROPERTIES, drm_mode_obj_get_properties_ioctl, 0),
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_OBJ_SETPROPERTY, drm_mode_obj_set_property_ioctl, DRM_MASTER),
+ 	DRM_IOCTL_DEF(DRM_IOCTL_MODE_CURSOR2, drm_mode_cursor2_ioctl, DRM_MASTER),
+diff --git a/drivers/gpu/drm/panel/panel-edp.c b/drivers/gpu/drm/panel/panel-edp.c
+index 767e47a2b0c1..e9c042b23eaf 100644
+--- a/drivers/gpu/drm/panel/panel-edp.c
++++ b/drivers/gpu/drm/panel/panel-edp.c
+@@ -1522,6 +1522,32 @@ static const struct panel_desc neweast_wjfh116008a = {
+ 	},
+ };
+ 
++static const struct drm_display_mode samsung_lsl101dl01_mode = {
++	.clock = 266000,
++	.hdisplay = 2560,
++	.hsync_start = 2560 + 40,
++	.hsync_end = 2560 + 40 + 22,
++	.htotal = 2560 + 40 + 22 + 33,
++	.vdisplay = 1600,
++	.vsync_start = 1600 + 3,
++	.vsync_end = 1600 + 3 + 6,
++	.vtotal = 1600 + 3 + 6 + 37,
++};
++
++static const struct panel_desc samsung_lsl101dl01 = {
++	.modes = &samsung_lsl101dl01_mode,
++	.num_modes = 1,
++	.bpc = 8,
++	.size = {
++		.width = 216,
++		.height = 135,
++	},
++	.delay = {
++		.hpd_absent = 350,
++		.unprepare = 500,
++	},
++};
++
+ static const struct drm_display_mode samsung_lsn122dl01_c01_mode = {
+ 	.clock = 271560,
+ 	.hdisplay = 2560,
+@@ -1543,6 +1569,34 @@ static const struct panel_desc samsung_lsn122dl01_c01 = {
+ 	},
+ };
+ 
++static const struct drm_display_mode samsung_ltl101dl02_002_mode = {
++	.clock = 268627,
++	.hdisplay = 2560,
++	.hsync_start = 2560 + 48,
++	.hsync_end = 2560 + 48 + 32,
++	.htotal = 2560 + 48 + 32 + 80,
++	.vdisplay = 1600,
++	.vsync_start = 1600 + 3,
++	.vsync_end = 1600 + 3 + 6,
++	.vtotal = 1600 + 3 + 6 + 37,
++	.flags = DRM_MODE_FLAG_NVSYNC | DRM_MODE_FLAG_NHSYNC,
++};
++
++static const struct panel_desc samsung_ltl101dl02_002 = {
++	.modes = &samsung_ltl101dl02_002_mode,
++	.num_modes = 1,
++	.bpc = 6,
++	.size = {
++		.width = 218,
++		.height = 136,
++	},
++	.delay = {
++		.hpd_absent = 200,
++		.unprepare = 500,
++	},
++
++};
++
+ static const struct drm_display_mode samsung_ltn140at29_301_mode = {
+ 	.clock = 76300,
+ 	.hdisplay = 1366,
+@@ -1694,9 +1748,15 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "neweast,wjfh116008a",
+ 		.data = &neweast_wjfh116008a,
++	}, {
++		.compatible = "samsung,lsl101dl01",
++		.data = &samsung_lsl101dl01,
+ 	}, {
+ 		.compatible = "samsung,lsn122dl01-c01",
+ 		.data = &samsung_lsn122dl01_c01,
++	}, {
++		.compatible = "samsung,ltl101dl02-002",
++		.data = &samsung_ltl101dl02_002,
+ 	}, {
+ 		.compatible = "samsung,ltn140at29-301",
+ 		.data = &samsung_ltn140at29_301,
+diff --git a/drivers/gpu/drm/tiny/Kconfig b/drivers/gpu/drm/tiny/Kconfig
+index f6889f649bc1..e293eece083d 100644
+--- a/drivers/gpu/drm/tiny/Kconfig
++++ b/drivers/gpu/drm/tiny/Kconfig
+@@ -161,6 +161,19 @@ config TINYDRM_ILI9486
+ 
+ 	  If M is selected the module will be called ili9486.
+ 
++config TINYDRM_ILI9488_PIO
++	tristate "DRM support for ILI9488 display panels (8bit PIO)"
++	depends on DRM
++	select DRM_KMS_HELPER
++	select DRM_KMS_CMA_HELPER
++	select DRM_MIPI_DBI
++	select BACKLIGHT_CLASS_DEVICE
++	help
++	  DRM driver for th following Ilitek ILI9488 panels:
++          * Hardkernel 3.5" 480x320 TFT (HKTFT 3.5")
++
++	  If M is selected the module will be called hktft35.
++
+ config TINYDRM_MI0283QT
+ 	tristate "DRM support for MI0283QT"
+ 	depends on DRM && SPI
+diff --git a/drivers/gpu/drm/tiny/Makefile b/drivers/gpu/drm/tiny/Makefile
+index 76dde89a044b..c553556734d6 100644
+--- a/drivers/gpu/drm/tiny/Makefile
++++ b/drivers/gpu/drm/tiny/Makefile
+@@ -12,6 +12,7 @@ obj-$(CONFIG_TINYDRM_ILI9163)		+= ili9163.o
+ obj-$(CONFIG_TINYDRM_ILI9225)		+= ili9225.o
+ obj-$(CONFIG_TINYDRM_ILI9341)		+= ili9341.o
+ obj-$(CONFIG_TINYDRM_ILI9486)		+= ili9486.o
++obj-$(CONFIG_TINYDRM_ILI9488_PIO)	+= ili9488_pio.o
+ obj-$(CONFIG_TINYDRM_MI0283QT)		+= mi0283qt.o
+ obj-$(CONFIG_TINYDRM_REPAPER)		+= repaper.o
+ obj-$(CONFIG_TINYDRM_ST7586)		+= st7586.o
+diff --git a/drivers/gpu/drm/tiny/ili9488_pio.c b/drivers/gpu/drm/tiny/ili9488_pio.c
+new file mode 100644
+index 000000000000..f3a0b1fb885a
+--- /dev/null
++++ b/drivers/gpu/drm/tiny/ili9488_pio.c
+@@ -0,0 +1,366 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * DRM driver for Hardkernel 3.5 ISP TFT display
++ *
++ * Copyright 2021 Dongjin Kim <tobetter@gmail.com>
++ *
++ */
++
++#include <linux/delay.h>
++#include <linux/dma-buf.h>
++#include <linux/gpio/consumer.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/property.h>
++#include <linux/of_gpio.h>
++#include <linux/of_address.h>
++#include <linux/io.h>
++#include <video/mipi_display.h>
++
++#include <drm/drm_atomic_helper.h>
++#include <drm/drm_damage_helper.h>
++#include <drm/drm_drv.h>
++#include <drm/drm_fb_cma_helper.h>
++#include <drm/drm_fb_helper.h>
++#include <drm/drm_fourcc.h>
++#include <drm/drm_gem_atomic_helper.h>
++#include <drm/drm_gem_cma_helper.h>
++#include <drm/drm_gem_framebuffer_helper.h>
++#include <drm/drm_managed.h>
++#include <drm/drm_mipi_dbi.h>
++#include <drm/drm_rect.h>
++
++#define ILI9488_COLUMN_ADDR	0x2a
++#define ILI9488_PAGE_ADDR	0x2b
++#define ILI9488_MEMORY_WRITE	0x2c
++#define ILI9488_ITFCTR1         0xb0
++#define ILI9488_FRMCTR1		0xb1
++#define ILI9488_PWCTRL1         0xc2
++#define ILI9488_VMCTRL1         0xc5
++#define ILI9488_PGAMCTRL        0xe0
++#define ILI9488_NGAMCTRL        0xe1
++#define ILI9488_MADCTL_BGR      BIT(3)
++#define ILI9488_MADCTL_MV       BIT(5)
++#define ILI9488_MADCTL_MX       BIT(6)
++#define ILI9488_MADCTL_MY       BIT(7)
++
++struct ili9488_data {
++	struct mipi_dbi_dev *dbidev;
++	struct gpio_desc *wr;
++	struct gpio_desc *cs;
++	struct gpio_desc *db[8];
++	void __iomem *membase;
++	u32 mask;
++	u32 bits[8];
++	u32 bits_wr;
++};
++
++static struct ili9488_data *pdata;
++static u32 *rgb;
++
++static u32 ili9488_rgb565_to_gpiobus(struct ili9488_data *pdata, u8 color)
++{
++	int i;
++	u32 value = 0;
++
++	for (i = 0; i < 8; i++) {
++		if (color & 1)
++			value |= pdata->bits[i];
++		else
++			value &= ~(pdata->bits[i]);
++		color >>= 1;
++	}
++
++	return value;
++}
++
++static int ili9488_bus_write(struct mipi_dbi *dbi, u8 data)
++{
++	int i;
++
++	if (pdata->membase) {
++		u32 v = (readl(pdata->membase) & ~pdata->mask) | *(rgb + data);
++		writel(v, pdata->membase);
++		writel(v | pdata->bits_wr, pdata->membase);
++		return 0;
++	}
++
++	gpiod_set_value(pdata->wr, 0);
++	for (i = 0; i < 8; i++) {
++		gpiod_set_value(pdata->db[i], data & 1);
++		data >>= 1;
++	}
++	gpiod_set_value(pdata->wr, 1);
++
++	return 0;
++}
++
++static int ili9488_command(struct mipi_dbi *dbi, u8 *cmd, u8 *par, size_t num)
++{
++	u8 *p = par;
++
++	gpiod_set_value(dbi->dc, 0);
++	ili9488_bus_write(dbi, *cmd);
++	gpiod_set_value(dbi->dc, 1);
++
++	while (num--)
++		ili9488_bus_write(dbi, *p++);
++
++	return 0;
++}
++
++static void ili9488_pipe_enable(struct drm_simple_display_pipe *pipe,
++				struct drm_crtc_state *crtc_state,
++				struct drm_plane_state *plane_state)
++{
++	struct mipi_dbi_dev *dbidev = drm_to_mipi_dbi_dev(pipe->crtc.dev);
++	struct mipi_dbi *dbi = &dbidev->dbi;
++	u8 addr_mode;
++	int ret, idx;
++
++	if (!drm_dev_enter(pipe->crtc.dev, &idx))
++		return;
++
++	ret = mipi_dbi_poweron_reset(dbidev);
++	if (ret < 0)
++		goto out_exit;
++	if (ret == 1)
++		goto out_enable;
++
++	gpiod_set_value(pdata->cs, 0);
++
++	mipi_dbi_command(dbi, ILI9488_ITFCTR1, 0x00);
++	mipi_dbi_command(dbi, MIPI_DCS_EXIT_SLEEP_MODE);
++	msleep(250);
++
++	mipi_dbi_command(dbi, MIPI_DCS_SET_PIXEL_FORMAT, 0x55);
++	mipi_dbi_command(dbi, ILI9488_PWCTRL1, 0x33);
++	mipi_dbi_command(dbi, ILI9488_VMCTRL1, 0x00, 0x1e, 0x80, 0x00);
++	mipi_dbi_command(dbi, ILI9488_FRMCTR1, 0xb0, 0x11);
++	mipi_dbi_command(dbi, ILI9488_PGAMCTRL,
++			0x00, 0x04, 0x0e, 0x08, 0x17, 0x0a, 0x40, 0x79,
++			0x4d, 0x07, 0x0e, 0x0a, 0x1a, 0x1d, 0x0f);
++	mipi_dbi_command(dbi, ILI9488_NGAMCTRL,
++			0x00, 0x1b, 0x1f, 0x02, 0x10, 0x05, 0x32, 0x34,
++			0x43, 0x02, 0x0a, 0x09, 0x33, 0x37, 0x0f);
++	mipi_dbi_command(dbi, MIPI_DCS_SET_DISPLAY_ON);
++	msleep(100);
++
++ out_enable:
++	switch (dbidev->rotation) {
++		case 90:
++			addr_mode = ILI9488_MADCTL_MY;
++			break;
++		case 180:
++			addr_mode = ILI9488_MADCTL_MV;
++			break;
++		case 270:
++			addr_mode = ILI9488_MADCTL_MX;
++			break;
++		default:
++			addr_mode = ILI9488_MADCTL_MV | ILI9488_MADCTL_MY |
++				ILI9488_MADCTL_MX;
++			break;
++	}
++
++	addr_mode |= ILI9488_MADCTL_BGR;
++	mipi_dbi_command(dbi, MIPI_DCS_SET_ADDRESS_MODE, addr_mode);
++	mipi_dbi_enable_flush(dbidev, crtc_state, plane_state);
++
++out_exit:
++	drm_dev_exit(idx);
++}
++
++static const struct drm_simple_display_pipe_funcs ili9488_pipe_funcs = {
++	.enable = ili9488_pipe_enable,
++	.disable = mipi_dbi_pipe_disable,
++	.update = mipi_dbi_pipe_update,
++	.prepare_fb = drm_gem_simple_display_pipe_prepare_fb,
++};
++
++static const struct drm_display_mode ili9488_mode = {
++	DRM_SIMPLE_MODE(480, 320, 73, 49),
++};
++
++DEFINE_DRM_GEM_CMA_FOPS(ili9488_fops);
++
++static struct drm_driver ili9488_driver = {
++	.driver_features	= DRIVER_GEM | DRIVER_MODESET | DRIVER_ATOMIC,
++	.fops			= &ili9488_fops,
++	DRM_GEM_CMA_DRIVER_OPS_VMAP,
++	.name			= "ili9488",
++	.desc			= "Ilitek ILI9488",
++	.date			= "20210201",
++	.major			= 1,
++	.minor			= 0,
++};
++
++static int ili9488_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct device_node *np = dev->of_node;
++	struct mipi_dbi *dbi;
++	struct drm_device *drm;
++	struct mipi_dbi_dev *dbidev;
++	int ret;
++	int i;
++	u32 rotation = 0;
++	struct resource res;
++	char str[32];
++
++	pdata = devm_kzalloc(dev, sizeof(struct ili9488_data), GFP_KERNEL);
++	if (!pdata)
++		return -ENOMEM;
++
++	dbidev = devm_drm_dev_alloc(dev, &ili9488_driver,
++			struct mipi_dbi_dev, drm);
++	if (IS_ERR(dbidev))
++		return PTR_ERR(dbidev);
++
++	dbi = &dbidev->dbi;
++	drm = &dbidev->drm;
++
++	dbi->reset = devm_gpiod_get(dev, "reset", GPIOD_OUT_HIGH);
++	if (IS_ERR(dbi->reset)) {
++		DRM_DEV_ERROR(dev, "Failed to get gpio 'reset'\n");
++		return PTR_ERR(dbi->reset);
++	}
++
++	dbi->dc = devm_gpiod_get(dev, "dc", GPIOD_OUT_LOW);
++	if (IS_ERR(dbi->dc)) {
++		DRM_DEV_ERROR(dev, "Failed to get gpio 'dc'\n");
++		return PTR_ERR(dbi->dc);
++	}
++
++	pdata->wr = devm_gpiod_get(dev, "wr", GPIOD_OUT_HIGH);
++	if (IS_ERR(pdata->wr)) {
++		DRM_DEV_ERROR(dev, "Failed to get gpio 'wr'\n");
++		return PTR_ERR(pdata->wr);
++	}
++
++	pdata->cs = devm_gpiod_get(dev, "cs", GPIOD_OUT_LOW);
++	if (IS_ERR(pdata->cs)) {
++		DRM_DEV_ERROR(dev, "Failed to get gpio 'cs'\n");
++		return PTR_ERR(pdata->cs);
++	}
++
++	for (i = 0; i < 8; i++) {
++		struct gpio_desc *desc;
++		int gpio = of_get_named_gpio(np, "db-gpios", i);
++		if (gpio < 0)
++			break;	/* FIXME */
++
++		desc = gpio_to_desc(gpio);
++
++		devm_gpio_request(dev, gpio, NULL);
++		gpiod_direction_output(desc, 1);
++
++		pdata->db[i] = desc;
++	}
++
++	ret = of_address_to_resource(np, 0, &res);
++	if (!ret) {
++		pdata->membase = devm_ioremap(dev, res.start,
++				resource_size(&res));
++		if (!IS_ERR(pdata->membase)) {
++			for (i = 0; i < 8; i++) {
++				sprintf(str, "db-bits-%d", i);
++				ret = of_property_read_u32(np, str,
++						&pdata->bits[i]);
++				if (ret)
++					continue;
++				pdata->mask |= pdata->bits[i];
++			}
++
++			ret = of_property_read_u32(np, "db-bits-wr",
++					&pdata->bits_wr);
++			if (!ret)
++				pdata->mask |= pdata->bits_wr;
++		}
++	}
++
++	dbidev->backlight = devm_of_find_backlight(dev);
++	if (IS_ERR(dbidev->backlight))
++		return PTR_ERR(dbidev->backlight);
++
++	device_property_read_u32(dev, "rotation", &rotation);
++
++	rgb = devm_kzalloc(dev, sizeof(u32) * 256, GFP_KERNEL);
++	if (rgb) {
++		u32 *p = rgb;
++		for (i = 0; i < 256; i++)
++			*p++ = ili9488_rgb565_to_gpiobus(pdata, i);
++	}
++
++	gpiod_set_value(pdata->wr, 1);
++	gpiod_set_value(dbi->dc, 0);
++
++	/* override the command function set in  mipi_dbi_spi_init() */
++	dbi->command = ili9488_command;
++	dbi->read_commands = NULL;
++	dbi->swap_bytes = true;
++
++	ret = mipi_dbi_dev_init(dbidev, &ili9488_pipe_funcs,
++			&ili9488_mode, rotation);
++	if (ret)
++		return ret;
++
++	drm_mode_config_reset(drm);
++
++	ret = drm_dev_register(drm, 0);
++	if (ret)
++		return ret;
++
++	platform_set_drvdata(pdev, pdata);
++	pdata->dbidev = dbidev;
++
++	drm_fbdev_generic_setup(drm, 0);
++
++	return 0;
++}
++
++static int ili9488_remove(struct platform_device *pdev)
++{
++	struct ili9488_data *pdata = platform_get_drvdata(pdev);
++	struct mipi_dbi_dev *dbidev = pdata->dbidev;
++	struct drm_device *drm = &dbidev->drm;
++
++	drm_dev_unplug(drm);
++	drm_atomic_helper_shutdown(drm);
++
++	return 0;
++}
++
++static const struct of_device_id ili9488_dt_ids[] = {
++	{ .compatible = "ili9488", 0 },
++	{ .compatible = "hardkernel,ili9488", 0 },
++	{ },
++};
++
++MODULE_DEVICE_TABLE(of, ili9488_dt_ids);
++
++static struct platform_driver ili9488_platform_driver = {
++	.driver = {
++		.name = "ili9488",
++		.of_match_table = ili9488_dt_ids,
++	},
++	.probe = ili9488_probe,
++	.remove = ili9488_remove,
++};
++
++static int __init ili9488_init(void)
++{
++	return platform_driver_register(&ili9488_platform_driver);
++}
++
++static void __exit ili9488_exit(void)
++{
++	platform_driver_unregister(&ili9488_platform_driver);
++}
++
++module_init(ili9488_init);
++module_exit(ili9488_exit);
++
++MODULE_DESCRIPTION("Ilitek ILI9488 DRM driver (8bit PIO mode)");
++MODULE_AUTHOR("Dongjin Kim <tobetter@gmail.com>");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/i2c/busses/i2c-cros-ec-tunnel.c b/drivers/i2c/busses/i2c-cros-ec-tunnel.c
+index ab2688bd4d33..331ec3dfad57 100644
+--- a/drivers/i2c/busses/i2c-cros-ec-tunnel.c
++++ b/drivers/i2c/busses/i2c-cros-ec-tunnel.c
+@@ -35,6 +35,92 @@ struct ec_i2c_device {
+ 	u8 response_buf[256];
+ };
+ 
++#define CHECK_I2C_WR(num, length) \
++	(((msgs[num].flags & I2C_M_RD) == 0) && (msgs[num].len == length))
++
++#define CHECK_I2C_RD(num, length) \
++	((msgs[num].flags & I2C_M_RD) && (msgs[num].len == length))
++
++/* Standard I2C address for smart batteries */
++#define SBS_I2C_ADDR 0xB
++
++static int ec_i2c_forward_msg(struct ec_i2c_device *bus, int cmd,
++			      struct i2c_msg *outmsg, struct i2c_msg *inmsg)
++{
++	struct cros_ec_command *msg;
++	int ret;
++	int inmsg_len = inmsg ? inmsg->len : 0;
++	int outmsg_len = outmsg ? outmsg->len : 0;
++
++	msg = kzalloc(sizeof(*msg) + max(inmsg_len, outmsg_len), GFP_KERNEL);
++
++	msg->command = cmd;
++	msg->outsize = outmsg_len;
++	msg->insize = inmsg_len;
++
++	if (outmsg)
++		memcpy(msg->data, outmsg->buf, outmsg->len);
++
++	ret = cros_ec_cmd_xfer_status(bus->ec, msg);
++	if (ret >= 0 && inmsg)
++		memcpy(inmsg->buf, msg->data, inmsg->len);
++	return ret;
++}
++
++static int ec_i2c_limited_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[],
++			       int num)
++{
++	struct ec_i2c_device *bus = adap->algo_data;
++	int ret;
++
++	if (!num || (msgs[0].addr != SBS_I2C_ADDR))
++		return -ENODEV;
++
++	/* Battery device probing */
++	if ((num == 1) && (msgs[0].len == 0)) {
++		uint8_t dummy[] = { 0x0d, 0 };
++		struct i2c_msg otmp = { .buf = dummy, .len = 1 };
++		struct i2c_msg itmp = { .buf = dummy, .len = 2 };
++
++		ret = ec_i2c_forward_msg(bus, EC_CMD_SB_READ_WORD,
++					  &otmp, &itmp);
++		return ret < 0 ? ret : num;
++	}
++	/* Write a word-sized register */
++	if ((num == 1) && CHECK_I2C_WR(0, 3)) {
++		ret = ec_i2c_forward_msg(bus, EC_CMD_SB_WRITE_WORD,
++					  &msgs[0], NULL);
++		return ret < 0 ? ret : num;
++	}
++	/* Read a word-sized register */
++	if ((num == 2) && CHECK_I2C_WR(0, 1) && CHECK_I2C_RD(1, 2)) {
++		ret = ec_i2c_forward_msg(bus, EC_CMD_SB_READ_WORD,
++					  &msgs[0], &msgs[1]);
++		return ret < 0 ? ret : num;
++	}
++	/* Retrieve string data length */
++	if ((num == 2) && CHECK_I2C_WR(0, 1) && CHECK_I2C_RD(1, 1)) {
++		msgs[1].buf[0] = I2C_SMBUS_BLOCK_MAX;
++		return num;
++	}
++	/* Read string data */
++	if ((num == 2) && CHECK_I2C_WR(0, 1) &&
++			  CHECK_I2C_RD(1, I2C_SMBUS_BLOCK_MAX)) {
++		char tmpblock[I2C_SMBUS_BLOCK_MAX + 1];
++		struct i2c_msg tmpmsg = { .buf = tmpblock,
++					  .len = I2C_SMBUS_BLOCK_MAX };
++		ret = ec_i2c_forward_msg(bus, EC_CMD_SB_READ_BLOCK,
++					 &msgs[0], &tmpmsg);
++		tmpblock[I2C_SMBUS_BLOCK_MAX] = 0;
++		/* real string length */
++		msgs[1].buf[0] = strlen(tmpblock);
++		strscpy(&msgs[1].buf[1], tmpblock, msgs[1].len);
++		return ret < 0 ? ret : num;
++	}
++
++	return -EIO;
++}
++
+ /**
+  * ec_i2c_count_message - Count bytes needed for ec_i2c_construct_message
+  *
+@@ -234,6 +320,11 @@ static u32 ec_i2c_functionality(struct i2c_adapter *adap)
+ 	return I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;
+ }
+ 
++static const struct i2c_algorithm ec_i2c_limited_algorithm = {
++	.master_xfer	= ec_i2c_limited_xfer,
++	.functionality	= ec_i2c_functionality,
++};
++
+ static const struct i2c_algorithm ec_i2c_algorithm = {
+ 	.xfer = ec_i2c_xfer,
+ 	.functionality = ec_i2c_functionality,
+@@ -275,6 +366,9 @@ static int ec_i2c_probe(struct platform_device *pdev)
+ 	bus->adap.retries = I2C_MAX_RETRIES;
+ 	ACPI_COMPANION_SET(&bus->adap.dev, ACPI_COMPANION(&pdev->dev));
+ 
++	if (of_find_property(pdev->dev.of_node, "google,limited-passthrough", NULL))
++		bus->adap.algo = &ec_i2c_limited_algorithm;
++
+ 	err = i2c_add_adapter(&bus->adap);
+ 	if (err)
+ 		return err;
+diff --git a/drivers/iio/light/bh1750.c b/drivers/iio/light/bh1750.c
+index 4b869fa9e5b1..a00ba3232dbf 100644
+--- a/drivers/iio/light/bh1750.c
++++ b/drivers/iio/light/bh1750.c
+@@ -18,6 +18,7 @@
+  */
+ 
+ #include <linux/delay.h>
++#include <linux/gpio/consumer.h>
+ #include <linux/i2c.h>
+ #include <linux/iio/iio.h>
+ #include <linux/iio/sysfs.h>
+@@ -37,6 +38,7 @@ enum {
+ struct bh1750_chip_info;
+ struct bh1750_data {
+ 	struct i2c_client *client;
++	struct gpio_desc *reset_gpio;
+ 	struct mutex lock;
+ 	const struct bh1750_chip_info *chip_info;
+ 	u16 mtreg;
+@@ -67,6 +69,18 @@ static const struct bh1750_chip_info bh1750_chip_info_tbl[] = {
+ 	[BH1750] = { 31,  254,  69,  1740, 57500000,  1, 0x001F, 0x00E0 },
+ };
+ 
++static void bh1750_reset(struct bh1750_data *data)
++{
++	if (!data->reset_gpio)
++		return;
++
++	gpiod_set_value(data->reset_gpio, 0);
++	udelay(2); // More than 1µs is what the datasheet says
++	gpiod_set_value(data->reset_gpio, 1);
++
++	return;
++}
++
+ static int bh1750_change_int_time(struct bh1750_data *data, int usec)
+ {
+ 	int ret;
+@@ -248,6 +262,12 @@ static int bh1750_probe(struct i2c_client *client)
+ 	data->client = client;
+ 	data->chip_info = &bh1750_chip_info_tbl[id->driver_data];
+ 
++	data->reset_gpio = devm_gpiod_get_optional(&client->dev, "reset", GPIOD_OUT_HIGH);
++	if (IS_ERR(data->reset_gpio))
++		dev_warn(&client->dev, "Failed to get reset gpio\n");
++
++	bh1750_reset(data);
++
+ 	usec = data->chip_info->mtreg_to_usec * data->chip_info->mtreg_default;
+ 	ret = bh1750_change_int_time(data, usec);
+ 	if (ret < 0)
+diff --git a/drivers/iommu/io-pgtable-arm.c b/drivers/iommu/io-pgtable-arm.c
+index 0e67f1721a3d..5b13af9ca48d 100644
+--- a/drivers/iommu/io-pgtable-arm.c
++++ b/drivers/iommu/io-pgtable-arm.c
+@@ -479,9 +479,10 @@ static arm_lpae_iopte arm_lpae_prot_to_pte(struct arm_lpae_io_pgtable *data,
+ 	 * "outside the GPU" (i.e. either the Inner or System domain in CPU
+ 	 * terms, depending on coherency).
+ 	 */
+-	if (prot & IOMMU_CACHE && data->iop.fmt != ARM_MALI_LPAE)
++	if (prot & IOMMU_CACHE ||
++	    (data->iop.fmt == ARM_MALI_LPAE && !data->iop.cfg.coherent_walk))
+ 		pte |= ARM_LPAE_PTE_SH_IS;
+-	else
++	else if (data->iop.fmt == ARM_MALI_LPAE)
+ 		pte |= ARM_LPAE_PTE_SH_OS;
+ 
+ 	if (prot & IOMMU_NOEXEC)
+diff --git a/drivers/media/common/videobuf2/videobuf2-v4l2.c b/drivers/media/common/videobuf2/videobuf2-v4l2.c
+index 293f3d5f1c4e..d73ec00b5e92 100644
+--- a/drivers/media/common/videobuf2/videobuf2-v4l2.c
++++ b/drivers/media/common/videobuf2/videobuf2-v4l2.c
+@@ -682,7 +682,7 @@ static void vb2_set_flags_and_caps(struct vb2_queue *q, u32 memory,
+ 		*flags = 0;
+ 	} else {
+ 		/* Clear all unknown flags. */
+-		*flags &= V4L2_MEMORY_FLAG_NON_COHERENT;
++		*flags |= V4L2_MEMORY_FLAG_NON_COHERENT;
+ 	}
+ 
+ 	*caps |= V4L2_BUF_CAP_SUPPORTS_ORPHANED_BUFS;
+diff --git a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
+index 50451984d59f..6e8c189493b4 100644
+--- a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
++++ b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
+@@ -880,6 +880,7 @@ static int s5p_mfc_open(struct file *file)
+ 	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES;
+ 	q->mem_ops = &vb2_dma_contig_memops;
+ 	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
++	q->allow_cache_hints = 1;
+ 	ret = vb2_queue_init(q);
+ 	if (ret) {
+ 		mfc_err("Failed to initialize videobuf2 queue(capture)\n");
+@@ -915,6 +916,7 @@ static int s5p_mfc_open(struct file *file)
+ 	q->dma_attrs = DMA_ATTR_ALLOC_SINGLE_PAGES;
+ 	q->mem_ops = &vb2_dma_contig_memops;
+ 	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
++	q->allow_cache_hints = 1;
+ 	ret = vb2_queue_init(q);
+ 	if (ret) {
+ 		mfc_err("Failed to initialize videobuf2 queue(output)\n");
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c
+index 2a37592a6281..6244ec42e089 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_ethtool.c
+@@ -887,6 +887,8 @@ static int stmmac_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
+ 	priv->wolopts = wol->wolopts;
+ 	mutex_unlock(&priv->lock);
+ 
++	phy_ethtool_set_wol(dev->phydev, wol);
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/net/phy/realtek.c b/drivers/net/phy/realtek.c
+index 166f6a728373..67aea8a7f426 100644
+--- a/drivers/net/phy/realtek.c
++++ b/drivers/net/phy/realtek.c
+@@ -13,6 +13,7 @@
+ #include <linux/module.h>
+ #include <linux/delay.h>
+ #include <linux/clk.h>
++#include <linux/etherdevice.h>
+ 
+ #define RTL821x_PHYSR				0x11
+ #define RTL821x_PHYSR_DUPLEX			BIT(13)
+@@ -266,7 +267,11 @@ static int rtl8211f_config_intr(struct phy_device *phydev)
+ 
+ 		val = RTL8211F_INER_LINK_STATUS;
+ 		err = phy_write_paged(phydev, 0xa42, RTL821x_INER, val);
++
++		phy_modify_paged(phydev, 0xd40, 0x16, BIT(5), 0);
+ 	} else {
++		phy_modify_paged(phydev, 0xd40, 0x16, 0, BIT(5));
++
+ 		val = 0;
+ 		err = phy_write_paged(phydev, 0xa42, RTL821x_INER, val);
+ 		if (err)
+@@ -367,6 +372,34 @@ static int rtl8211c_config_init(struct phy_device *phydev)
+ 			    CTL1000_ENABLE_MASTER | CTL1000_AS_MASTER);
+ }
+ 
++static int rtl8211f_set_wol(struct phy_device *phydev,
++		struct ethtool_wolinfo *wol)
++{
++	struct net_device *netdev = phydev->attached_dev;
++	const u8 *mac = (const u8 *)netdev->dev_addr;
++
++	if ((wol->wolopts & (WAKE_MAGIC | WAKE_UCAST)) == 0) {
++		disable_irq_wake(phydev->irq);
++		return 0;
++	}
++
++	if ((wol->wolopts & WAKE_UCAST)
++			&& is_valid_ether_addr(mac)) {
++		phy_write_paged(phydev, 0xd8c, 0x10, (mac[1] << 8) | mac[0]);
++		phy_write_paged(phydev, 0xd8c, 0x11, (mac[3] << 8) | mac[2]);
++		phy_write_paged(phydev, 0xd8c, 0x12, (mac[5] << 8) | mac[4]);
++	}
++
++	if (wol->wolopts & WAKE_MAGIC) {
++		phy_write_paged(phydev, 0xd8a, 0x10, 0x1000);
++		phy_write_paged(phydev, 0xd8a, 0x11, 0x9fff);
++	}
++
++	enable_irq_wake(phydev->irq);
++
++	return 0;
++}
++
+ static int rtl8211f_config_init(struct phy_device *phydev)
+ {
+ 	struct rtl821x_priv *priv = phydev->priv;
+@@ -1306,6 +1339,7 @@ static struct phy_driver realtek_drvs[] = {
+ 		.handle_interrupt = rtl8211f_handle_interrupt,
+ 		.suspend	= rtl821x_suspend,
+ 		.resume		= rtl821x_resume,
++		.set_wol	= rtl8211f_set_wol,
+ 		.read_page	= rtl821x_read_page,
+ 		.write_page	= rtl821x_write_page,
+ 		.flags		= PHY_ALWAYS_CALL_SUSPEND,
+diff --git a/drivers/net/usb/qmi_wwan.c b/drivers/net/usb/qmi_wwan.c
+index 0c011d8f5d4d..238c25473850 100644
+--- a/drivers/net/usb/qmi_wwan.c
++++ b/drivers/net/usb/qmi_wwan.c
+@@ -1492,6 +1492,7 @@ static const struct usb_device_id products[] = {
+ 	{QMI_GOBI_DEVICE(0x1199, 0x901b)},	/* Sierra Wireless MC7770 */
+ 	{QMI_GOBI_DEVICE(0x12d1, 0x14f1)},	/* Sony Gobi 3000 Composite */
+ 	{QMI_GOBI_DEVICE(0x1410, 0xa021)},	/* Foxconn Gobi 3000 Modem device (Novatel E396) */
++	{QMI_GOBI_DEVICE(0x1410, 0xa023)},	/* Foxconn Gobi 3000 Modem device (Novatel E396U) */
+ 
+ 	{ }					/* END */
+ };
+diff --git a/drivers/phy/samsung/phy-exynos5250-usb2.c b/drivers/phy/samsung/phy-exynos5250-usb2.c
+index 21b06072f866..73d0be50dd06 100644
+--- a/drivers/phy/samsung/phy-exynos5250-usb2.c
++++ b/drivers/phy/samsung/phy-exynos5250-usb2.c
+@@ -177,11 +177,7 @@ static void exynos5250_isol(struct samsung_usb2_phy_instance *inst, bool on)
+ 	u32 offset;
+ 	u32 mask = EXYNOS_5250_USB_ISOL_ENABLE;
+ 
+-	if (drv->cfg == &exynos5250_usb2_phy_config &&
+-	    inst->cfg->id == EXYNOS5250_DEVICE)
+-		offset = EXYNOS_5250_USB_ISOL_OTG_OFFSET;
+-	else if (drv->cfg == &exynos5250_usb2_phy_config &&
+-		 inst->cfg->id == EXYNOS5250_HOST)
++	if (drv->cfg == &exynos5250_usb2_phy_config)
+ 		offset = EXYNOS_5250_USB_ISOL_HOST_OFFSET;
+ 	else if (drv->cfg == &exynos5420_usb2_phy_config &&
+ 		 inst->cfg->id == EXYNOS5250_HOST)
+@@ -238,27 +234,10 @@ static int exynos5250_power_on(struct samsung_usb2_phy_instance *inst)
+ 	case EXYNOS5250_HOST:
+ 	case EXYNOS5250_HSIC0:
+ 	case EXYNOS5250_HSIC1:
+-		/* Host registers configuration */
+-		ctrl0 = readl(drv->reg_phy + EXYNOS_5250_HOSTPHYCTRL0);
+-		/* The clock */
+-		ctrl0 &= ~EXYNOS_5250_HOSTPHYCTRL0_FSEL_MASK;
+-		ctrl0 |= drv->ref_reg_val <<
+-					EXYNOS_5250_HOSTPHYCTRL0_FSEL_SHIFT;
+-
+-		/* Reset */
+-		ctrl0 &=	~(EXYNOS_5250_HOSTPHYCTRL0_PHYSWRST |
+-				EXYNOS_5250_HOSTPHYCTRL0_PHYSWRSTALL |
+-				EXYNOS_5250_HOSTPHYCTRL0_SIDDQ |
+-				EXYNOS_5250_HOSTPHYCTRL0_FORCESUSPEND |
+-				EXYNOS_5250_HOSTPHYCTRL0_FORCESLEEP);
+-		ctrl0 |=	EXYNOS_5250_HOSTPHYCTRL0_LINKSWRST |
+-				EXYNOS_5250_HOSTPHYCTRL0_UTMISWRST |
+-				EXYNOS_5250_HOSTPHYCTRL0_COMMON_ON_N;
+-		writel(ctrl0, drv->reg_phy + EXYNOS_5250_HOSTPHYCTRL0);
+-		udelay(10);
+-		ctrl0 &=	~(EXYNOS_5250_HOSTPHYCTRL0_LINKSWRST |
+-				EXYNOS_5250_HOSTPHYCTRL0_UTMISWRST);
+-		writel(ctrl0, drv->reg_phy + EXYNOS_5250_HOSTPHYCTRL0);
++		regmap_update_bits(drv->reg_sys,
++				   EXYNOS_5250_MODE_SWITCH_OFFSET,
++				   EXYNOS_5250_MODE_SWITCH_MASK,
++				   EXYNOS_5250_MODE_SWITCH_HOST);
+ 
+ 		/* OTG configuration */
+ 		otg = readl(drv->reg_phy + EXYNOS_5250_USBOTGSYS);
+@@ -282,37 +261,60 @@ static int exynos5250_power_on(struct samsung_usb2_phy_instance *inst)
+ 		otg &= ~(EXYNOS_5250_USBOTGSYS_PHY_SW_RST |
+ 			EXYNOS_5250_USBOTGSYS_LINK_SW_RST_UOTG |
+ 			EXYNOS_5250_USBOTGSYS_PHYLINK_SW_RESET);
+-
+-		/* HSIC phy configuration */
+-		hsic = (EXYNOS_5250_HSICPHYCTRLX_REFCLKDIV_12 |
+-				EXYNOS_5250_HSICPHYCTRLX_REFCLKSEL_DEFAULT |
+-				EXYNOS_5250_HSICPHYCTRLX_PHYSWRST);
+-		writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL1);
+-		writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL2);
+-		udelay(10);
+-		hsic &= ~EXYNOS_5250_HSICPHYCTRLX_PHYSWRST;
+-		writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL1);
+-		writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL2);
+-		/* The following delay is necessary for the reset sequence to be
+-		 * completed */
+-		udelay(80);
+-
+-		/* Enable EHCI DMA burst */
+-		ehci = readl(drv->reg_phy + EXYNOS_5250_HOSTEHCICTRL);
+-		ehci |=	EXYNOS_5250_HOSTEHCICTRL_ENAINCRXALIGN |
+-			EXYNOS_5250_HOSTEHCICTRL_ENAINCR4 |
+-			EXYNOS_5250_HOSTEHCICTRL_ENAINCR8 |
+-			EXYNOS_5250_HOSTEHCICTRL_ENAINCR16;
+-		writel(ehci, drv->reg_phy + EXYNOS_5250_HOSTEHCICTRL);
+-
+-		/* OHCI settings */
+-		ohci = readl(drv->reg_phy + EXYNOS_5250_HOSTOHCICTRL);
+-		/* Following code is based on the old driver */
+-		ohci |=	0x1 << 3;
+-		writel(ohci, drv->reg_phy + EXYNOS_5250_HOSTOHCICTRL);
++		writel(otg, drv->reg_phy + EXYNOS_5250_USBOTGSYS);
+ 
+ 		break;
+ 	}
++	/* Host registers configuration */
++	ctrl0 = readl(drv->reg_phy + EXYNOS_5250_HOSTPHYCTRL0);
++	/* The clock */
++	ctrl0 &= ~EXYNOS_5250_HOSTPHYCTRL0_FSEL_MASK;
++	ctrl0 |= drv->ref_reg_val <<
++				EXYNOS_5250_HOSTPHYCTRL0_FSEL_SHIFT;
++
++	/* Reset */
++	ctrl0 &=	~(EXYNOS_5250_HOSTPHYCTRL0_PHYSWRST |
++			EXYNOS_5250_HOSTPHYCTRL0_PHYSWRSTALL |
++			EXYNOS_5250_HOSTPHYCTRL0_SIDDQ |
++			EXYNOS_5250_HOSTPHYCTRL0_FORCESUSPEND |
++			EXYNOS_5250_HOSTPHYCTRL0_FORCESLEEP);
++	ctrl0 |=	EXYNOS_5250_HOSTPHYCTRL0_LINKSWRST |
++			EXYNOS_5250_HOSTPHYCTRL0_UTMISWRST |
++			EXYNOS_5250_HOSTPHYCTRL0_COMMON_ON_N;
++	writel(ctrl0, drv->reg_phy + EXYNOS_5250_HOSTPHYCTRL0);
++	udelay(10);
++	ctrl0 &=	~(EXYNOS_5250_HOSTPHYCTRL0_LINKSWRST |
++			EXYNOS_5250_HOSTPHYCTRL0_UTMISWRST);
++	writel(ctrl0, drv->reg_phy + EXYNOS_5250_HOSTPHYCTRL0);
++
++	/* HSIC phy configuration */
++	hsic = (EXYNOS_5250_HSICPHYCTRLX_REFCLKDIV_12 |
++			EXYNOS_5250_HSICPHYCTRLX_REFCLKSEL_DEFAULT |
++			EXYNOS_5250_HSICPHYCTRLX_PHYSWRST);
++	writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL1);
++	writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL2);
++	udelay(10);
++	hsic &= ~EXYNOS_5250_HSICPHYCTRLX_PHYSWRST;
++	writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL1);
++	writel(hsic, drv->reg_phy + EXYNOS_5250_HSICPHYCTRL2);
++	/* The following delay is necessary for the reset sequence to be
++	 * completed */
++	udelay(80);
++
++	/* Enable EHCI DMA burst */
++	ehci = readl(drv->reg_phy + EXYNOS_5250_HOSTEHCICTRL);
++	ehci |=	EXYNOS_5250_HOSTEHCICTRL_ENAINCRXALIGN |
++		EXYNOS_5250_HOSTEHCICTRL_ENAINCR4 |
++		EXYNOS_5250_HOSTEHCICTRL_ENAINCR8 |
++		EXYNOS_5250_HOSTEHCICTRL_ENAINCR16;
++	writel(ehci, drv->reg_phy + EXYNOS_5250_HOSTEHCICTRL);
++
++	/* OHCI settings */
++	ohci = readl(drv->reg_phy + EXYNOS_5250_HOSTOHCICTRL);
++	/* Following code is based on the old driver */
++	ohci |=	0x1 << 3;
++	writel(ohci, drv->reg_phy + EXYNOS_5250_HOSTOHCICTRL);
++
+ 	exynos5250_isol(inst, 0);
+ 
+ 	return 0;
+diff --git a/drivers/pmdomain/samsung/exynos-pm-domains.c b/drivers/pmdomain/samsung/exynos-pm-domains.c
+index 9b502e8751d1..0eb4e3838094 100644
+--- a/drivers/pmdomain/samsung/exynos-pm-domains.c
++++ b/drivers/pmdomain/samsung/exynos-pm-domains.c
+@@ -18,6 +18,8 @@
+ #include <linux/of.h>
+ #include <linux/of_address.h>
+ #include <linux/pm_runtime.h>
++#include <linux/of_platform.h>
++#include <linux/sched.h>
+ 
+ struct exynos_pm_domain_config {
+ 	/* Value for LOCAL_PWR_CFG and STATUS fields for each domain */
+@@ -73,15 +75,15 @@ static int exynos_pd_power_off(struct generic_pm_domain *domain)
+ 	return exynos_pd_power(domain, false);
+ }
+ 
+-static const struct exynos_pm_domain_config exynos4210_cfg = {
++static const struct exynos_pm_domain_config exynos4210_cfg __initconst = {
+ 	.local_pwr_cfg		= 0x7,
+ };
+ 
+-static const struct exynos_pm_domain_config exynos5433_cfg = {
++static const struct exynos_pm_domain_config exynos5433_cfg __initconst = {
+ 	.local_pwr_cfg		= 0xf,
+ };
+ 
+-static const struct of_device_id exynos_pm_domain_of_match[] = {
++static const struct of_device_id exynos_pm_domain_of_match[] __initconst = {
+ 	{
+ 		.compatible = "samsung,exynos4210-pd",
+ 		.data = &exynos4210_cfg,
+@@ -92,7 +94,7 @@ static const struct of_device_id exynos_pm_domain_of_match[] = {
+ 	{ },
+ };
+ 
+-static const char *exynos_get_domain_name(struct device_node *node)
++static __init const char *exynos_get_domain_name(struct device_node *node)
+ {
+ 	const char *name;
+ 
+@@ -101,44 +103,60 @@ static const char *exynos_get_domain_name(struct device_node *node)
+ 	return kstrdup_const(name, GFP_KERNEL);
+ }
+ 
+-static int exynos_pd_probe(struct platform_device *pdev)
++static __init int exynos4_pm_init_power_domain(void)
+ {
+-	const struct exynos_pm_domain_config *pm_domain_cfg;
+-	struct device *dev = &pdev->dev;
+-	struct device_node *np = dev->of_node;
+-	struct of_phandle_args child, parent;
+-	struct exynos_pm_domain *pd;
+-	int on, ret;
++	struct device_node *np;
++	const struct of_device_id *match;
+ 
+-	pm_domain_cfg = of_device_get_match_data(dev);
+-	pd = devm_kzalloc(dev, sizeof(*pd), GFP_KERNEL);
+-	if (!pd)
+-		return -ENOMEM;
++	for_each_matching_node_and_match(np, exynos_pm_domain_of_match, &match) {
++		const struct exynos_pm_domain_config *pm_domain_cfg;
++		struct exynos_pm_domain *pd;
++		int on;
+ 
+-	pd->pd.name = exynos_get_domain_name(np);
+-	if (!pd->pd.name)
+-		return -ENOMEM;
++		pm_domain_cfg = match->data;
+ 
+-	pd->base = of_iomap(np, 0);
+-	if (!pd->base) {
+-		kfree_const(pd->pd.name);
+-		return -ENODEV;
+-	}
++		pd = kzalloc(sizeof(*pd), GFP_KERNEL);
++		if (!pd) {
++			of_node_put(np);
++			return -ENOMEM;
++		}
++		pd->pd.name = exynos_get_domain_name(np);
++		if (!pd->pd.name) {
++			kfree(pd);
++			of_node_put(np);
++			return -ENOMEM;
++		}
+ 
+-	pd->pd.power_off = exynos_pd_power_off;
+-	pd->pd.power_on = exynos_pd_power_on;
+-	pd->local_pwr_cfg = pm_domain_cfg->local_pwr_cfg;
++		pd->base = of_iomap(np, 0);
++		if (!pd->base) {
++			pr_warn("%s: failed to map memory\n", __func__);
++			kfree_const(pd->pd.name);
++			kfree(pd);
++			continue;
++		}
++
++		pd->pd.power_off = exynos_pd_power_off;
++		pd->pd.power_on = exynos_pd_power_on;
++		pd->local_pwr_cfg = pm_domain_cfg->local_pwr_cfg;
+ 
+-	on = readl_relaxed(pd->base + 0x4) & pd->local_pwr_cfg;
++		on = readl_relaxed(pd->base + 0x4) & pd->local_pwr_cfg;
++
++		pm_genpd_init(&pd->pd, NULL, !on);
++		of_genpd_add_provider_simple(np, &pd->pd);
++	}
+ 
+-	pm_genpd_init(&pd->pd, NULL, !on);
+-	ret = of_genpd_add_provider_simple(np, &pd->pd);
++	/* Assign the child power domains to their parents */
++	for_each_matching_node(np, exynos_pm_domain_of_match) {
++		struct of_phandle_args child, parent;
+ 
+-	if (ret == 0 && of_parse_phandle_with_args(np, "power-domains",
+-				      "#power-domain-cells", 0, &parent) == 0) {
+ 		child.np = np;
+ 		child.args_count = 0;
+ 
++		if (of_parse_phandle_with_args(np, "power-domains",
++					       "#power-domain-cells", 0,
++					       &parent) != 0)
++			continue;
++
+ 		if (of_genpd_add_subdomain(&parent, &child))
+ 			pr_warn("%pOF failed to add subdomain: %pOF\n",
+ 				parent.np, child.np);
+@@ -147,21 +165,6 @@ static int exynos_pd_probe(struct platform_device *pdev)
+ 				parent.np, child.np);
+ 	}
+ 
+-	pm_runtime_enable(dev);
+-	return ret;
+-}
+-
+-static struct platform_driver exynos_pd_driver = {
+-	.probe	= exynos_pd_probe,
+-	.driver	= {
+-		.name		= "exynos-pd",
+-		.of_match_table	= exynos_pm_domain_of_match,
+-		.suppress_bind_attrs = true,
+-	}
+-};
+-
+-static __init int exynos4_pm_init_power_domain(void)
+-{
+-	return platform_driver_register(&exynos_pd_driver);
++	return 0;
+ }
+ core_initcall(exynos4_pm_init_power_domain);
+diff --git a/drivers/power/supply/ds2780_battery.c b/drivers/power/supply/ds2780_battery.c
+index 1e7f297f6cb1..ce5cd844980f 100644
+--- a/drivers/power/supply/ds2780_battery.c
++++ b/drivers/power/supply/ds2780_battery.c
+@@ -755,7 +755,7 @@ static int ds2780_battery_probe(struct platform_device *pdev)
+ 
+ 	dev_info->dev			= &pdev->dev;
+ 	dev_info->w1_dev		= pdev->dev.parent;
+-	dev_info->bat_desc.name		= dev_name(&pdev->dev);
++	dev_info->bat_desc.name		= kasprintf(GFP_KERNEL, "ds2780-battery.%d", pdev->dev.id);
+ 	dev_info->bat_desc.type		= POWER_SUPPLY_TYPE_BATTERY;
+ 	dev_info->bat_desc.properties	= ds2780_battery_props;
+ 	dev_info->bat_desc.num_properties = ARRAY_SIZE(ds2780_battery_props);
+diff --git a/drivers/power/supply/smb347-charger.c b/drivers/power/supply/smb347-charger.c
+index c8392933ee28..4f103536a04a 100644
+--- a/drivers/power/supply/smb347-charger.c
++++ b/drivers/power/supply/smb347-charger.c
+@@ -352,11 +352,20 @@ static bool smb347_is_ps_online(struct smb347_charger *smb)
+  * Function returns charging status. %0 means no charging is in progress,
+  * %1 means pre-charging, %2 fast-charging and %3 taper-charging.
+  */
+-static int smb347_charging_status(struct smb347_charger *smb)
++static int smb347_charging_status(struct smb347_charger *smb,
++				  struct power_supply *psy)
+ {
+ 	unsigned int val;
+ 	int ret;
+ 
++	if (psy->desc->type == POWER_SUPPLY_TYPE_USB) {
++		if (!smb->usb_online)
++			return -ENODATA;
++	} else {
++		if (!smb->mains_online)
++			return -ENODATA;
++	}
++
+ 	if (!smb347_is_ps_online(smb))
+ 		return 0;
+ 
+@@ -987,14 +996,20 @@ static int smb347_irq_init(struct smb347_charger *smb,
+  * Returns the constant charge current programmed
+  * into the charger in uA.
+  */
+-static int get_const_charge_current(struct smb347_charger *smb)
++static int get_const_charge_current(struct smb347_charger *smb,
++				    struct power_supply *psy)
+ {
+ 	unsigned int id = smb->id;
+ 	int ret, intval;
+ 	unsigned int v;
+ 
+-	if (!smb347_is_ps_online(smb))
+-		return -ENODATA;
++	if (psy->desc->type == POWER_SUPPLY_TYPE_USB) {
++		if (!smb->usb_online)
++			return -ENODATA;
++	} else {
++		if (!smb->mains_online)
++			return -ENODATA;
++	}
+ 
+ 	ret = regmap_read(smb->regmap, STAT_B, &v);
+ 	if (ret < 0)
+@@ -1020,13 +1035,19 @@ static int get_const_charge_current(struct smb347_charger *smb)
+  * Returns the constant charge voltage programmed
+  * into the charger in uV.
+  */
+-static int get_const_charge_voltage(struct smb347_charger *smb)
++static int get_const_charge_voltage(struct smb347_charger *smb,
++				    struct power_supply *psy)
+ {
+ 	int ret, intval;
+ 	unsigned int v;
+ 
+-	if (!smb347_is_ps_online(smb))
+-		return -ENODATA;
++	if (psy->desc->type == POWER_SUPPLY_TYPE_USB) {
++		if (!smb->usb_online)
++			return -ENODATA;
++	} else {
++		if (!smb->mains_online)
++			return -ENODATA;
++	}
+ 
+ 	ret = regmap_read(smb->regmap, STAT_A, &v);
+ 	if (ret < 0)
+@@ -1099,6 +1120,11 @@ static int smb347_get_property_locked(struct power_supply *psy,
+ 	struct smb347_charger *smb = power_supply_get_drvdata(psy);
+ 	int ret;
+ 
++	ret = smb347_update_ps_status(smb);
++	if (ret < 0)
++		return ret;
++	smb347_start_stop_charging(smb);
++
+ 	switch (prop) {
+ 	case POWER_SUPPLY_PROP_STATUS:
+ 		ret = smb347_get_charging_status(smb, psy);
+@@ -1108,19 +1134,15 @@ static int smb347_get_property_locked(struct power_supply *psy,
+ 		break;
+ 
+ 	case POWER_SUPPLY_PROP_CHARGE_TYPE:
+-		if (psy->desc->type == POWER_SUPPLY_TYPE_USB) {
+-			if (!smb->usb_online)
+-				return -ENODATA;
+-		} else {
+-			if (!smb->mains_online)
+-				return -ENODATA;
+-		}
++		ret = smb347_charging_status(smb, psy);
++		if (ret < 0)
++			return ret;
+ 
+ 		/*
+ 		 * We handle trickle and pre-charging the same, and taper
+ 		 * and none the same.
+ 		 */
+-		switch (smb347_charging_status(smb)) {
++		switch (ret) {
+ 		case 1:
+ 			val->intval = POWER_SUPPLY_CHARGE_TYPE_TRICKLE;
+ 			break;
+@@ -1141,14 +1163,14 @@ static int smb347_get_property_locked(struct power_supply *psy,
+ 		break;
+ 
+ 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE:
+-		ret = get_const_charge_voltage(smb);
++		ret = get_const_charge_voltage(smb, psy);
+ 		if (ret < 0)
+ 			return ret;
+ 		val->intval = ret;
+ 		break;
+ 
+ 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
+-		ret = get_const_charge_current(smb);
++		ret = get_const_charge_current(smb, psy);
+ 		if (ret < 0)
+ 			return ret;
+ 		val->intval = ret;
+diff --git a/drivers/regulator/Kconfig b/drivers/regulator/Kconfig
+index 39297f7d8177..f54d8cc0e6b3 100644
+--- a/drivers/regulator/Kconfig
++++ b/drivers/regulator/Kconfig
+@@ -303,6 +303,16 @@ config REGULATOR_CROS_EC
+ 	  This driver can also be built as a module. If so, the module
+ 	  will be called cros-ec-regulator.
+ 
++config REGULATOR_CROS_EC_TPS65090
++	tristate "ChromeOS EC driver TPS65090 FET regulators"
++	depends on CROS_EC && OF
++	help
++	  This driver supports voltage regulators that is connected to ChromeOS
++	  EC and controlled through EC host commands.
++
++	  This driver can also be built as a module. If so, the module
++	  will be called cros-ec-tps96590.
++
+ config REGULATOR_DA903X
+ 	tristate "Dialog Semiconductor DA9030/DA9034 regulators"
+ 	depends on PMIC_DA903X
+diff --git a/drivers/regulator/Makefile b/drivers/regulator/Makefile
+index 3d5a803dce8a..20ac0d7019d1 100644
+--- a/drivers/regulator/Makefile
++++ b/drivers/regulator/Makefile
+@@ -16,6 +16,7 @@ obj-$(CONFIG_REGULATOR_88PM800) += 88pm800-regulator.o
+ obj-$(CONFIG_REGULATOR_88PM8607) += 88pm8607.o
+ obj-$(CONFIG_REGULATOR_88PM886) += 88pm886-regulator.o
+ obj-$(CONFIG_REGULATOR_CROS_EC) += cros-ec-regulator.o
++obj-$(CONFIG_REGULATOR_CROS_EC_TPS65090) += cros-ec-tps65090.o
+ obj-$(CONFIG_REGULATOR_CPCAP) += cpcap-regulator.o
+ obj-$(CONFIG_REGULATOR_AAT2870) += aat2870-regulator.o
+ obj-$(CONFIG_REGULATOR_AB8500)	+= ab8500-ext.o ab8500.o
+diff --git a/drivers/regulator/cros-ec-tps65090.c b/drivers/regulator/cros-ec-tps65090.c
+new file mode 100644
+index 000000000000..563bd59dded0
+--- /dev/null
++++ b/drivers/regulator/cros-ec-tps65090.c
+@@ -0,0 +1,189 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Copyright (C) 2013 Google, Inc
++ *
++ * Expose the ChromeOS EC regulator information.
++ */
++
++#include <linux/module.h>
++#include <linux/of.h>
++#include <linux/platform_data/cros_ec_proto.h>
++#include <linux/platform_device.h>
++#include <linux/regulator/driver.h>
++#include <linux/regulator/machine.h>
++#include <linux/regulator/of_regulator.h>
++#include <linux/slab.h>
++
++#define MAX_REGULATORS		10
++
++struct cros_ec_tps65090_regulator {
++	struct regulator_desc	desc;
++	struct regulator_dev	*rdev;
++	struct cros_ec_device	*ec;
++
++	u32			control_reg;
++};
++
++struct cros_ec_tps65090_data {
++	struct cros_ec_tps65090_regulator *regulators[MAX_REGULATORS];
++};
++
++/* Control register for FETs(7) range from 15 -> 21 and correspond to
++   FET number (1-7) on the EC side */
++#define reg_to_cros_ec_fet_index(reg) (reg->control_reg - 14)
++
++static int cros_ec_tps65090_fet_enable(struct regulator_dev *dev)
++{
++	struct cros_ec_tps65090_regulator *reg = rdev_get_drvdata(dev);
++	struct ec_params_ldo_set cmd = {
++		.index = reg_to_cros_ec_fet_index(reg),
++		.state = EC_LDO_STATE_ON,
++	};
++
++	return cros_ec_cmd(reg->ec, 0, EC_CMD_LDO_SET, &cmd,
++			   sizeof(cmd), NULL, 0);
++}
++
++static int cros_ec_tps65090_fet_disable(struct regulator_dev *dev)
++{
++	struct cros_ec_tps65090_regulator *reg = rdev_get_drvdata(dev);
++	struct ec_params_ldo_set cmd = {
++		.index = reg_to_cros_ec_fet_index(reg),
++		.state = EC_LDO_STATE_OFF,
++	};
++
++	return cros_ec_cmd(reg->ec, 0, EC_CMD_LDO_SET, &cmd,
++			   sizeof(cmd), NULL, 0);
++}
++
++static int cros_ec_tps65090_fet_is_enabled(struct regulator_dev *dev)
++{
++	struct cros_ec_tps65090_regulator *reg = rdev_get_drvdata(dev);
++	struct ec_params_ldo_get cmd = {
++		.index = reg_to_cros_ec_fet_index(reg),
++	};
++	struct ec_response_ldo_get resp;
++	int ret;
++
++	ret = cros_ec_cmd(reg->ec, 0, EC_CMD_LDO_GET, &cmd,
++			  sizeof(cmd), &resp, sizeof(resp));
++	if (ret < 0)
++		return ret;
++
++	return resp.state;
++}
++
++static struct regulator_ops cros_ec_tps65090_fet_ops = {
++	.enable	= cros_ec_tps65090_fet_enable,
++	.disable = cros_ec_tps65090_fet_disable,
++	.is_enabled = cros_ec_tps65090_fet_is_enabled,
++	.set_suspend_enable = cros_ec_tps65090_fet_enable,
++	.set_suspend_disable = cros_ec_tps65090_fet_disable,
++};
++
++static int cros_ec_tps65090_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct cros_ec_device *ec = dev_get_drvdata(dev->parent);
++	struct device_node *reg_np, *np;
++	struct cros_ec_tps65090_data *data;
++	struct cros_ec_tps65090_regulator *reg;
++	struct regulator_init_data *init_data;
++	struct regulator_config cfg = {};
++	u32 id = 0;
++
++	if (!ec)
++		return dev_err_probe(dev, -EINVAL, "no EC device found\n");
++
++	if (!dev->of_node)
++		return dev_err_probe(dev, -EINVAL, "no device tree data available\n");
++
++	data = devm_kzalloc(dev, sizeof(struct cros_ec_tps65090_data), GFP_KERNEL);
++	if (!data)
++		return -ENOMEM;
++
++	reg_np = of_find_node_by_name(dev->of_node, "regulators");
++	if (!reg_np)
++		return dev_err_probe(dev, -EINVAL,
++				     "no OF regulator data found at %s\n",
++				     dev->of_node->full_name);
++
++	for_each_child_of_node(reg_np, np) {
++		init_data = of_get_regulator_init_data(dev, np, &reg->desc);
++		if (!init_data) {
++			dev_err(dev, "regulator_init_data failed for %s\n",
++				np->full_name);
++			goto err;
++		}
++
++		if (init_data->constraints.min_uV != init_data->constraints.max_uV) {
++			dev_err(dev, "regulator specified with variable voltages\n");
++			goto err;
++		}
++
++		reg = devm_kzalloc(dev, sizeof(struct cros_ec_tps65090_regulator),
++				   GFP_KERNEL);
++		reg->desc.name = kstrdup(of_get_property(np, "regulator-name",
++							 NULL), GFP_KERNEL);
++		reg->ec = ec;
++		if (!reg->desc.name) {
++			dev_err(dev, "no regulator-name specified at %s\n",
++				np->full_name);
++			goto err;
++		}
++
++		if (of_property_read_u32(np, "ti,control-reg",
++					 &reg->control_reg)) {
++			dev_err(dev, "no control-reg property at %s\n",
++				np->full_name);
++			goto err;
++		}
++
++		reg->desc.id = id;
++		reg->desc.ops = &cros_ec_tps65090_fet_ops;
++		reg->desc.type = REGULATOR_VOLTAGE;
++		reg->desc.owner = THIS_MODULE;
++		reg->desc.n_voltages = 1;
++		reg->desc.fixed_uV = init_data->constraints.min_uV;
++
++		cfg.dev = dev->parent;
++		cfg.driver_data = reg;
++		cfg.of_node = np;
++		cfg.init_data = init_data;
++
++		reg->rdev = devm_regulator_register(dev, &reg->desc, &cfg);
++		dev_dbg(dev, "%s supply registered (FET%d)\n", reg->desc.name,
++			reg_to_cros_ec_fet_index(reg));
++
++		data->regulators[id++] = reg;
++	}
++
++	platform_set_drvdata(pdev, data);
++	of_node_put(reg_np);
++
++	return 0;
++
++err:
++	dev_err(dev, "bad OF regulator data in %s\n", reg_np->full_name);
++	of_node_put(reg_np);
++	return -EINVAL;
++}
++
++static const struct of_device_id cros_ec_tps65090_of_match[] = {
++	{ .compatible = "ti,cros-ec-tps65090", },
++	{}
++};
++MODULE_DEVICE_TABLE(of, cros_ec_tps65090_of_match);
++
++static struct platform_driver cros_ec_tps65090_driver = {
++	.probe = cros_ec_tps65090_probe,
++	.driver = {
++		.name = "cros-ec-tps65090",
++		.of_match_table = cros_ec_tps65090_of_match,
++	},
++};
++
++module_platform_driver(cros_ec_tps65090_driver);
++
++MODULE_LICENSE("GPL");
++MODULE_DESCRIPTION("ChromeOS EC controlled TPS65090 FET regulators");
+diff --git a/drivers/usb/serial/qcserial.c b/drivers/usb/serial/qcserial.c
+index c7de9585feb2..38d5c9bf3879 100644
+--- a/drivers/usb/serial/qcserial.c
++++ b/drivers/usb/serial/qcserial.c
+@@ -117,7 +117,8 @@ static const struct usb_device_id id_table[] = {
+ 	{USB_DEVICE(0x05c6, 0x920c)},	/* Gobi 3000 QDL */
+ 	{USB_DEVICE(0x05c6, 0x920d)},	/* Gobi 3000 Composite */
+ 	{USB_DEVICE(0x1410, 0xa020)},   /* Novatel Gobi 3000 QDL */
+-	{USB_DEVICE(0x1410, 0xa021)},	/* Novatel Gobi 3000 Composite */
++	{USB_DEVICE(0x1410, 0xa021)},	/* Novatel Gobi 3000 Composite (E396) */
++	{USB_DEVICE(0x1410, 0xa023)},	/* Novatel Gobi 3000 Composite (E396U) */
+ 	{USB_DEVICE(0x413c, 0x8193)},	/* Dell Gobi 3000 QDL */
+ 	{USB_DEVICE(0x413c, 0x8194)},	/* Dell Gobi 3000 Composite */
+ 	{USB_DEVICE(0x413c, 0x81a6)},	/* Dell DW5570 QDL (MC8805) */
+diff --git a/drivers/w1/masters/ds2482.c b/drivers/w1/masters/ds2482.c
+index a2ecbb863c57..dfc85808f841 100644
+--- a/drivers/w1/masters/ds2482.c
++++ b/drivers/w1/masters/ds2482.c
+@@ -18,6 +18,9 @@
+ 
+ #include <linux/w1.h>
+ 
++#include <linux/gpio/consumer.h>
++#include <linux/of.h>
++
+ /*
+  * Allow the active pullup to be disabled, default is enabled.
+  *
+@@ -108,6 +111,7 @@ struct ds2482_w1_chan {
+ struct ds2482_data {
+ 	struct i2c_client	*client;
+ 	struct mutex		access_lock;
++	struct gpio_desc	*sleep_gpio;
+ 
+ 	/* 1-wire interface(s) */
+ 	int			w1_count;	/* 1 or 8 */
+@@ -460,6 +464,10 @@ static int ds2482_probe(struct i2c_client *client)
+ 	data->client = client;
+ 	i2c_set_clientdata(client, data);
+ 
++	data->sleep_gpio = devm_gpiod_get_optional(&client->dev, "sleep", GPIOD_OUT_HIGH);
++	if (IS_ERR(data->sleep_gpio))
++		dev_warn(&client->dev, "Failed to get reset gpio\n");
++
+ 	/* Reset the device (sets the read_ptr to status) */
+ 	if (ds2482_send_cmd(data, DS2482_CMD_RESET) < 0) {
+ 		dev_warn(&client->dev, "DS2482 reset failed.\n");
+@@ -533,6 +541,10 @@ static void ds2482_remove(struct i2c_client *client)
+ 			w1_remove_master_device(&data->w1_ch[idx].w1_bm);
+ 	}
+ 
++	if (data->sleep_gpio) {
++		gpiod_set_value(data->sleep_gpio, 0);
++	}
++
+ 	/* Free the memory */
+ 	kfree(data);
+ }
+@@ -547,9 +559,19 @@ static const struct i2c_device_id ds2482_id[] = {
+ };
+ MODULE_DEVICE_TABLE(i2c, ds2482_id);
+ 
++#ifdef CONFIG_OF
++static const struct of_device_id ds2482_of_match[] = {
++	{ .compatible = "maxim,ds2482", },
++	{ .compatible = "maxim,ds2484", },
++	{ },
++};
++MODULE_DEVICE_TABLE(of, ds2482_of_match);
++#endif
++
+ static struct i2c_driver ds2482_driver = {
+ 	.driver = {
+-		.name	= "ds2482",
++		.name		= "ds2482",
++		.of_match_table	= of_match_ptr(ds2482_of_match),
+ 	},
+ 	.probe		= ds2482_probe,
+ 	.remove		= ds2482_remove,
+diff --git a/include/drm/drm_mipi_dbi.h b/include/drm/drm_mipi_dbi.h
+index f45f9612c0bc..18ef0944b065 100644
+--- a/include/drm/drm_mipi_dbi.h
++++ b/include/drm/drm_mipi_dbi.h
+@@ -221,12 +221,7 @@ int mipi_dbi_buf_copy(void *dst, struct iosys_map *src, struct drm_framebuffer *
+ #define mipi_dbi_command(dbi, cmd, seq...) \
+ ({ \
+ 	const u8 d[] = { seq }; \
+-	struct device *dev = &(dbi)->spi->dev;	\
+-	int ret; \
+-	ret = mipi_dbi_command_stackbuf(dbi, cmd, d, ARRAY_SIZE(d)); \
+-	if (ret) \
+-		dev_err_ratelimited(dev, "error %d when sending command %#02x\n", ret, cmd); \
+-	ret; \
++	mipi_dbi_command_stackbuf(dbi, cmd, d, ARRAY_SIZE(d)); \
+ })
+ 
+ #ifdef CONFIG_DEBUG_FS
+diff --git a/include/dt-bindings/clock/exynos5250.h b/include/dt-bindings/clock/exynos5250.h
+index 2337c028bbe1..93122823c04d 100644
+--- a/include/dt-bindings/clock/exynos5250.h
++++ b/include/dt-bindings/clock/exynos5250.h
+@@ -176,5 +176,7 @@
+ #define CLK_MOUT_APLL		1028
+ #define CLK_MOUT_MPLL		1029
+ #define CLK_MOUT_VPLLSRC	1030
++#define CLK_MOUT_FIMD1		1031
++#define CLK_MOUT_VPLL		1032
+ 
+ #endif /* _DT_BINDINGS_CLOCK_EXYNOS_5250_H */
+diff --git a/sound/soc/samsung/snow.c b/sound/soc/samsung/snow.c
+index 4bbe7bcdb845..708637b4b88a 100644
+--- a/sound/soc/samsung/snow.c
++++ b/sound/soc/samsung/snow.c
+@@ -3,9 +3,12 @@
+ // ASoC machine driver for Snow boards
+ 
+ #include <linux/clk.h>
++#include <linux/gpio/consumer.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
+ #include <linux/of.h>
++#include <linux/of_device.h>
++#include <sound/jack.h>
+ #include <sound/pcm_params.h>
+ #include <sound/soc.h>
+ 
+@@ -21,6 +24,37 @@ SND_SOC_DAILINK_DEFS(links,
+ struct snow_priv {
+ 	struct snd_soc_dai_link dai_link;
+ 	struct clk *clk_i2s_bus;
++	struct gpio_desc *gpiod_hp_det;
++	struct gpio_desc *gpiod_mic_det;
++};
++
++static struct snd_soc_jack snow_hp_jack;
++
++static struct snd_soc_jack_pin snow_hp_jack_pins[] = {
++	{ .pin = "Headphone Jack", .mask = SND_JACK_HEADPHONE },
++};
++
++static struct snd_soc_jack_gpio snow_hp_jack_gpio = {
++	.name = "Headphones detection",
++	.report = SND_JACK_HEADPHONE,
++	.debounce_time = 150,
++};
++
++static struct snd_soc_jack snow_mic_jack;
++
++static struct snd_soc_jack_pin snow_mic_jack_pins[] = {
++	{ .pin = "Mic Jack", .mask = SND_JACK_MICROPHONE },
++};
++
++static struct snd_soc_jack_gpio snow_mic_jack_gpio = {
++	.name = "Microphone detection",
++	.report = SND_JACK_MICROPHONE,
++	.debounce_time = 150,
++};
++
++static const struct snd_soc_dapm_widget snow_dapm_widgets[] = {
++	SND_SOC_DAPM_HP("Headphone Jack", NULL),
++	SND_SOC_DAPM_MIC("Mic Jack", NULL),
+ };
+ 
+ static int snow_card_hw_params(struct snd_pcm_substream *substream,
+@@ -104,9 +138,56 @@ static int snow_late_probe(struct snd_soc_card *card)
+ {
+ 	struct snd_soc_pcm_runtime *rtd;
+ 	struct snd_soc_dai *codec_dai;
++	struct snow_priv *priv = snd_soc_card_get_drvdata(card);
++	const char *jack_name;
++	int err;
+ 
+ 	rtd = snd_soc_get_pcm_runtime(card, &card->dai_link[0]);
+ 
++	if (priv->gpiod_hp_det) {
++		jack_name = "Headphones";
++
++		err = snd_soc_card_jack_new_pins(card, jack_name,
++					    SND_JACK_HEADPHONE,
++					    &snow_hp_jack,
++					    snow_hp_jack_pins,
++					    ARRAY_SIZE(snow_hp_jack_pins));
++		if (err) {
++			dev_err(rtd->dev,
++				"Headphones Jack creation failed: %d\n", err);
++			return err;
++		}
++
++		snow_hp_jack_gpio.desc = priv->gpiod_hp_det;
++
++		err = snd_soc_jack_add_gpios(&snow_hp_jack, 1,
++					     &snow_hp_jack_gpio);
++		if (err)
++			dev_err(rtd->dev, "Headphones GPIOs not added: %d\n", err);
++	}
++
++	if (priv->gpiod_mic_det) {
++		jack_name = "Microphone";
++
++		err = snd_soc_card_jack_new_pins(card, jack_name,
++					    SND_JACK_MICROPHONE,
++					    &snow_mic_jack,
++					    snow_mic_jack_pins,
++					    ARRAY_SIZE(snow_mic_jack_pins));
++		if (err) {
++			dev_err(rtd->dev,
++				"Microphone Jack creation failed: %d\n", err);
++			return err;
++		}
++
++		snow_mic_jack_gpio.desc = priv->gpiod_mic_det;
++
++		err = snd_soc_jack_add_gpios(&snow_mic_jack, 1,
++					     &snow_mic_jack_gpio);
++		if (err)
++			dev_err(rtd->dev, "Microphone GPIOs not added: %d\n", err);
++	}
++
+ 	/* In the multi-codec case codec_dais 0 is MAX98095 and 1 is HDMI. */
+ 	codec_dai = snd_soc_rtd_to_codec(rtd, 0);
+ 
+@@ -128,6 +209,7 @@ static int snow_probe(struct platform_device *pdev)
+ 	struct device_node *cpu, *codec;
+ 	struct snd_soc_dai_link *link;
+ 	struct snow_priv *priv;
++	struct gpio_desc *gpiod;
+ 	int ret;
+ 
+ 	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
+@@ -136,6 +218,16 @@ static int snow_probe(struct platform_device *pdev)
+ 
+ 	link = &priv->dai_link;
+ 
++	gpiod = devm_gpiod_get_optional(dev, "samsung,hp-det", GPIOD_IN);
++	priv->gpiod_hp_det = gpiod;
++	if (IS_ERR(gpiod))
++		return PTR_ERR(gpiod);
++
++	gpiod = devm_gpiod_get_optional(dev, "samsung,mic-det", GPIOD_IN);
++	priv->gpiod_mic_det = gpiod;
++	if (IS_ERR(gpiod))
++		return PTR_ERR(gpiod);
++
+ 	link->dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
+ 			SND_SOC_DAIFMT_CBS_CFS;
+ 
+@@ -153,6 +245,9 @@ static int snow_probe(struct platform_device *pdev)
+ 	card->num_links = 1;
+ 	card->dev = dev;
+ 
++	card->dapm_widgets = snow_dapm_widgets;
++	card->num_dapm_widgets = ARRAY_SIZE(snow_dapm_widgets);
++
+ 	/* Try new DT bindings with HDMI support first. */
+ 	cpu = of_get_child_by_name(dev->of_node, "cpu");
+ 
+@@ -231,6 +326,7 @@ static void snow_remove(struct platform_device *pdev)
+ }
+ 
+ static const struct of_device_id snow_of_match[] = {
++	{ .compatible = "google,snow-audio-max98089", },
+ 	{ .compatible = "google,snow-audio-max98090", },
+ 	{ .compatible = "google,snow-audio-max98091", },
+ 	{ .compatible = "google,snow-audio-max98095", },
