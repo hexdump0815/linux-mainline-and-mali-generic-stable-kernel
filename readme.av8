@@ -20,7 +20,7 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-c
 # some dwmac-meson8b clock fixes - no longer needed as they are in 5.10.14 at least
 #patch -p1 < /compile/doc/stable/misc.av8/patches/dwmac-meson8b-clk-fix.patch
 # v5.4 - fix v3d power setup for rpi3
-patch -p1 < /compile/doc/stable/misc.av8/patches/rpi3-v3d-power-fix.patch
+#patch -p1 < /compile/doc/stable/misc.av8/patches/rpi3-v3d-power-fix.patch
 # fix a typo to be able to enable the v3d driver - no longer needed with v5.18
 #patch -p1 < /compile/doc/stable/misc.av8/patches/fix-v3d-typo.patch
 # enable cpufreq on odroid c2
@@ -68,12 +68,8 @@ cp -v arch/arm64/boot/Image /boot/Image-${kver}
 # for amlogic 64bit socs (legacy u-boot)
 mkimage -A arm64 -O linux -T kernel -C none -a 0x1080000 -e 0x1080000 -n linux-${kver} -d arch/arm64/boot/Image /boot/uImage-${kver}
 mkdir -p /boot/dtb-${kver}
-cp -v arch/arm64/boot/dts/rockchip/rk33*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-g*.dtb /boot/dtb-${kver}
 cp -v arch/arm64/boot/dts/amlogic/meson-sm1*.dtb /boot/dtb-${kver}
-cp -v arch/arm64/boot/dts/allwinner/sun50i-h5*.dtb /boot/dtb-${kver}
-cp -v arch/arm64/boot/dts/allwinner/sun50i-h6*.dtb /boot/dtb-${kver}
-cp -v arch/arm64/boot/dts/broadcom/bcm*-rpi-*.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
