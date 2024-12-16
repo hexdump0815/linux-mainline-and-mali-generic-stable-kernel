@@ -1,0 +1,156 @@
+this reverts commit 8df1ddb5bf11ab820ad991e164dab82c0960add9 "drm/dp: Don't
+attempt AUX transfers when eDP panels are not powered"
+https://github.com/gregkh/linux/commit/8df1ddb5bf11ab820ad991e164dab82c0960add9
+to avoid a failing link training when the screen blanks and comes back
+resulting in a black screen with backlight on in 6.9 and later - the error in
+dmesg is:
+```
+tegra-sor 54540000.sor: failed to power down link: -110
+tegra-sor 54540000.sor: failed to probe DP link: -16
+tegra-sor 54540000.sor: failed to choose link: -34
+[drm:drm_dp_link_apply_training] *ERROR* failed to set training parameters: -22
+[drm:drm_dp_link_train] *ERROR* failed to recover clock: -22
+[drm:drm_dp_link_train] *ERROR* clock recovery failed: -22
+[drm:drm_dp_link_apply_training] *ERROR* failed to set training parameters: -22
+[drm:drm_dp_link_train] *ERROR* failed to disable link training: -22
+[drm:drm_dp_link_train] *ERROR* full link training failed: -22
+tegra-sor 54540000.sor: link training failed: -22
+tegra-sor 54540000.sor: failed to compute configuration: -22
+tegra-sor 54540000.sor: failed to attach SOR: -110
+tegra-sor 54540000.sor: failed to wakeup SOR: -110
+```
+maybe it is a result of what is causing the message
+```
+tegra-sor 54540000.sor: failed to power down link: -110
+```
+which was there before and still is there despite the display blanking being ok
+again
+
+diff --git a/drivers/gpu/drm/display/drm_dp_helper.c b/drivers/gpu/drm/display/drm_dp_helper.c
+index 6ee51003de3c..760b9adac1e3 100644
+--- a/drivers/gpu/drm/display/drm_dp_helper.c
++++ b/drivers/gpu/drm/display/drm_dp_helper.c
+@@ -533,15 +533,6 @@ static int drm_dp_dpcd_access(struct drm_dp_aux *aux, u8 request,
+ 
+ 	mutex_lock(&aux->hw_mutex);
+ 
+-	/*
+-	 * If the device attached to the aux bus is powered down then there's
+-	 * no reason to attempt a transfer. Error out immediately.
+-	 */
+-	if (aux->powered_down) {
+-		ret = -EBUSY;
+-		goto unlock;
+-	}
+-
+ 	/*
+ 	 * The specification doesn't give any recommendation on how often to
+ 	 * retry native transactions. We used to retry 7 times like for
+@@ -609,29 +600,6 @@ int drm_dp_dpcd_probe(struct drm_dp_aux *aux, unsigned int offset)
+ }
+ EXPORT_SYMBOL(drm_dp_dpcd_probe);
+ 
+-/**
+- * drm_dp_dpcd_set_powered() - Set whether the DP device is powered
+- * @aux: DisplayPort AUX channel; for convenience it's OK to pass NULL here
+- *       and the function will be a no-op.
+- * @powered: true if powered; false if not
+- *
+- * If the endpoint device on the DP AUX bus is known to be powered down
+- * then this function can be called to make future transfers fail immediately
+- * instead of needing to time out.
+- *
+- * If this function is never called then a device defaults to being powered.
+- */
+-void drm_dp_dpcd_set_powered(struct drm_dp_aux *aux, bool powered)
+-{
+-	if (!aux)
+-		return;
+-
+-	mutex_lock(&aux->hw_mutex);
+-	aux->powered_down = !powered;
+-	mutex_unlock(&aux->hw_mutex);
+-}
+-EXPORT_SYMBOL(drm_dp_dpcd_set_powered);
+-
+ /**
+  * drm_dp_dpcd_read() - read a series of bytes from the DPCD
+  * @aux: DisplayPort AUX channel (SST or MST)
+@@ -1891,9 +1859,6 @@ static int drm_dp_i2c_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs,
+ 	struct drm_dp_aux_msg msg;
+ 	int err = 0;
+ 
+-	if (aux->powered_down)
+-		return -EBUSY;
+-
+ 	dp_aux_i2c_transfer_size = clamp(dp_aux_i2c_transfer_size, 1, DP_AUX_MAX_PAYLOAD_BYTES);
+ 
+ 	memset(&msg, 0, sizeof(msg));
+diff --git a/drivers/gpu/drm/panel/panel-edp.c b/drivers/gpu/drm/panel/panel-edp.c
+index 767e47a2b0c1..851660a9afac 100644
+--- a/drivers/gpu/drm/panel/panel-edp.c
++++ b/drivers/gpu/drm/panel/panel-edp.c
+@@ -402,7 +402,6 @@ static int panel_edp_suspend(struct device *dev)
+ {
+ 	struct panel_edp *p = dev_get_drvdata(dev);
+ 
+-	drm_dp_dpcd_set_powered(p->aux, false);
+ 	gpiod_set_value_cansleep(p->enable_gpio, 0);
+ 	regulator_disable(p->supply);
+ 	p->unprepared_time = ktime_get_boottime();
+@@ -453,7 +452,6 @@ static int panel_edp_prepare_once(struct panel_edp *p)
+ 	}
+ 
+ 	gpiod_set_value_cansleep(p->enable_gpio, 1);
+-	drm_dp_dpcd_set_powered(p->aux, true);
+ 
+ 	p->powered_on_time = ktime_get_boottime();
+ 
+@@ -492,7 +490,6 @@ static int panel_edp_prepare_once(struct panel_edp *p)
+ 	return 0;
+ 
+ error:
+-	drm_dp_dpcd_set_powered(p->aux, false);
+ 	gpiod_set_value_cansleep(p->enable_gpio, 0);
+ 	regulator_disable(p->supply);
+ 	p->unprepared_time = ktime_get_boottime();
+diff --git a/drivers/gpu/drm/panel/panel-samsung-atna33xc20.c b/drivers/gpu/drm/panel/panel-samsung-atna33xc20.c
+index 9a482a744b8c..4b7d98095f1c 100644
+--- a/drivers/gpu/drm/panel/panel-samsung-atna33xc20.c
++++ b/drivers/gpu/drm/panel/panel-samsung-atna33xc20.c
+@@ -70,7 +70,6 @@ static int atana33xc20_suspend(struct device *dev)
+ 	if (p->el3_was_on)
+ 		atana33xc20_wait(p->el_on3_off_time, 150);
+ 
+-	drm_dp_dpcd_set_powered(p->aux, false);
+ 	ret = regulator_disable(p->supply);
+ 	if (ret)
+ 		return ret;
+@@ -92,7 +91,6 @@ static int atana33xc20_resume(struct device *dev)
+ 	ret = regulator_enable(p->supply);
+ 	if (ret)
+ 		return ret;
+-	drm_dp_dpcd_set_powered(p->aux, true);
+ 	p->powered_on_time = ktime_get_boottime();
+ 
+ 	if (p->no_hpd) {
+diff --git a/include/drm/display/drm_dp_helper.h b/include/drm/display/drm_dp_helper.h
+index 279624833ea9..5a6acf2a6f03 100644
+--- a/include/drm/display/drm_dp_helper.h
++++ b/include/drm/display/drm_dp_helper.h
+@@ -513,15 +513,9 @@ struct drm_dp_aux {
+ 	 * @is_remote: Is this AUX CH actually using sideband messaging.
+ 	 */
+ 	bool is_remote;
+-
+-	/**
+-	 * @powered_down: If true then the remote endpoint is powered down.
+-	 */
+-	bool powered_down;
+ };
+ 
+ int drm_dp_dpcd_probe(struct drm_dp_aux *aux, unsigned int offset);
+-void drm_dp_dpcd_set_powered(struct drm_dp_aux *aux, bool powered);
+ ssize_t drm_dp_dpcd_read(struct drm_dp_aux *aux, unsigned int offset,
+ 			 void *buffer, size_t size);
+ ssize_t drm_dp_dpcd_write(struct drm_dp_aux *aux, unsigned int offset,

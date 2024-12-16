@@ -1,0 +1,15 @@
+diff --git a/drivers/power/supply/sbs-battery.c b/drivers/power/supply/sbs-battery.c
+index a6c204c08232..8e68b3d93995 100644
+--- a/drivers/power/supply/sbs-battery.c
++++ b/drivers/power/supply/sbs-battery.c
+@@ -1003,8 +1003,8 @@ static int sbs_get_property(struct power_supply *psy,
+ 		break;
+ 
+ 	default:
+-		dev_err(&client->dev,
+-			"%s: INVALID property\n", __func__);
++//		dev_err(&client->dev,
++//			"%s: INVALID property\n", __func__);
+ 		return -EINVAL;
+ 	}
+ 

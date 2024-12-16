@@ -1,0 +1,31 @@
+this reverts commit 9c8a10bf1f3467b2c16f6848249bdc7692ace825 "drm/nouveau/kms/nv50-: Disable AUX bus for disconnected DP ports" 
+https://github.com/gregkh/linux/commit/9c8a10bf1f3467b2c16f6848249bdc7692ace825 and is required additionally to the other 01 patch to get the kernel compiled again with that 01 patch - see the note on top of that for more details
+
+diff --git a/drivers/gpu/drm/nouveau/nouveau_dp.c b/drivers/gpu/drm/nouveau/nouveau_dp.c
+index bcda0105160f..4746cac5a425 100644
+--- a/drivers/gpu/drm/nouveau/nouveau_dp.c
++++ b/drivers/gpu/drm/nouveau/nouveau_dp.c
+@@ -235,9 +235,6 @@ nouveau_dp_detect(struct nouveau_connector *nv_connector,
+ 			return NOUVEAU_DP_NONE;
+ 	}
+ 
+-	// Ensure that the aux bus is enabled for probing
+-	drm_dp_dpcd_set_powered(&nv_connector->aux, true);
+-
+ 	mutex_lock(&nv_encoder->dp.hpd_irq_lock);
+ 	if (mstm) {
+ 		/* If we're not ready to handle MST state changes yet, just
+@@ -299,13 +296,6 @@ nouveau_dp_detect(struct nouveau_connector *nv_connector,
+ 	if (mstm && !mstm->suspended && ret != NOUVEAU_DP_MST)
+ 		nv50_mstm_remove(mstm);
+ 
+-	/* GSP doesn't like when we try to do aux transactions on a port it considers disconnected,
+-	 * and since we don't really have a usecase for that anyway - just disable the aux bus here
+-	 * if we've decided the connector is disconnected
+-	 */
+-	if (ret == NOUVEAU_DP_NONE)
+-		drm_dp_dpcd_set_powered(&nv_connector->aux, false);
+-
+ 	mutex_unlock(&nv_encoder->dp.hpd_irq_lock);
+ 	return ret;
+ }

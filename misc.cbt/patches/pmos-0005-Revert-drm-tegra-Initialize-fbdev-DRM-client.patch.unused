@@ -1,0 +1,82 @@
+From eb6676dd69643cd476b61591a89ceadbf24d1ffd Mon Sep 17 00:00:00 2001
+From: Anton Bambura <jenneron@protonmail.com>
+Date: Mon, 19 Feb 2024 02:04:59 +0200
+Subject: [PATCH 5/5] Revert "drm/tegra: Initialize fbdev DRM client"
+
+This reverts commit 25dda38e0b07941f291a442ac470b0637b7b3e60.
+---
+ drivers/gpu/drm/tegra/fbdev.c | 33 +--------------------------------
+ 1 file changed, 1 insertion(+), 32 deletions(-)
+
+diff --git a/drivers/gpu/drm/tegra/fbdev.c b/drivers/gpu/drm/tegra/fbdev.c
+index 0892d9f36195..2bd13f2a2fc2 100644
+--- a/drivers/gpu/drm/tegra/fbdev.c
++++ b/drivers/gpu/drm/tegra/fbdev.c
+@@ -125,30 +125,6 @@ static const struct drm_fb_helper_funcs tegra_fb_helper_funcs = {
+ 	.fb_probe = tegra_fbdev_probe,
+ };
+ 
+-/*
+- * struct drm_client
+- */
+-
+-static void tegra_fbdev_client_unregister(struct drm_client_dev *client)
+-{ }
+-
+-static int tregra_fbdev_client_restore(struct drm_client_dev *client)
+-{
+-	return 0;
+-}
+-
+-static int tegra_fbdev_client_hotplug(struct drm_client_dev *client)
+-{
+-	return 0;
+-}
+-
+-static const struct drm_client_funcs tegra_fbdev_client_funcs = {
+-	.owner		= THIS_MODULE,
+-	.unregister	= tegra_fbdev_client_unregister,
+-	.restore	= tegra_fbdev_client_restore,
+-	.hotplug	= tegra_fbdev_client_hotplug,
+-};
+-
+ static struct drm_fb_helper *tegra_fbdev_create(struct drm_device *drm)
+ {
+ 	struct drm_fb_helper *helper;
+@@ -175,15 +151,11 @@ static int tegra_fbdev_init(struct drm_fb_helper *helper,
+ 	struct drm_device *drm = helper->dev;
+ 	int err;
+ 
+-	err = drm_client_init(dev, &helper->client, "fbdev", &tegra_fbdev_client_funcs);
+-	if (err)
+-		return err;
+-
+ 	err = drm_fb_helper_init(drm, helper);
+ 	if (err < 0) {
+ 		dev_err(drm->dev, "failed to initialize DRM FB helper: %d\n",
+ 			err);
+-		goto err_drm_client_release;
++		return err;
+ 	}
+ 
+ 	err = drm_fb_helper_initial_config(helper);
+@@ -197,8 +169,6 @@ static int tegra_fbdev_init(struct drm_fb_helper *helper,
+ 
+ fini:
+ 	drm_fb_helper_fini(helper);
+-err_drm_client_release:
+-	drm_client_release(&helper->client);
+ 	return err;
+ }
+ 
+@@ -221,7 +191,6 @@ static void tegra_fbdev_exit(struct drm_fb_helper *helper)
+ 	}
+ 
+ 	drm_fb_helper_fini(helper);
+-	drm_client_release(&helper->client);
+ 	tegra_fbdev_free(helper);
+ }
+ 
+-- 
+2.42.0
+

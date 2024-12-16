@@ -1,0 +1,360 @@
+From b05ad03707395b4fcdf1f0d69bd1b50816ad917f Mon Sep 17 00:00:00 2001
+From: Anton Bambura <jenneron@protonmail.com>
+Date: Mon, 19 Feb 2024 02:04:49 +0200
+Subject: [PATCH 4/5] Revert "drm/tegra: Implement fbdev emulation as in-kernel
+ client"
+
+This reverts commit 71ec16f45ef8d10e20c58e85f7d3644e324d3c13.
+---
+ drivers/gpu/drm/tegra/drm.c   |  23 ++++-
+ drivers/gpu/drm/tegra/drm.h   |  18 +++-
+ drivers/gpu/drm/tegra/fbdev.c | 173 +++++++++++++++++++---------------
+ 3 files changed, 132 insertions(+), 82 deletions(-)
+
+diff --git a/drivers/gpu/drm/tegra/drm.c b/drivers/gpu/drm/tegra/drm.c
+index ff36171c8fb7..1073f26a2bba 100644
+--- a/drivers/gpu/drm/tegra/drm.c
++++ b/drivers/gpu/drm/tegra/drm.c
+@@ -56,6 +56,9 @@ static int tegra_atomic_check(struct drm_device *drm,
+ 
+ static const struct drm_mode_config_funcs tegra_drm_mode_config_funcs = {
+ 	.fb_create = tegra_fb_create,
++#ifdef CONFIG_DRM_FBDEV_EMULATION
++	.output_poll_changed = drm_fb_helper_output_poll_changed,
++#endif
+ 	.atomic_check = tegra_atomic_check,
+ 	.atomic_commit = drm_atomic_helper_commit,
+ };
+@@ -882,6 +885,7 @@ static const struct drm_driver tegra_drm_driver = {
+ 			   DRIVER_ATOMIC | DRIVER_RENDER | DRIVER_SYNCOBJ,
+ 	.open = tegra_drm_open,
+ 	.postclose = tegra_drm_postclose,
++	.lastclose = drm_fb_helper_lastclose,
+ 
+ #if defined(CONFIG_DEBUG_FS)
+ 	.debugfs_init = tegra_debugfs_init,
+@@ -1179,11 +1183,15 @@ static int host1x_drm_probe(struct host1x_device *dev)
+ 	drm->mode_config.funcs = &tegra_drm_mode_config_funcs;
+ 	drm->mode_config.helper_private = &tegra_drm_mode_config_helpers;
+ 
++	err = tegra_drm_fb_prepare(drm);
++	if (err < 0)
++		goto config;
++
+ 	drm_kms_helper_poll_init(drm);
+ 
+ 	err = host1x_device_init(dev);
+ 	if (err < 0)
+-		goto poll;
++		goto fbdev;
+ 
+ 	/*
+ 	 * Now that all display controller have been initialized, the maximum
+@@ -1246,14 +1254,18 @@ static int host1x_drm_probe(struct host1x_device *dev)
+ 	if (err < 0)
+ 		goto hub;
+ 
+-	err = drm_dev_register(drm, 0);
++	err = tegra_drm_fb_init(drm);
+ 	if (err < 0)
+ 		goto hub;
+ 
+-	tegra_fbdev_setup(drm);
++	err = drm_dev_register(drm, 0);
++	if (err < 0)
++		goto fb;
+ 
+ 	return 0;
+ 
++fb:
++	tegra_drm_fb_exit(drm);
+ hub:
+ 	if (tegra->hub)
+ 		tegra_display_hub_cleanup(tegra->hub);
+@@ -1266,8 +1278,10 @@ static int host1x_drm_probe(struct host1x_device *dev)
+ 	}
+ 
+ 	host1x_device_exit(dev);
+-poll:
++fbdev:
+ 	drm_kms_helper_poll_fini(drm);
++	tegra_drm_fb_free(drm);
++config:
+ 	drm_mode_config_cleanup(drm);
+ domain:
+ 	if (tegra->domain)
+@@ -1288,6 +1302,7 @@ static int host1x_drm_remove(struct host1x_device *dev)
+ 	drm_dev_unregister(drm);
+ 
+ 	drm_kms_helper_poll_fini(drm);
++	tegra_drm_fb_exit(drm);
+ 	drm_atomic_helper_shutdown(drm);
+ 	drm_mode_config_cleanup(drm);
+ 
+diff --git a/drivers/gpu/drm/tegra/drm.h b/drivers/gpu/drm/tegra/drm.h
+index f9d18e8cf6ab..576f03b8434e 100644
+--- a/drivers/gpu/drm/tegra/drm.h
++++ b/drivers/gpu/drm/tegra/drm.h
+@@ -15,6 +15,7 @@
+ #include <drm/drm_bridge.h>
+ #include <drm/drm_edid.h>
+ #include <drm/drm_encoder.h>
++#include <drm/drm_fb_helper.h>
+ #include <drm/drm_fixed.h>
+ #include <drm/drm_probe_helper.h>
+ #include <uapi/drm/tegra_drm.h>
+@@ -193,9 +194,22 @@ struct drm_framebuffer *tegra_fb_create(struct drm_device *drm,
+ 					const struct drm_mode_fb_cmd2 *cmd);
+ 
+ #ifdef CONFIG_DRM_FBDEV_EMULATION
+-void tegra_fbdev_setup(struct drm_device *drm);
++int tegra_drm_fb_prepare(struct drm_device *drm);
++void tegra_drm_fb_free(struct drm_device *drm);
++int tegra_drm_fb_init(struct drm_device *drm);
++void tegra_drm_fb_exit(struct drm_device *drm);
+ #else
+-static inline void tegra_fbdev_setup(struct drm_device *drm)
++static inline int tegra_drm_fb_prepare(struct drm_device *drm)
++{
++	return 0;
++}
++static inline void tegra_drm_fb_free(struct drm_device *drm)
++{ }
++static inline int tegra_drm_fb_init(struct drm_device *drm)
++{
++	return 0;
++}
++static inline void tegra_drm_fb_exit(struct drm_device *drm)
+ { }
+ #endif
+ 
+diff --git a/drivers/gpu/drm/tegra/fbdev.c b/drivers/gpu/drm/tegra/fbdev.c
+index db6eaac3d30e..0892d9f36195 100644
+--- a/drivers/gpu/drm/tegra/fbdev.c
++++ b/drivers/gpu/drm/tegra/fbdev.c
+@@ -11,9 +11,6 @@
+ #include <linux/fb.h>
+ #include <linux/vmalloc.h>
+ 
+-#include <drm/drm_drv.h>
+-#include <drm/drm_crtc_helper.h>
+-#include <drm/drm_fb_helper.h>
+ #include <drm/drm_fourcc.h>
+ #include <drm/drm_framebuffer.h>
+ #include <drm/drm_gem_framebuffer_helper.h>
+@@ -37,33 +34,12 @@ static int tegra_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
+ 	return __tegra_gem_mmap(&bo->gem, vma);
+ }
+ 
+-static void tegra_fbdev_fb_destroy(struct fb_info *info)
+-{
+-	struct drm_fb_helper *helper = info->par;
+-	struct drm_framebuffer *fb = helper->fb;
+-	struct tegra_bo *bo = tegra_fb_get_plane(fb, 0);
+-
+-	drm_fb_helper_fini(helper);
+-
+-	/* Undo the special mapping we made in fbdev probe. */
+-	if (bo->pages) {
+-		vunmap(bo->vaddr);
+-		bo->vaddr = NULL;
+-	}
+-	drm_framebuffer_remove(fb);
+-
+-	drm_client_release(&helper->client);
+-	drm_fb_helper_unprepare(helper);
+-	kfree(helper);
+-}
+-
+ static const struct fb_ops tegra_fb_ops = {
+ 	.owner = THIS_MODULE,
+ 	__FB_DEFAULT_DMAMEM_OPS_RDWR,
+ 	DRM_FB_HELPER_DEFAULT_OPS,
+ 	__FB_DEFAULT_DMAMEM_OPS_DRAW,
+ 	.fb_mmap = tegra_fb_mmap,
+-	.fb_destroy = tegra_fbdev_fb_destroy,
+ };
+ 
+ static int tegra_fbdev_probe(struct drm_fb_helper *helper,
+@@ -154,52 +130,16 @@ static const struct drm_fb_helper_funcs tegra_fb_helper_funcs = {
+  */
+ 
+ static void tegra_fbdev_client_unregister(struct drm_client_dev *client)
+-{
+-	struct drm_fb_helper *fb_helper = drm_fb_helper_from_client(client);
+-
+-	if (fb_helper->info) {
+-		drm_fb_helper_unregister_info(fb_helper);
+-	} else {
+-		drm_client_release(&fb_helper->client);
+-		drm_fb_helper_unprepare(fb_helper);
+-		kfree(fb_helper);
+-	}
+-}
++{ }
+ 
+-static int tegra_fbdev_client_restore(struct drm_client_dev *client)
++static int tregra_fbdev_client_restore(struct drm_client_dev *client)
+ {
+-	drm_fb_helper_lastclose(client->dev);
+-
+ 	return 0;
+ }
+ 
+ static int tegra_fbdev_client_hotplug(struct drm_client_dev *client)
+ {
+-	struct drm_fb_helper *fb_helper = drm_fb_helper_from_client(client);
+-	struct drm_device *dev = client->dev;
+-	int ret;
+-
+-	if (dev->fb_helper)
+-		return drm_fb_helper_hotplug_event(dev->fb_helper);
+-
+-	ret = drm_fb_helper_init(dev, fb_helper);
+-	if (ret)
+-		goto err_drm_err;
+-
+-	if (!drm_drv_uses_atomic_modeset(dev))
+-		drm_helper_disable_unused_functions(dev);
+-
+-	ret = drm_fb_helper_initial_config(fb_helper);
+-	if (ret)
+-		goto err_drm_fb_helper_fini;
+-
+ 	return 0;
+-
+-err_drm_fb_helper_fini:
+-	drm_fb_helper_fini(fb_helper);
+-err_drm_err:
+-	drm_err(dev, "Failed to setup fbdev emulation (ret=%d)\n", ret);
+-	return ret;
+ }
+ 
+ static const struct drm_client_funcs tegra_fbdev_client_funcs = {
+@@ -209,28 +149,109 @@ static const struct drm_client_funcs tegra_fbdev_client_funcs = {
+ 	.hotplug	= tegra_fbdev_client_hotplug,
+ };
+ 
+-void tegra_fbdev_setup(struct drm_device *dev)
++static struct drm_fb_helper *tegra_fbdev_create(struct drm_device *drm)
+ {
+ 	struct drm_fb_helper *helper;
+-	int ret;
+-
+-	drm_WARN(dev, !dev->registered, "Device has not been registered.\n");
+-	drm_WARN(dev, dev->fb_helper, "fb_helper is already set!\n");
+ 
+ 	helper = kzalloc(sizeof(*helper), GFP_KERNEL);
+ 	if (!helper)
+-		return;
+-	drm_fb_helper_prepare(dev, helper, 32, &tegra_fb_helper_funcs);
++		return ERR_PTR(-ENOMEM);
+ 
+-	ret = drm_client_init(dev, &helper->client, "fbdev", &tegra_fbdev_client_funcs);
+-	if (ret)
+-		goto err_drm_client_init;
++	drm_fb_helper_prepare(drm, helper, 32, &tegra_fb_helper_funcs);
+ 
+-	drm_client_register(&helper->client);
+-
+-	return;
++	return helper;
++}
+ 
+-err_drm_client_init:
++static void tegra_fbdev_free(struct drm_fb_helper *helper)
++{
+ 	drm_fb_helper_unprepare(helper);
+ 	kfree(helper);
+ }
++
++static int tegra_fbdev_init(struct drm_fb_helper *helper,
++			    unsigned int num_crtc,
++			    unsigned int max_connectors)
++{
++	struct drm_device *drm = helper->dev;
++	int err;
++
++	err = drm_client_init(dev, &helper->client, "fbdev", &tegra_fbdev_client_funcs);
++	if (err)
++		return err;
++
++	err = drm_fb_helper_init(drm, helper);
++	if (err < 0) {
++		dev_err(drm->dev, "failed to initialize DRM FB helper: %d\n",
++			err);
++		goto err_drm_client_release;
++	}
++
++	err = drm_fb_helper_initial_config(helper);
++	if (err < 0) {
++		dev_err(drm->dev, "failed to set initial configuration: %d\n",
++			err);
++		goto fini;
++	}
++
++	return 0;
++
++fini:
++	drm_fb_helper_fini(helper);
++err_drm_client_release:
++	drm_client_release(&helper->client);
++	return err;
++}
++
++static void tegra_fbdev_exit(struct drm_fb_helper *helper)
++{
++	struct drm_framebuffer *fb = helper->fb;
++
++	drm_fb_helper_unregister_info(helper);
++
++	if (fb) {
++		struct tegra_bo *bo = tegra_fb_get_plane(fb, 0);
++
++		/* Undo the special mapping we made in fbdev probe. */
++		if (bo && bo->pages) {
++			vunmap(bo->vaddr);
++			bo->vaddr = NULL;
++		}
++
++		drm_framebuffer_remove(fb);
++	}
++
++	drm_fb_helper_fini(helper);
++	drm_client_release(&helper->client);
++	tegra_fbdev_free(helper);
++}
++
++int tegra_drm_fb_prepare(struct drm_device *drm)
++{
++	drm->fb_helper = tegra_fbdev_create(drm);
++	if (IS_ERR(drm->fb_helper))
++		return PTR_ERR(drm->fb_helper);
++
++	return 0;
++}
++
++void tegra_drm_fb_free(struct drm_device *drm)
++{
++	tegra_fbdev_free(drm->fb_helper);
++}
++
++int tegra_drm_fb_init(struct drm_device *drm)
++{
++	int err;
++
++	err = tegra_fbdev_init(drm->fb_helper, drm->mode_config.num_crtc,
++			       drm->mode_config.num_connector);
++	if (err < 0)
++		return err;
++
++	return 0;
++}
++
++void tegra_drm_fb_exit(struct drm_device *drm)
++{
++	tegra_fbdev_exit(drm->fb_helper);
++}
+-- 
+2.42.0
+
