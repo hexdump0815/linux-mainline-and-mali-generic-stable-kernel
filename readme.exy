@@ -23,7 +23,7 @@ patch -p1 < /compile/doc/stable/misc.exy/patches/exynos-hdmi-infoframes-patch.tx
 # add some extra cpu clocks for odroid x (disabled by default) and raise temp limits for x/x2 like u3
 patch -p1 < /compile/doc/stable/misc.exy/patches/add-disabled-extra-cpu-clocks-odroid-x-v6.6.patch
 # fix kernel version number: + instead of -dirty at the end
-patch -p1 < /compile/doc/stable/misc.exy/patches/fix-kernel-version-number-v6.6.patch
+patch -p1 < /compile/doc/stable/misc.exy/patches/fix-kernel-version-number-v6.12.5.patch
 
 # add u3noplus dtb for the non plus version to fix reboot for it - has to be redone for each new kernel version
 git checkout -- arch/arm/boot/dts/samsung/Makefile

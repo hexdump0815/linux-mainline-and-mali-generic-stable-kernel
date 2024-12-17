@@ -38,7 +38,7 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v6.11.
 # copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
 cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
 # fix kernel version number: + instead of -dirty at the end
-patch -p1 < /compile/doc/stable/misc.av8/patches/fix-kernel-version-number-v6.6.patch
+patch -p1 < /compile/doc/stable/misc.av8/patches/fix-kernel-version-number-v6.12.5.patch
 
 export ARCH=arm64
 scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.av8/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-aarch64.cfg /compile/doc/stable/misc.av8/options/additional-options-special.cfg
