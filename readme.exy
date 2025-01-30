@@ -3,6 +3,7 @@
 # - /compile/source/linux-stable-exy - the kernel sources checked out from gitrepo
 # - /compile/result/stable - the resulting kernel, modules etc. tar.gz files
 # - /compile/doc/kernel-config-options - https://github.com/hexdump0815/kernel-config-options
+# - /compile/doc/kernel-extra-patches - https://github.com/hexdump0815/kernel-extra-patches
 # name: stb-exy - exynos
 
 # it looks like for newer kernel versions like v6.5 the following packages have to be
@@ -23,7 +24,7 @@ patch -p1 < /compile/doc/stable/misc.exy/patches/exynos-hdmi-infoframes-patch.tx
 # add some extra cpu clocks for odroid x (disabled by default) and raise temp limits for x/x2 like u3
 patch -p1 < /compile/doc/stable/misc.exy/patches/add-disabled-extra-cpu-clocks-odroid-x-v6.6.patch
 # fix kernel version number: + instead of -dirty at the end
-patch -p1 < /compile/doc/stable/misc.exy/patches/fix-kernel-version-number-v6.12.5.patch
+patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 
 # add u3noplus dtb for the non plus version to fix reboot for it - has to be redone for each new kernel version
 git checkout -- arch/arm/boot/dts/samsung/Makefile
@@ -53,7 +54,7 @@ make modules_install
 mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
-cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+cp -v tools/power/cpupower/libcpupower.so.? /lib/modules/${kver}/tools
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 cp -v arch/arm/boot/zImage /boot/zImage-${kver}
