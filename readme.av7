@@ -31,6 +31,8 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/r89-dtb-more-and-higher-cpu-clo
 patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-higher-alert-temp.patch
 # add higher cpu clocks for h3
 patch -p1 < /compile/doc/stable/misc.av7/patches/sun8i-h3-higher-cpu-clocks.patch
+# remove panfrost purge log spam
+patch -p1 < /compile/doc/kernel-extra-patches/remove-panfrost-purge-log-spam/v6.12.12.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 

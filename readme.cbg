@@ -18,6 +18,8 @@ cd /compile/source/linux-stable-cbg
 patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0002-drm-rockchip-Only-wait-for-panel-ACK-on-PSR-entry.patch
 # add gamma drm support for rk3399 - no longer needed for v6.1 as it is already included
 #patch -p1 < /compile/doc/stable/misc.cbg/patches/rk3399-add-drm-gamma-support.patch
+# remove panfrost purge log spam
+patch -p1 < /compile/doc/kernel-extra-patches/remove-panfrost-purge-log-spam/v6.12.12.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 

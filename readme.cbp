@@ -14,6 +14,8 @@ cd /compile/source/linux-stable-cbp
 # patches:
 # bring in patches from v6.11-rc7 of pmos exynos5 mainline tree
 patch -p1 < /compile/doc/stable/misc.cbp/patches/pmos-exynos-v6.12-rc6.patch
+# remove panfrost purge log spam
+patch -p1 < /compile/doc/kernel-extra-patches/remove-panfrost-purge-log-spam/v6.12.12.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 

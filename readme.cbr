@@ -38,6 +38,8 @@ patch -p1 < /compile/doc/stable/misc.cbr/patches/veyron-fix-audio-v5.4.patch
 patch -p1 < /compile/doc/stable/misc.cbr/patches/cadmium-veyron.fixup-emmc-from-urja.patch
 # fix power-off problem with v6.5+
 patch -p1 < /compile/doc/stable/misc.cbr/patches/mfd-rk8xx-Fix-shutdown-handler.patch
+# remove panfrost purge log spam
+patch -p1 < /compile/doc/kernel-extra-patches/remove-panfrost-purge-log-spam/v6.12.12.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 

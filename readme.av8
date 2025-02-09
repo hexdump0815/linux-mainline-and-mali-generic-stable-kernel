@@ -38,6 +38,8 @@ patch -p1 < /compile/doc/stable/misc.av8/patches/gxl-higher-temps.patch
 patch -p1 < /compile/doc/stable/misc.av8/patches/add-new-dtbs-to-Makefile-v6.11.patch
 # copy additional dtb files - maintained: sm1-h96max-x3, g12a-t95q and gxl-s905x-mi-box
 cp -i /compile/doc/stable/misc.av8/dtb/*.dts arch/arm64/boot/dts/amlogic
+# remove panfrost purge log spam
+patch -p1 < /compile/doc/kernel-extra-patches/remove-panfrost-purge-log-spam/v6.12.12.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 
