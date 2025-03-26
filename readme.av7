@@ -14,29 +14,8 @@ patch -p1 < /compile/doc/stable/misc.av7/patches/gen-stmmac-mac-addr-on-kernel-c
 #patch -p1 < /compile/doc/stable/misc.av7/patches/bpi-enable-more-overclock.patch
 # set bpi otg usb to host mode
 patch -p1 < /compile/doc/stable/misc.av7/patches/bpi-usb-otg-host-mode.patch
-# more clock speeds for r89, enable emmc, gpu node, hdmi fix
-patch -p1 < /compile/doc/stable/misc.av7/patches/r89-dtb-more-and-higher-cpu-clocks-emmc-gpu-hdmi.patch
-# raise the temp limits where thermal throttling starts
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-higher-alert-temp.patch
 # add higher cpu clocks for h3
 patch -p1 < /compile/doc/stable/misc.av7/patches/sun8i-h3-higher-cpu-clocks.patch
-# v5.1 - add more meson8m2 dtbs
-patch -p1 < /compile/doc/stable/misc.av7/patches/meson8m2-dtb.patch
-cp -i /compile/doc/stable/misc.av7/dtb/meson8m2*.dts* arch/arm/boot/dts
-# v5.4 - fix v3d power setup for rpi3
-patch -p1 < /compile/doc/stable/misc.av7/patches/rpi3-v3d-power-fix-armv7l.patch
-# improve rk3288 hdmi timing - based on https://github.com/armbian/build/pull/1887
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4004-drm-rockchip-vop-filter-modes-outside-0.5-pixel-cloc.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4005-drm-rockchip-dw_hdmi-Set-cur_ctr-to-0-always.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4006-drm-rockchip-dw_hdmi-adjust-cklvl-txlvl-for-RF-EMI.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4007-drm-rockchip-dw_hdmi-Use-auto-generated-tables.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4008-drm-rockchip-dw_hdmi-add-default-594Mhz-clk-for-4K-6.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4009-drm-rockchip-dw-hdmi-limit-tmds-to-340mhz.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4010-HACK-drm-rockchip-vop-limit-resolution-to-3840x2160.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4011-MINIARM-set-npll-be-used-for-hdmi-only.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4012-clk-rockchip-rk3288-use-npll-table-to-to-improve-HDM.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4013-clk-rockchip-rk3288-add-more-npll-clocks.patch
-patch -p1 < /compile/doc/stable/misc.av7/patches/rk3288-improved-hdmi-timing/4015-FIXME-Don-t-use-vop_crtc_mode_valid.patch
 
 export ARCH=arm
 scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/doc/kernel-config-options/docker-options.cfg /compile/doc/kernel-config-options/options-to-remove-generic.cfg /compile/doc/stable/misc.av7/options/options-to-remove-special.cfg /compile/doc/kernel-config-options/additional-options-generic.cfg /compile/doc/kernel-config-options/additional-options-armv7l.cfg /compile/doc/stable/misc.av7/options/additional-options-special.cfg
@@ -44,6 +23,8 @@ scripts/kconfig/merge_config.sh -m arch/arm/configs/multi_v7_defconfig /compile/
 make olddefconfig
 make -j 4 zImage dtbs modules
 cd tools/perf
+# without this it would fail on warnings
+export WERROR=0
 make
 cd ../power/cpupower
 make
@@ -56,7 +37,7 @@ make modules_install
 mkdir -p /lib/modules/${kver}/tools
 cp -v tools/perf/perf /lib/modules/${kver}/tools
 cp -v tools/power/cpupower/cpupower /lib/modules/${kver}/tools
-cp -v tools/power/cpupower/libcpupower.so.0.0.1 /lib/modules/${kver}/tools/libcpupower.so.0
+cp -v tools/power/cpupower/libcpupower.so.? /lib/modules/${kver}/tools
 # make headers_install INSTALL_HDR_PATH=/usr
 cp -v .config /boot/config-${kver}
 # for all except amlogic 32bit socs
@@ -64,19 +45,8 @@ cp -v arch/arm/boot/zImage /boot/zImage-${kver}
 # for amlogic 32bit socs (legacy u-boot)
 mkimage -A arm -O linux -T kernel -C none -a 0x00208000 -e 0x00208000 -n linux-${kver} -d arch/arm/boot/zImage /boot/uImage-${kver}
 mkdir -p /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/meson8b-mxq.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/meson8m2*.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/sun7i-a20-bananapi.dtb /boot/dtb-${kver}
 cp -v arch/arm/boot/dts/sun8i-h3-libretech-all-h3-cc.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rk3288-r89.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rk3288-tinker.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rk3288-tinker-s.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/rk3288-veyron*.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/tegra124*.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/bcm2836-rpi-2-b.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/bcm2837-rpi-3-b.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dtb /boot/dtb-${kver}
-cp -v arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dtb /boot/dtb-${kver}
 cp -v System.map /boot/System.map-${kver}
 cd /boot
 update-initramfs -c -k ${kver}
