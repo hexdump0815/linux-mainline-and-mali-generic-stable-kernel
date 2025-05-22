@@ -1,0 +1,81 @@
+from: https://patchwork.kernel.org/project/linux-rockchip/patch/20240730180903.81688-1-sebastian.reichel@collabora.com/
+via: https://libera.irclog.whitequark.org/linux-rockchip/2024-12-17#37468234
+
+diff --git a/drivers/mfd/rk8xx-core.c b/drivers/mfd/rk8xx-core.c
+index 71c2b80a4678..0f43c3183ae5 100644
+--- a/drivers/mfd/rk8xx-core.c
++++ b/drivers/mfd/rk8xx-core.c
+@@ -692,10 +692,11 @@ void rk8xx_shutdown(struct device *dev)
+ }
+ EXPORT_SYMBOL_GPL(rk8xx_shutdown);
+ 
+-int rk8xx_probe(struct device *dev, int variant, unsigned int irq, struct regmap *regmap)
++int rk8xx_probe(struct device *dev, int variant, unsigned int irq, struct regmap *regmap, bool is_spi)
+ {
+ 	struct rk808 *rk808;
+ 	const struct rk808_reg_data *pre_init_reg;
++	enum sys_off_mode pwr_off_mode = SYS_OFF_MODE_POWER_OFF;
+ 	const struct mfd_cell *cells;
+ 	int dual_support = 0;
+ 	int nr_pre_init_regs;
+@@ -785,10 +786,20 @@ int rk8xx_probe(struct device *dev, int variant, unsigned int irq, struct regmap
+ 	if (ret)
+ 		return dev_err_probe(dev, ret, "failed to add MFD devices\n");
+ 
++	/*
++	 * Currently the Rockchip SPI driver always sleeps when doing SPI
++	 * transfers. This is not allowed in the SYS_OFF_MODE_POWER_OFF
++	 * handler, so we are using the prepare handler as a workaround.
++	 * This should be removed once the Rockchip SPI driver has been
++	 * adapted.
++	 */
++	if (is_spi)
++		pwr_off_mode = SYS_OFF_MODE_POWER_OFF_PREPARE;
++
+ 	if (device_property_read_bool(dev, "system-power-controller") ||
+ 	    device_property_read_bool(dev, "rockchip,system-power-controller")) {
+ 		ret = devm_register_sys_off_handler(dev,
+-				    SYS_OFF_MODE_POWER_OFF_PREPARE, SYS_OFF_PRIO_HIGH,
++				    pwr_off_mode, SYS_OFF_PRIO_HIGH,
+ 				    &rk808_power_off, rk808);
+ 		if (ret)
+ 			return dev_err_probe(dev, ret,
+diff --git a/drivers/mfd/rk8xx-i2c.c b/drivers/mfd/rk8xx-i2c.c
+index 69a6b297d723..a2029decd654 100644
+--- a/drivers/mfd/rk8xx-i2c.c
++++ b/drivers/mfd/rk8xx-i2c.c
+@@ -189,7 +189,7 @@ static int rk8xx_i2c_probe(struct i2c_client *client)
+ 		return dev_err_probe(&client->dev, PTR_ERR(regmap),
+ 				     "regmap initialization failed\n");
+ 
+-	return rk8xx_probe(&client->dev, data->variant, client->irq, regmap);
++	return rk8xx_probe(&client->dev, data->variant, client->irq, regmap, false);
+ }
+ 
+ static void rk8xx_i2c_shutdown(struct i2c_client *client)
+diff --git a/drivers/mfd/rk8xx-spi.c b/drivers/mfd/rk8xx-spi.c
+index 3405fb82ff9f..20f9428f94bb 100644
+--- a/drivers/mfd/rk8xx-spi.c
++++ b/drivers/mfd/rk8xx-spi.c
+@@ -94,7 +94,7 @@ static int rk8xx_spi_probe(struct spi_device *spi)
+ 		return dev_err_probe(&spi->dev, PTR_ERR(regmap),
+ 				     "Failed to init regmap\n");
+ 
+-	return rk8xx_probe(&spi->dev, RK806_ID, spi->irq, regmap);
++	return rk8xx_probe(&spi->dev, RK806_ID, spi->irq, regmap, true);
+ }
+ 
+ static const struct of_device_id rk8xx_spi_of_match[] = {
+diff --git a/include/linux/mfd/rk808.h b/include/linux/mfd/rk808.h
+index 69cbea78b430..be15b84cff9e 100644
+--- a/include/linux/mfd/rk808.h
++++ b/include/linux/mfd/rk808.h
+@@ -1349,7 +1349,7 @@ struct rk808 {
+ };
+ 
+ void rk8xx_shutdown(struct device *dev);
+-int rk8xx_probe(struct device *dev, int variant, unsigned int irq, struct regmap *regmap);
++int rk8xx_probe(struct device *dev, int variant, unsigned int irq, struct regmap *regmap, bool is_spi);
+ int rk8xx_suspend(struct device *dev);
+ int rk8xx_resume(struct device *dev);
+ 
