@@ -9,7 +9,7 @@ cd /compile/source/linux-stable-m8x
 
 # patches:
 # add all the meson specific changes from the xdarlight meson8 kernel tree https://github.com/xdarklight/linux
-patch -p1 < /compile/doc/stable/misc.m8x/patches/xdl-vs-mainline-v6.1.121.patch
+patch -p1 < /compile/doc/stable/misc.m8x/patches/xdl-vs-mainline-v6.1.148.patch
 # set mac addr on kernel cmdline - otherwise a random one is generated
 patch -p1 < /compile/doc/stable/misc.m8x/patches/gen-stmmac-mac-addr-on-kernel-cmdline-v5.18.patch
 # some fix around reboot and mmc
