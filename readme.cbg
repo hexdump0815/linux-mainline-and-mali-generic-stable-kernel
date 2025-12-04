@@ -15,11 +15,12 @@ cd /compile/source/linux-stable-cbg
 # this one does not apply anymore for v6.12 as the code seems to have been rewritten completely
 # lets keep it off for now
 #patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0001-drm-bridge-analogix_dp-Don-t-return-EBUSY-when-msg-s.patch
-patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0002-drm-rockchip-Only-wait-for-panel-ACK-on-PSR-entry.patch
+# lets keep this off for now as well
+#patch -p1 < /compile/doc/stable/misc.cbg/patches/cadmium-gru.0002-drm-rockchip-Only-wait-for-panel-ACK-on-PSR-entry.patch
 # add gamma drm support for rk3399 - no longer needed for v6.1 as it is already included
 #patch -p1 < /compile/doc/stable/misc.cbg/patches/rk3399-add-drm-gamma-support.patch
 # remove battery failed to report property log spam
-patch -p1 < /compile/doc/kernel-extra-patches/remove-battery-property-log-spam/v6.6.112.patch
+patch -p1 < /compile/doc/kernel-extra-patches/remove-battery-property-log-spam/v6.18.patch
 # remove panfrost purge log spam
 patch -p1 < /compile/doc/kernel-extra-patches/remove-panfrost-purge-log-spam/v6.12.12.patch
 # fix kernel version number: + instead of -dirty at the end

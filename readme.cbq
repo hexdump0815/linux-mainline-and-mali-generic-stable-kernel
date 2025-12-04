@@ -12,10 +12,12 @@
 cd /compile/source/linux-stable-cbq
 
 # patches:
-# fix for at least the panel on some wormdingler devices (maybe others too)
-patch -p1 < /compile/doc/stable/misc.cbq/patches/fix-boe-tv101wum-nl6-panel.patch
+# fix for at least the panel on some wormdingler devices (maybe others too) - no longer needed with v6.18
+#patch -p1 < /compile/doc/stable/misc.cbq/patches/fix-boe-tv101wum-nl6-panel.patch
+# add gamma lut support for color profiles, night light etc.
+patch -p1 < /compile/doc/stable/misc.cbq/patches/add-gamma-lut-support.patch
 # remove battery failed to report property log spam
-patch -p1 < /compile/doc/kernel-extra-patches/remove-battery-property-log-spam/v6.6.112.patch
+patch -p1 < /compile/doc/kernel-extra-patches/remove-battery-property-log-spam/v6.18.patch
 # fix kernel version number: + instead of -dirty at the end
 patch -p1 < /compile/doc/kernel-extra-patches/fix-kernel-version/v6.12.5.patch
 
